@@ -1,0 +1,24 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SQLiteNetTest.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="DailyXmlDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\test.xml</Value>
+    </Setting>
+    <Setting Name="DatabaseFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\ep.sqlite3</Value>
+    </Setting>
+    <Setting Name="DetailXmlDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\4hours.xml</Value>
+    </Setting>
+    <Setting Name="PltTemplatePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\plot_riko_template.plt</Value>
+    </Setting>
+    <Setting Name="PltOutputPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\plot_riko.plt</Value>
+    </Setting>
+    <Setting Name="GnuplotBinaryPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>
