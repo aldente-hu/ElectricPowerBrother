@@ -61,102 +61,112 @@ namespace TenkiChecker
 			var source = @"http://www.tenki.jp/amedas/2/5/31461.html";
 
 			System.Net.WebClient client = new WebClient();
-			using (System.IO.Stream stream = await client.OpenReadTaskAsync(source))
+
+			try
 			{
-				using (System.IO.StreamReader reader = new System.IO.StreamReader(stream, new UTF8Encoding(false)))
+				using (System.IO.Stream stream = await client.OpenReadTaskAsync(source))
 				{
-					bool expecting_date = false;
-					bool data10min_active = false;
-					bool on_table = false;
-
-					DateTime? expecting_temperature_at = null;	// 次の行で、この時刻の気温を拾えるはず！
-					DateTime? source_time = null;	// 最新観測データの時刻。
-					DateTime? previous_data_time = null;	// 直前に取得したデータの時刻(最初のデータを取得するまでは，source_timeと同じ)．
-
-					while (true)
+					using (System.IO.StreamReader reader = new System.IO.StreamReader(stream, new UTF8Encoding(false)))
 					{
-						string line = reader.ReadLine();
-						//Console.WriteLine(line);
-						if (line == null)
-						{
-							break;
-						}
+						bool expecting_date = false;
+						bool data10min_active = false;
+						bool on_table = false;
 
-						if (data10min_active)
+						DateTime? expecting_temperature_at = null;	// 次の行で、この時刻の気温を拾えるはず！
+						DateTime? source_time = null;	// 最新観測データの時刻。
+						DateTime? previous_data_time = null;	// 直前に取得したデータの時刻(最初のデータを取得するまでは，source_timeと同じ)．
+
+						while (true)
 						{
-							if (on_table)
+							string line = reader.ReadLine();
+							//Console.WriteLine(line);
+							if (line == null)
 							{
-								// ★とりあえず出力する．
-								if (!line.Contains("th>"))
+								break;
+							}
+
+							if (data10min_active)
+							{
+								if (on_table)
 								{
-									Console.WriteLine(line);
-								}
-								
-								if (expecting_temperature_at.HasValue)
-								{
-									// 気温取得！
-									decimal? temperature = ReadTemperature(line);
-									if (temperature.HasValue)
-									{ 
-										Console.WriteLine("Time: {0}, Temperature: {1}", expecting_temperature_at.Value, temperature.Value);
-										TemperatureDB.InsertTemperature(expecting_temperature_at.Value, temperature.Value);
-										previous_data_time = expecting_temperature_at;
-									}
-									expecting_temperature_at = null;
-								}
-								else if (line.Contains("</table>"))
-								{
-									on_table = false;
-									// ここでreturnしてしまってもいいのでは？
-									return;
-								}
-								else
-								{
-									// ☆データの日時の取得を試みる．
-									expecting_temperature_at = ReadDateTime(line, previous_data_time.Value);
-									if (expecting_temperature_at.HasValue && expecting_temperature_at.Value <= after)
+									// ★とりあえず出力する．
+									if (!line.Contains("th>"))
 									{
+										Console.WriteLine(line);
+									}
+
+									if (expecting_temperature_at.HasValue)
+									{
+										// 気温取得！
+										decimal? temperature = ReadTemperature(line);
+										if (temperature.HasValue)
+										{
+											Console.WriteLine("Time: {0}, Temperature: {1}", expecting_temperature_at.Value, temperature.Value);
+											TemperatureDB.InsertTemperature(expecting_temperature_at.Value, temperature.Value);
+											previous_data_time = expecting_temperature_at;
+										}
+										expecting_temperature_at = null;
+									}
+									else if (line.Contains("</table>"))
+									{
+										on_table = false;
+										// ここでreturnしてしまってもいいのでは？
 										return;
 									}
-								}
-							}
-							// not on_table
-							else if (expecting_date)
-							{
-								string j_datetime_pattern = @"(\d{4}年\d\d月\d\d日)\s*(\d\d)時(\d\d)分";	// 0:00は"24時00分"と表示されるので注意が必要？
-								var m = Regex.Match(line, j_datetime_pattern);
-								if (m.Success)
-								{
-									// source_time = DateTime.Parse(m.Value, JpCulture);
-									source_time = DateTime.Parse(m.Groups[1].Value, JpCulture).AddHours(Convert.ToDouble(m.Groups[2].Value)).AddMinutes(Convert.ToDouble(m.Groups[3].Value));
-									// 欲しいデータの時刻より新しくなければここでreturnする．
-									if (source_time <= after)
+									else
 									{
-										return;
+										// ☆データの日時の取得を試みる．
+										expecting_temperature_at = ReadDateTime(line, previous_data_time.Value);
+										if (expecting_temperature_at.HasValue && expecting_temperature_at.Value <= after)
+										{
+											return;
+										}
 									}
-									previous_data_time = source_time.Value;
-									expecting_date = false;
+								}
+								// not on_table
+								else if (expecting_date)
+								{
+									string j_datetime_pattern = @"(\d{4}年\d\d月\d\d日)\s*(\d\d)時(\d\d)分";	// 0:00は"24時00分"と表示されるので注意が必要？
+									var m = Regex.Match(line, j_datetime_pattern);
+									if (m.Success)
+									{
+										// source_time = DateTime.Parse(m.Value, JpCulture);
+										source_time = DateTime.Parse(m.Groups[1].Value, JpCulture).AddHours(Convert.ToDouble(m.Groups[2].Value)).AddMinutes(Convert.ToDouble(m.Groups[3].Value));
+										// 欲しいデータの時刻より新しくなければここでreturnする．
+										if (source_time <= after)
+										{
+											return;
+										}
+										previous_data_time = source_time.Value;
+										expecting_date = false;
+									}
+								}
+
+								else if (line.Contains("<table"))
+								{
+									on_table = true;
+									Console.WriteLine("We've landed on the table.");
 								}
 							}
-
-							else if (line.Contains("<table"))
+							else if (line.Contains("10分観測値"))
 							{
-								on_table = true;
-								Console.WriteLine("We've landed on the table.");
+								Console.WriteLine(line);
+								// 10min.
+								data10min_active = true;
+								expecting_date = true;
+								continue;
 							}
-						}
-						else if (line.Contains("10分観測値"))
-						{
-							Console.WriteLine(line);
-							// 10min.
-							data10min_active = true;
-							expecting_date = true;
-							continue;
-						}
 
+						}
 					}
-				}
 
+				}
+			}
+			catch(System.Net.WebException ex)
+			{
+ 				// WebExceptionはtemporaryなネットワーク障害に起因することが考えられるので，
+				// いったん握りつぶしておく．
+				Console.WriteLine(ex.Message);
 			}
 			
 
