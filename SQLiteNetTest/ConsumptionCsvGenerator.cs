@@ -70,7 +70,7 @@ namespace SQLiteNetTest
 			using (StreamWriter writer = new StreamWriter(destination, false, new UTF8Encoding(false)))
 			{
 				// ヘッダ部の書き込み
-				writer.WriteLine(string.Format("時刻,{0},{1},{2}", todayTitle, maxTitle, stdTitle));
+				writer.WriteLine(string.Format("# 時刻,{0},{1},{2}", todayTitle, maxTitle, stdTitle));
 				// データ部の書き込み
 				for (int i = 1; i <= 6 * 24; i++)
 				{
