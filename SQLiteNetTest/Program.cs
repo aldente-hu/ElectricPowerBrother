@@ -28,15 +28,20 @@ namespace SQLiteNetTest
 			ChartGenerator.TemplatePath = MySettings.PltTemplatePath;
 			ChartGenerator.OutputPath = MySettings.PltOutputPath;
 			ChartGenerator.GnuplotBinaryPath = MySettings.GnuplotBinaryPath;
+
+			// for test
+			CsvGenerator = new ConsumptionCsvGenerator(MySettings.DatabaseFile);
 		}
 		#endregion
 		static ConsumptionXmlGenerator XmlGenerator;
 		static GnuplotChart ChartGenerator;
+		static ConsumptionCsvGenerator CsvGenerator;
 
 		// とりあえず2つ．
 		// 1とか2とか付く変数は，各インスタンスで保持した方がいいのかもしれない．
 		static DateTime NewestData1 = new DateTime(0);
 		static DateTime NewestData2 = new DateTime(0);
+		static DateTime NewestData3 = new DateTime(0);
 
 		static void UpdateXmlFiles(object state)
 		{
@@ -60,14 +65,27 @@ namespace SQLiteNetTest
 
 		}
 
+		static void UpdateTrinityCsvFile(object state)
+		{
+			var current = CsvGenerator.GetRikoLatestTime();
+			if (current > NewestData3)
+			{
+				CsvGenerator.OutputTrinityCsv(current, MySettings.TrinityCsvDestination);
+				NewestData3 = current;
+			}
+		}
+
 		static System.Threading.Timer ticker1;
 		static System.Threading.Timer ticker2;
+		static System.Threading.Timer ticker3;
 
 		static void Main(string[] args)
 		{
 
 			ticker1 = new System.Threading.Timer(UpdateXmlFiles, null, 0, 60 * 1000);
 			ticker2 = new System.Threading.Timer(UpdateSvgChart, null, 14 * 1000, 60 * 1000);
+			ticker3 = new System.Threading.Timer(UpdateTrinityCsvFile, null, 28 * 1000, 60 * 1000);
+
 			Console.WriteLine("Press the Enter key to end program.");
 			Console.ReadKey();
 		}

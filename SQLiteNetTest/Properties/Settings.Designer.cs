@@ -94,5 +94,17 @@ namespace SQLiteNetTest.Properties {
                 this["GnuplotBinaryPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\test.csv")]
+        public string TrinityCsvDestination {
+            get {
+                return ((string)(this["TrinityCsvDestination"]));
+            }
+            set {
+                this["TrinityCsvDestination"] = value;
+            }
+        }
     }
 }

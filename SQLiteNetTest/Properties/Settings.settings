@@ -20,5 +20,8 @@
     <Setting Name="GnuplotBinaryPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="TrinityCsvDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\test.csv</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
