@@ -56,7 +56,7 @@ namespace SQLiteNetTest
 				var series_current = series.Value;
 				DateTime from = series_current - series_current.TimeOfDay;
 				DateTime to = from.AddDays(1);
-				Console.WriteLine("{0} - {1}", from, to);
+				//Console.WriteLine("{0} - {1}", from, to);
 
 				foreach (var data in GetDetailConsumptions(from, to))
 				{
