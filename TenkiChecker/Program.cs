@@ -24,16 +24,19 @@ namespace TenkiChecker
 		}
 
 		static TemperatureData TemperatureDB;
+		static TemperatureCsvGenerator CsvGenerator;
 		static System.Threading.Timer ticker1;
 		static System.Threading.Timer ticker2;
+		static System.Threading.Timer ticker3;
 
 		static void Main(string[] args)
 		{
 			TemperatureDB = new TemperatureData(MySettings.DatabaseFile);
-
+			CsvGenerator = new TemperatureCsvGenerator(MySettings.DatabaseFile);
 			Console.WriteLine("Press the Enter key to end program.");
 			ticker1 = new System.Threading.Timer(GetTemperature, null, 27 * 1000, 270 * 1000);
 			ticker2 = new System.Threading.Timer(OutputTemperatureXml, null, 65 * 1000, 270 * 1000);
+			ticker3 = new System.Threading.Timer(OutputTodayTemperatureCsv, null, 55 * 1000, 270 * 1000);
 
 			Console.ReadKey();
 		}
@@ -51,6 +54,13 @@ namespace TenkiChecker
 			DateTime current = TemperatureDB.GetLatestTime();
 			TemperatureDB.OutputOneDayXml(current, MySettings.XmlDestination);
 		}
+
+		static void OutputTodayTemperatureCsv(object state)
+		{
+			DateTime current = TemperatureDB.GetLatestTime();
+			CsvGenerator.OutputTodayCsv(current, MySettings.TodayCsvDestination);
+		}
+
 
 
 		// after以後のデータを取得します。

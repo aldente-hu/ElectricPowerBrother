@@ -46,5 +46,17 @@ namespace TenkiChecker.Properties {
                 this["XmlDestination"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\today_temperature.csv")]
+        public string TodayCsvDestination {
+            get {
+                return ((string)(this["TodayCsvDestination"]));
+            }
+            set {
+                this["TodayCsvDestination"] = value;
+            }
+        }
     }
 }

@@ -8,5 +8,8 @@
     <Setting Name="XmlDestination" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\today_temperature.xml</Value>
     </Setting>
+    <Setting Name="TodayCsvDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\today_temperature.csv</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
