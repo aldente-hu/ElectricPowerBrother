@@ -29,19 +29,26 @@ namespace SQLiteNetTest
 			ChartGenerator.OutputPath = MySettings.PltOutputPath;
 			ChartGenerator.GnuplotBinaryPath = MySettings.GnuplotBinaryPath;
 
-			// for test
 			CsvGenerator = new ConsumptionCsvGenerator(MySettings.DatabaseFile);
+			CsvGenerator.CommentOutHeader = false;
+
+			GnuplotTrinity = new GnuplotTrinityChart {
+				GnuplotBinaryPath = MySettings.GnuplotBinaryPath,
+				Height = 600, Width = 1000, FontSize = 18 };
+
+
 		}
 		#endregion
 		static ConsumptionXmlGenerator XmlGenerator;
 		static GnuplotChart ChartGenerator;
 		static ConsumptionCsvGenerator CsvGenerator;
+		static GnuplotTrinityChart GnuplotTrinity;
 
-		// とりあえず2つ．
 		// 1とか2とか付く変数は，各インスタンスで保持した方がいいのかもしれない．
 		static DateTime NewestData1 = new DateTime(0);
 		static DateTime NewestData2 = new DateTime(0);
 		static DateTime NewestData3 = new DateTime(0);
+
 
 		static void UpdateXmlFiles(object state)
 		{
@@ -75,17 +82,25 @@ namespace SQLiteNetTest
 			}
 		}
 
+		static void UpdateTrinityChart(object state)
+		{
+			//GnuplotTrinity.DrawChart(MySettings.TrinityChartDestination);
+			GnuplotTrinity.GenerateGraph();
+		}
+
 		static System.Threading.Timer ticker1;
 		static System.Threading.Timer ticker2;
 		static System.Threading.Timer ticker3;
+		static System.Threading.Timer ticker4;
 
 		static void Main(string[] args)
 		{
-
+			
 			ticker1 = new System.Threading.Timer(UpdateXmlFiles, null, 0, 60 * 1000);
 			ticker2 = new System.Threading.Timer(UpdateSvgChart, null, 14 * 1000, 60 * 1000);
 			ticker3 = new System.Threading.Timer(UpdateTrinityCsvFile, null, 28 * 1000, 60 * 1000);
-
+			ticker4 = new System.Threading.Timer(UpdateTrinityChart, null, 34 * 1000, 60 * 1000);
+			
 			Console.WriteLine("Press the Enter key to end program.");
 			Console.ReadKey();
 		}

@@ -23,5 +23,8 @@
     <Setting Name="TrinityCsvDestination" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\test.csv</Value>
     </Setting>
+    <Setting Name="TrinityChartDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\trinity.svg</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

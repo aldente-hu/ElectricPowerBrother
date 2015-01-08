@@ -10,6 +10,17 @@ namespace TenkiChecker
 
 	public class TemperatureCsvGenerator : TemperatureData
 	{
+
+		/// <summary>
+		/// ヘッダ行を#でコメントアウトするかどうかの値を取得／設定します．
+		/// </summary>
+		public bool CommentOutHeader { get; set; }
+
+		/// <summary>
+		/// ヘッダ行に日付を入れるかどうかの値を取得／設定します．
+		/// </summary>
+		public bool UseDateOnHeader { get; set; }
+
 		public TemperatureCsvGenerator(string fileName) : base(fileName) { }
 
 		public void OutputTodayCsv(DateTime date, string destination)
@@ -23,8 +34,8 @@ namespace TenkiChecker
 			using (StreamWriter writer = new StreamWriter(destination, false, new UTF8Encoding(false)))
 			{
 				// ヘッダ部の書き込み
-				writer.WriteLine(string.Format("# {0}", date.ToString("yyyy-MM-dd")));
-				writer.WriteLine("# 時刻,気温");
+				//writer.WriteLine(string.Format("# {0}", date.ToString("yyyy-MM-dd")));
+				writer.WriteLine(string.Format("{0}時刻,気温{1}", CommentOutHeader ? "# " : string.Empty, UseDateOnHeader ? from.ToString("(MM月dd日)") : string.Empty));
 				// データ部の書き込み
 				foreach (var onedata in data)
 				{

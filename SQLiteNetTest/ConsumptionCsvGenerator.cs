@@ -15,6 +15,12 @@ namespace SQLiteNetTest
 		public ConsumptionCsvGenerator(string fileName) : base(fileName)
 		{ }
 
+		/// <summary>
+		/// ヘッダ行を#でコメントアウトするかどうかの値を取得／設定します．
+		/// </summary>
+		public bool CommentOutHeader { get; set; }
+
+
 		public void OutputTrinityCsv(DateTime time, string destination)
 		{
 			var trinity = DefineTrinity(time);
@@ -70,7 +76,7 @@ namespace SQLiteNetTest
 			using (StreamWriter writer = new StreamWriter(destination, false, new UTF8Encoding(false)))
 			{
 				// ヘッダ部の書き込み
-				writer.WriteLine(string.Format("# 時刻,{0},{1},{2}", todayTitle, maxTitle, stdTitle));
+				writer.WriteLine(string.Format("{3}時刻,{0},{1},{2}", todayTitle, maxTitle, stdTitle, CommentOutHeader ? "# " : string.Empty));
 				// データ部の書き込み
 				for (int i = 1; i <= 6 * 24; i++)
 				{

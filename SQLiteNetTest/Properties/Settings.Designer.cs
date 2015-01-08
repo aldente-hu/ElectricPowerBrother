@@ -106,5 +106,17 @@ namespace SQLiteNetTest.Properties {
                 this["TrinityCsvDestination"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\trinity.svg")]
+        public string TrinityChartDestination {
+            get {
+                return ((string)(this["TrinityChartDestination"]));
+            }
+            set {
+                this["TrinityChartDestination"] = value;
+            }
+        }
     }
 }

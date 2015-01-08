@@ -33,6 +33,9 @@ namespace TenkiChecker
 		{
 			TemperatureDB = new TemperatureData(MySettings.DatabaseFile);
 			CsvGenerator = new TemperatureCsvGenerator(MySettings.DatabaseFile);
+			CsvGenerator.CommentOutHeader = false;
+			CsvGenerator.UseDateOnHeader = true;
+
 			Console.WriteLine("Press the Enter key to end program.");
 			ticker1 = new System.Threading.Timer(GetTemperature, null, 27 * 1000, 270 * 1000);
 			ticker2 = new System.Threading.Timer(OutputTemperatureXml, null, 65 * 1000, 270 * 1000);
