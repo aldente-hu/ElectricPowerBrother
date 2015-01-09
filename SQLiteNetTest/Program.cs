@@ -85,7 +85,7 @@ namespace SQLiteNetTest
 		static void UpdateTrinityChart(object state)
 		{
 			//GnuplotTrinity.DrawChart(MySettings.TrinityChartDestination);
-			GnuplotTrinity.GenerateGraph();
+			GnuplotTrinity.GenerateGraph(MySettings.TrinityDataRootPath, MySettings.TrinitySvgOutputPath);
 		}
 
 		static System.Threading.Timer ticker1;

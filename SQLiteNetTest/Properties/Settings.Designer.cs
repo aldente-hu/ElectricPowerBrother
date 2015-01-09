@@ -118,5 +118,29 @@ namespace SQLiteNetTest.Properties {
                 this["TrinityChartDestination"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\ElectricPower")]
+        public string TrinityDataRootPath {
+            get {
+                return ((string)(this["TrinityDataRootPath"]));
+            }
+            set {
+                this["TrinityDataRootPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("public/himichu/trinity.svg")]
+        public string TrinitySvgOutputPath {
+            get {
+                return ((string)(this["TrinitySvgOutputPath"]));
+            }
+            set {
+                this["TrinitySvgOutputPath"] = value;
+            }
+        }
     }
 }

@@ -37,6 +37,8 @@ namespace SQLiteNetTest
 		}
 
 
+		// 未使用．
+		/*
 		public void DrawChart(string destination)
 		{
 			ProcessStartInfo startInfo = new ProcessStartInfo(this.GnuplotBinaryPath);
@@ -60,12 +62,13 @@ namespace SQLiteNetTest
 			}
 
 		}
+		*/
 
-		public void OutputCommands(StreamWriter destination)
+		public void OutputCommands(StreamWriter destination, string rootPath, string outputFileName)
 		{
-			destination.WriteLine(@"cd 'C:\Users\den\Documents\EP-5.5\ElectricPower'");
+			destination.WriteLine(string.Format("cd '{0}'", rootPath));
 			destination.WriteLine(string.Format("set terminal svg enhanced size {0},{1} fsize {2}", this.Width, this.Height, this.FontSize));
-			destination.WriteLine("set output 'public/himichu/trinity.svg'");	// ※とりあえず決め打ち．
+			destination.WriteLine(string.Format("set output '{0}'", outputFileName));	// ※とりあえず決め打ち．
 			destination.WriteLine("set encoding utf8");	
 			destination.WriteLine("set title \"電力消費量 (理工学部＋α)\"");	// 全角の"＋"は使わない方がよい．
 
@@ -121,15 +124,15 @@ set output
 
 		}
 
-		// DrawChartの代わり？
+		// DrawChartの代わり？今はこちらを使用している．
 		// GnuplotChartからのコピペ．
-		public void GenerateGraph()
+		public void GenerateGraph(string rootPath, string outputFileName)
 		{
 			string pltFile = Path.GetTempFileName();
 
 			using (StreamWriter writer = new StreamWriter(pltFile, false, new UTF8Encoding(false)))
 			{
-				OutputCommands(writer);
+				OutputCommands(writer, rootPath, outputFileName);
 			}
 
 			if (!string.IsNullOrEmpty(GnuplotBinaryPath))

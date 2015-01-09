@@ -26,5 +26,11 @@
     <Setting Name="TrinityChartDestination" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\trinity.svg</Value>
     </Setting>
+    <Setting Name="TrinityDataRootPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\ElectricPower</Value>
+    </Setting>
+    <Setting Name="TrinitySvgOutputPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">public/himichu/trinity.svg</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
