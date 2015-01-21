@@ -142,5 +142,17 @@ namespace SQLiteNetTest.Properties {
                 this["TrinitySvgOutputPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\24hours.xml")]
+        public string LatestXmlDestination {
+            get {
+                return ((string)(this["LatestXmlDestination"]));
+            }
+            set {
+                this["LatestXmlDestination"] = value;
+            }
+        }
     }
 }

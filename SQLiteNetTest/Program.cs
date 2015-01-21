@@ -56,7 +56,8 @@ namespace SQLiteNetTest
 			if (current > NewestData1)
 			{
 				XmlGenerator.OutputDailyXml(MySettings.DailyXmlDestination);
-				XmlGenerator.Output24HoursXml(current, MySettings.DetailXmlDestination);
+				XmlGenerator.OutputTrinityXml(current, MySettings.DetailXmlDestination);
+				XmlGenerator.Output24HoursXml(MySettings.LatestXmlDestination);
 				NewestData1 = current;
 			}
 		}

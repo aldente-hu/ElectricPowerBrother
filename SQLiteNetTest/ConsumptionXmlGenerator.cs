@@ -61,7 +61,8 @@ namespace SQLiteNetTest
 
 		}
 
-		public void Output24HoursXml(DateTime time, string destination)
+		// 01/19/2015 by aldente : メソッド名をOutput24HoursXmlからOutputTrinityXmlに変更．
+		public void OutputTrinityXml(DateTime time, string destination)
 		{
 			// 1.ドキュメントを生成．
 			XDocument doc = new XDocument(new XElement("consumptions"));
@@ -94,6 +95,28 @@ namespace SQLiteNetTest
 
 		}
 
+		// 01/21/2015 by aldente
+		/// <summary>
+		/// 最新24時間分の電力消費量をxmlで出力します．
+		/// 新しい方から順に出力します．
+		/// </summary>
+		/// <param name="destination"></param>
+		public void Output24HoursXml(string destination)
+		{
+			DateTime latest = GetRikoLatestTime();
+
+			XDocument doc = new XDocument(new XElement("consumptions"));
+			var root = doc.Root;
+
+			foreach (var data in GetDetailConsumptions(latest.AddDays(-1), latest).OrderByDescending(data => data.Key))
+			{
+				root.Add(
+					new XElement("consumption", new XAttribute("e_time", data.Key.ToString()), data.Value)
+				);
+			}
+
+			OutputXmlDocument(doc, destination);
+		}
 
 
 	}

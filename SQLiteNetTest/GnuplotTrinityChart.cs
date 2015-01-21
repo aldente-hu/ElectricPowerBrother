@@ -93,6 +93,7 @@ namespace SQLiteNetTest
 
 			destination.WriteLine("set output");
 			destination.WriteLine("exit");
+
 			/*
 cd 'C:\Users\den\Documents\EP-5.5\ElectricPower'
 set terminal svg enhanced size 900,600

@@ -32,5 +32,8 @@
     <Setting Name="TrinitySvgOutputPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">public/himichu/trinity.svg</Value>
     </Setting>
+    <Setting Name="LatestXmlDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\24hours.xml</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
