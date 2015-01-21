@@ -98,54 +98,9 @@ namespace TenkiChecker
 
 		}
 
-		public void OutputOneDayXml(DateTime date, string destination)
-		{
-			Console.WriteLine(date);
-			// 1.ドキュメントを生成．
-			XDocument doc = new XDocument(new XElement("amedas_hirosaki"));
-
-			XElement elem = new XElement("daily", new XAttribute("date", date.ToString("yyyy-MM-dd")));
-			//elem.SetAttributeValue("id", series.Key);
-
-			var from = date - date.TimeOfDay;
-			Console.WriteLine(from);
-
-			foreach (var data in GetOneDayTemperatures(date))
-			{
-				// 面倒だから時刻はTotalHoursを実数でそのまま出してしまおうか．
-				TimeSpan i_time = data.Key - from;
-				elem.Add(
-					new XElement("temperature", new XAttribute("hour", i_time.TotalHours.ToString("F3")), data.Value)
-				);
-			}
-			doc.Root.Add(elem);
-
-
-			// 2.XMLドキュメントを出力．
-			OutputXmlDocument(doc, destination);
-
-		}
 
 
 
-
-		// ※ConsumptionXmlGeneratorsクラスからのコピペ．
-		protected void OutputXmlDocument(XDocument doc, string destination)
-		{
-			// ☆将来的にはこれをプロパティ化しましょう．
-			XmlWriterSettings settings =
-			new XmlWriterSettings
-			{
-				NewLineHandling = NewLineHandling.Replace,
-				Indent = true,
-				IndentChars = "\t"
-			};
-
-			using (XmlWriter writer = XmlWriter.Create(destination, settings))
-			{
-				doc.WriteTo(writer);
-			}
-		}
 
 
 		static int TemperatureToInt(decimal temperature)

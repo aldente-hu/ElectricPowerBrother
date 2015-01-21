@@ -58,5 +58,17 @@ namespace TenkiChecker.Properties {
                 this["TodayCsvDestination"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\24hours_temperature.xml")]
+        public string LatestXmlDestination {
+            get {
+                return ((string)(this["LatestXmlDestination"]));
+            }
+            set {
+                this["LatestXmlDestination"] = value;
+            }
+        }
     }
 }

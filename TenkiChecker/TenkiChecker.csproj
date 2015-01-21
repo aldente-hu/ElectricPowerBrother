@@ -74,6 +74,7 @@
     </Compile>
     <Compile Include="TemperatureData.cs" />
     <Compile Include="TemperatureCsvGenerator.cs" />
+    <Compile Include="TemperatureXmlGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

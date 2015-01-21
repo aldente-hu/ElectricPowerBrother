@@ -25,9 +25,14 @@ namespace TenkiChecker
 
 		static TemperatureData TemperatureDB;
 		static TemperatureCsvGenerator CsvGenerator;
+		static TemperatureXmlGenerator XmlGenerator;
 		static System.Threading.Timer ticker1;
 		static System.Threading.Timer ticker2;
 		static System.Threading.Timer ticker3;
+
+		// 1とか2とか付く変数は，各インスタンスで保持した方がいいのかもしれない．
+		static DateTime NewestData2 = new DateTime(0);
+		static DateTime NewestData3 = new DateTime(0);
 
 		static void Main(string[] args)
 		{
@@ -35,6 +40,7 @@ namespace TenkiChecker
 			CsvGenerator = new TemperatureCsvGenerator(MySettings.DatabaseFile);
 			CsvGenerator.CommentOutHeader = false;
 			CsvGenerator.UseDateOnHeader = true;
+			XmlGenerator = new TemperatureXmlGenerator(MySettings.DatabaseFile);
 
 			Console.WriteLine("Press the Enter key to end program.");
 			ticker1 = new System.Threading.Timer(GetTemperature, null, 27 * 1000, 270 * 1000);
@@ -54,14 +60,23 @@ namespace TenkiChecker
 
 		static void OutputTemperatureXml(object state)
 		{
-			DateTime current = TemperatureDB.GetLatestTime();
-			TemperatureDB.OutputOneDayXml(current, MySettings.XmlDestination);
+			DateTime current = XmlGenerator.GetLatestTime();
+			if (current > NewestData2)
+			{
+				XmlGenerator.OutputOneDayXml(current, MySettings.XmlDestination);
+				XmlGenerator.Output24HoursXml(current, MySettings.LatestXmlDestination);
+				NewestData2 = current;
+			}
 		}
 
 		static void OutputTodayTemperatureCsv(object state)
 		{
-			DateTime current = TemperatureDB.GetLatestTime();
-			CsvGenerator.OutputTodayCsv(current, MySettings.TodayCsvDestination);
+			DateTime current = CsvGenerator.GetLatestTime();
+			if (current > NewestData3)
+			{
+				CsvGenerator.OutputTodayCsv(current, MySettings.TodayCsvDestination);
+				NewestData3 = current;
+			}
 		}
 
 

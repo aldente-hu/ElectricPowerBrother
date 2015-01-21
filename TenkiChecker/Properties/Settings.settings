@@ -11,5 +11,8 @@
     <Setting Name="TodayCsvDestination" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\today_temperature.csv</Value>
     </Setting>
+    <Setting Name="LatestXmlDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\24hours_temperature.xml</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
