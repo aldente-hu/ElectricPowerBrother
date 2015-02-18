@@ -202,6 +202,27 @@ namespace ElectricPowerData
 		}
 
 
+		// ☆Ticker用メソッドを定義しよう！
+		public Action<DateTime> UpdateAction { get; set; }
+
+		public DateTime Update(DateTime latestData)
+		{
+			var current = GetRikoLatestTime();
+			if (current > latestData)
+			{
+				// ここをデリゲート化したい！？
+				UpdateAction.Invoke(current);
+
+				// UpdateActionでは，こういう処理を行う．
+				//OutputDailyXml(DailyXmlDestination);
+				//OutputTrinityXml(current, DetailXmlDestination);
+				//Output24HoursXml(LatestXmlDestination);
+			}
+			return current;
+		}
+		// ☆ここまで．
+
+
 
 	}
 

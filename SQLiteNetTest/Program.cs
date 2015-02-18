@@ -19,89 +19,82 @@ namespace SQLiteNetTest
 			}
 		}
 
-		#region *[static]コンストラクタ
-		static Program()
-		{
-			XmlGenerator = new ConsumptionXmlGenerator(MySettings.DatabaseFile);
 
-			ChartGenerator = new GnuplotChart(MySettings.DatabaseFile);
-			ChartGenerator.TemplatePath = MySettings.PltTemplatePath;
-			ChartGenerator.OutputPath = MySettings.PltOutputPath;
-			ChartGenerator.GnuplotBinaryPath = MySettings.GnuplotBinaryPath;
-
-			CsvGenerator = new ConsumptionCsvGenerator(MySettings.DatabaseFile);
-			CsvGenerator.CommentOutHeader = false;
-
-			GnuplotTrinity = new GnuplotTrinityChart {
-				GnuplotBinaryPath = MySettings.GnuplotBinaryPath,
-				Height = 600, Width = 1000, FontSize = 18 };
-
-
-		}
-		#endregion
-		static ConsumptionXmlGenerator XmlGenerator;
-		static GnuplotChart ChartGenerator;
-		static ConsumptionCsvGenerator CsvGenerator;
-		static GnuplotTrinityChart GnuplotTrinity;
-
-		// 1とか2とか付く変数は，各インスタンスで保持した方がいいのかもしれない．
-		static DateTime NewestData1 = new DateTime(0);
-		static DateTime NewestData2 = new DateTime(0);
-		static DateTime NewestData3 = new DateTime(0);
-
-
-		static void UpdateXmlFiles(object state)
-		{
-			var current = XmlGenerator.GetRikoLatestTime();
-			if (current > NewestData1)
-			{
-				XmlGenerator.OutputDailyXml(MySettings.DailyXmlDestination);
-				XmlGenerator.OutputTrinityXml(current, MySettings.DetailXmlDestination);
-				XmlGenerator.Output24HoursXml(MySettings.LatestXmlDestination);
-				NewestData1 = current;
-			}
-		}
-
-		static void UpdateSvgChart(object state)
-		{
-			var current = XmlGenerator.GetRikoLatestTime();
-			if (current > NewestData2)
-			{
-				ChartGenerator.GenerateGraph(current);
-				NewestData2 = current;
-			}
-
-		}
-
-		static void UpdateTrinityCsvFile(object state)
-		{
-			var current = CsvGenerator.GetRikoLatestTime();
-			if (current > NewestData3)
-			{
-				CsvGenerator.OutputTrinityCsv(current, MySettings.TrinityCsvDestination);
-				NewestData3 = current;
-			}
-		}
-
-		static void UpdateTrinityChart(object state)
-		{
-			//GnuplotTrinity.DrawChart(MySettings.TrinityChartDestination);
-			GnuplotTrinity.GenerateGraph(MySettings.TrinityDataRootPath, MySettings.TrinitySvgOutputPath);
-		}
-
-		static System.Threading.Timer ticker1;
-		static System.Threading.Timer ticker2;
-		static System.Threading.Timer ticker3;
-		static System.Threading.Timer ticker4;
+		// staticな必要はある？
+		static Ticker ticker01;
+		static Ticker ticker02;
+		static Ticker ticker03;
+		static Ticker ticker04;
 
 		static void Main(string[] args)
 		{
+			/*
+			 * こういうことをしても，出力されるのは常に同じ時刻！
+			 */ /*
+			DateTime myTime = DateTime.Now;
+			Console.WriteLine(myTime.ToString());
+			ticker1 = new System.Threading.Timer((state) =>
+			{
+				state = ((DateTime)state).AddSeconds(2);
+				Console.WriteLine(state.ToString());
+				myTime = (DateTime)state;
+			}, myTime, 0, 7 * 100);
+		
+			*/
+
 			
-			ticker1 = new System.Threading.Timer(UpdateXmlFiles, null, 0, 60 * 1000);
-			ticker2 = new System.Threading.Timer(UpdateSvgChart, null, 14 * 1000, 60 * 1000);
-			ticker3 = new System.Threading.Timer(UpdateTrinityCsvFile, null, 28 * 1000, 60 * 1000);
-			ticker4 = new System.Threading.Timer(UpdateTrinityChart, null, 34 * 1000, 60 * 1000);
+			// これはどこで作ってもいい．
+			ConsumptionXmlGenerator xmlGenerator = new ConsumptionXmlGenerator(MySettings.DatabaseFile);
+			xmlGenerator.UpdateAction = (current) =>
+			{
+				xmlGenerator.OutputDailyXml(MySettings.DailyXmlDestination);
+				xmlGenerator.OutputTrinityXml(current, MySettings.DetailXmlDestination);
+				xmlGenerator.Output24HoursXml(MySettings.LatestXmlDestination);
+			};
+
+			//ticker01.Callback = UpdateXmlFiles;
+			ticker01 = new Ticker(xmlGenerator.Update);
+			ticker01.StartTimer(0, 60 * 1000);
+
+
+			GnuplotChart chartGenerator = new GnuplotChart(MySettings.DatabaseFile);
+			chartGenerator.TemplatePath = MySettings.PltTemplatePath;
+			chartGenerator.OutputPath = MySettings.PltOutputPath;
+			chartGenerator.GnuplotBinaryPath = MySettings.GnuplotBinaryPath;
+			chartGenerator.UpdateAction = (current) =>
+			{
+				chartGenerator.GenerateGraph(current);
+			};
+
+			ticker02 = new Ticker(chartGenerator.Update);
+			ticker02.StartTimer(14 * 1000, 60 * 1000);
+
+
+			var csvGenerator = new ConsumptionCsvGenerator(MySettings.DatabaseFile);
+			csvGenerator.CommentOutHeader = false;
+			csvGenerator.UpdateAction = (current) => {
+				csvGenerator.OutputTrinityCsv(current, MySettings.TrinityCsvDestination);
+			};
+
+			ticker03 = new Ticker(csvGenerator.Update);
+			ticker03.StartTimer(28 * 1000, 60 * 1000);
+
+
+			var gnuplotTrinity = new GnuplotTrinityChart
+			{
+				GnuplotBinaryPath = MySettings.GnuplotBinaryPath,
+				Height = 600,
+				Width = 1000,
+				FontSize = 18
+			};
+
+			ticker04 = new Ticker((state) =>
+			{
+				gnuplotTrinity.GenerateGraph(MySettings.TrinityDataRootPath, MySettings.TrinitySvgOutputPath);
+			});
+			ticker04.StartTimer(34 * 1000, 60 * 1000);
 			
+
 			Console.WriteLine("Press the Enter key to end program.");
 			Console.ReadKey();
 		}

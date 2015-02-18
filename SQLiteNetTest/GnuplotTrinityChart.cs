@@ -87,6 +87,7 @@ namespace SQLiteNetTest
 			destination.WriteLine("set grid y2tics");
 			destination.WriteLine("set key left top autotitle columnheader");	// これを使うと文字エンコーディングがおかしくなる？
 
+			// ※決め打ちを解消しましょう！
 			// プロットするデータの設定
 			destination.WriteLine("set datafile separator ','");
 			destination.WriteLine("plot 'public/himichu/trinity.csv' using 1:2 w lines lw 3 lc rgbcolor '#FF0000', 'public/himichu/trinity.csv' using 1:3 w lines lc rgbcolor '#FF3399', 'public/himichu/trinity.csv' using 1:4 w lines lc rgbcolor '#FF99CC', 'public/himichu/today_temperature.csv' using 1:2 w lines lw 3 lc rgbcolor '#0000CC' axis x1y2");
