@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 using System.Data.SQLite;
 
 
-namespace ElectricPowerData
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 {
 
-	public class ConsumptionData : SQLiteDateTimeConverting
+	public class ConsumptionData : SQLiteData
 	{
 
 		public ConsumptionData(string fileName)
@@ -47,7 +47,7 @@ namespace ElectricPowerData
 				using (var reader = command.ExecuteReader())
 				{
 					reader.Read();
-					return IntToTime(Convert.ToInt32(reader[0]));
+					return Convert.IntToTime(System.Convert.ToInt32(reader[0]));
 				}
 			}
 		}
@@ -69,15 +69,15 @@ namespace ElectricPowerData
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = string.Format(
 						"select date, sum(consumption) as total from jdhm_consumptions_10min where date < {0} and date >= {0} - 21 and ch in (1, 2) group by date",
-						DateToInt(before));
+						Convert.DateToInt(before));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
-							int date = Convert.ToInt32(reader["date"]);
-							int total = Convert.ToInt32(reader["total"]);
+							int date = System.Convert.ToInt32(reader["date"]);
+							int total = System.Convert.ToInt32(reader["total"]);
 							//Console.WriteLine("{0} : {1}", date, total);
-							dailyConsumptions.Add(IntToDate(date), total);
+							dailyConsumptions.Add(Convert.IntToDate(date), total);
 						}
 					}
 				}
@@ -101,15 +101,15 @@ namespace ElectricPowerData
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = string.Format(
 						"select hour + 1 as e_hour, count(consumption) as cnt, sum(consumption) as total from jdhm_consumptions_10min where date = {0} and ch in (1, 2) group by hour",
-						DateToInt(date));
+						Convert.DateToInt(date));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
-							if (!completed_only || Convert.ToInt32(reader["cnt"]) == 12)
+							if (!completed_only || System.Convert.ToInt32(reader["cnt"]) == 12)
 							{
-								int hour = Convert.ToInt32(reader["e_hour"]);
-								int total = Convert.ToInt32(reader["total"]);
+								int hour = System.Convert.ToInt32(reader["e_hour"]);
+								int total = System.Convert.ToInt32(reader["total"]);
 								//Console.WriteLine("{0} : {1}", hour, total);
 								hourlyConsumptions.Add(hour, total);
 							}
@@ -135,13 +135,13 @@ namespace ElectricPowerData
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = string.Format(
 						"select e_time, sum(consumption) as total from consumptions_10min where e_time > {0} and e_time <= {1} and ch in (1, 2) group by e_time",
-						TimeToInt(from), TimeToInt(to));
+						Convert.TimeToInt(from), Convert.TimeToInt(to));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
-							DateTime e_time = IntToTime(Convert.ToInt32(reader["e_time"]));
-							int total = Convert.ToInt32(reader["total"]);
+							DateTime e_time = Convert.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+							int total = System.Convert.ToInt32(reader["total"]);
 							detailConsumptions.Add(e_time, total);
 						}
 					}
@@ -185,12 +185,12 @@ namespace ElectricPowerData
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = string.Format(
 						"select sum(consumption) as total from consumptions_10min where e_time > {0} and e_time <= {1} and ch in (1, 2) group by e_time order by e_time",
-						TimeToInt(time.AddHours(-1)), TimeToInt(time.AddHours(1)));
+						Convert.TimeToInt(time.AddHours(-1)), Convert.TimeToInt(time.AddHours(1)));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
-							consumptions.Add(Convert.ToInt32(reader[0]));
+							consumptions.Add(System.Convert.ToInt32(reader[0]));
 						}
 					}
 				}

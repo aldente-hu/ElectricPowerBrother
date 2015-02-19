@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using System.Data.SQLite;
 
-namespace ElectricPowerData
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 {
 	public class AlertData : ConsumptionData
 	{
@@ -25,14 +25,14 @@ namespace ElectricPowerData
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = string.Format("select data_time, rank from alerts where region = 1 and data_time > {0} and data_time < {1} order by data_time",
-						TimeToInt(from), TimeToInt(to));
+						Convert.TimeToInt(from), Convert.TimeToInt(to));
 					using (var reader = command.ExecuteReader())
 					{
 						int current = 0;
 						while (reader.Read())
 						{
-							DateTime time = IntToTime(Convert.ToInt32(reader["data_time"]));
-							int rank = Convert.ToInt32(reader["rank"]);
+							DateTime time = Convert.IntToTime(System.Convert.ToInt32(reader["data_time"]));
+							int rank = System.Convert.ToInt32(reader["rank"]);
 							if (rank > current)
 							{
 								//Console.WriteLine("{0} : {1}", date, total);

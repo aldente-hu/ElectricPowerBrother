@@ -7,8 +7,8 @@
     <ProjectGuid>{C67B9075-00F2-49E3-BFD0-4E4E77885743}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ElectricPowerData</RootNamespace>
-    <AssemblyName>ElectricPowerData</AssemblyName>
+    <RootNamespace>HirosakiUniversity.Aldente.ElectricPowerBrother.Data</RootNamespace>
+    <AssemblyName>ElectricPowerBrotherData</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -46,7 +46,6 @@
     <Compile Include="ConsumptionData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLiteData.cs" />
-    <Compile Include="SQLiteDateTimeConverting.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

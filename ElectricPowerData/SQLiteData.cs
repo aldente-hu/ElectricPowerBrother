@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ElectricPowerData
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 {
 	public class SQLiteData
 	{
@@ -30,6 +30,35 @@ namespace ElectricPowerData
 		public SQLiteData(string fileName)
 		{
 			this._fileName = fileName;
+		}
+
+		// System.Convertと紛らわしいですかねぇ？
+		public static class Convert
+		{
+			// DateTime型か，DateTimeOffset型かは後々見直すことにする．
+
+			static DateTime DateOrigin = new DateTime(1970, 1, 1);
+
+			public static DateTime IntToDate(int date)
+			{
+				return DateOrigin.AddDays(date);
+			}
+
+			public static int DateToInt(DateTime date)
+			{
+				return date.Subtract(DateOrigin).Days;
+			}
+
+			public static DateTime IntToTime(int time)
+			{
+				return DateOrigin.AddSeconds(time + 32400);
+			}
+
+			public static int TimeToInt(DateTime time)
+			{
+				return System.Convert.ToInt32(time.Subtract(DateOrigin).TotalSeconds - 32400);
+			}
+
 		}
 
 	}

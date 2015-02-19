@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GnuplotChartBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ticker.cs" />
   </ItemGroup>

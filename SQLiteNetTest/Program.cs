@@ -20,8 +20,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 		}
 
+		static Program()
+		{
+			GnuplotChartBase.GnuplotBinaryPath = MySettings.GnuplotBinaryPath;
+		}
 
-		// staticな必要はある？
+
+		// staticである必要はある？
 		static Ticker ticker01;
 		static Ticker ticker02;
 		static Ticker ticker03;
@@ -42,6 +47,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}, myTime, 0, 7 * 100);
 		
 			*/
+
 
 			
 			// これはどこで作ってもいい．
@@ -80,18 +86,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			ticker03 = new Ticker(csvGenerator.Update);
 			ticker03.StartTimer(28 * 1000, 60 * 1000);
 
-
-			var gnuplotTrinity = new GnuplotTrinityChart
+			
+			var pltGenerator = new GnuplotTrinityChart
 			{
-				GnuplotBinaryPath = MySettings.GnuplotBinaryPath,
-				Height = 600,
 				Width = 1000,
-				FontSize = 18
+				Height = 600,
+				FontSize = 18,
+				RootPath = MySettings.TrinityDataRootPath,
+				ChartDestination = MySettings.TrinitySvgOutputPath
 			};
-
+			
 			ticker04 = new Ticker((state) =>
 			{
-				gnuplotTrinity.GenerateGraph(MySettings.TrinityDataRootPath, MySettings.TrinitySvgOutputPath);
+				GnuplotChartBase.GenerateGraph(pltGenerator);
 			});
 			ticker04.StartTimer(34 * 1000, 60 * 1000);
 			

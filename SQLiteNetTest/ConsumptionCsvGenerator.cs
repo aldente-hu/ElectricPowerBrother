@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.IO;
-using ElectricPowerData;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
+	using Data;
 
 	public class ConsumptionCsvGenerator : ConsumptionData
 	{

@@ -8,10 +8,11 @@ using System.IO;
 using System.Text.RegularExpressions;
 
 using System.Diagnostics;
-using ElectricPowerData;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
+	using Data;
+
 	// for gnuplot
 	public class GnuplotChart : ConsumptionData
 	{

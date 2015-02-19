@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 using System.Xml.Linq;
 using System.Xml;
-using ElectricPowerData;
+
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
+	using Data;
+
 	public class ConsumptionXmlGenerator : ConsumptionData
 	{
 		public ConsumptionXmlGenerator(string fileName) : base(fileName)
