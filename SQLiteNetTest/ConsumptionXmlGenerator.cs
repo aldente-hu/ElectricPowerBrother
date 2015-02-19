@@ -8,7 +8,7 @@ using System.Xml.Linq;
 using System.Xml;
 using ElectricPowerData;
 
-namespace SQLiteNetTest
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 	public class ConsumptionXmlGenerator : ConsumptionData
 	{

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.IO;
 using ElectricPowerData;
 
-namespace SQLiteNetTest
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 
 	public class ConsumptionCsvGenerator : ConsumptionData

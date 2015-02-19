@@ -8,7 +8,7 @@ using System.Data.SQLite;
 
 using HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers;
 
-namespace SQLiteNetTest
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 	class Program
 	{
@@ -16,7 +16,7 @@ namespace SQLiteNetTest
 		{
 			get
 			{
-				return SQLiteNetTest.Properties.Settings.Default;
+				return HirosakiUniversity.Aldente.ElectricPowerBrother.Properties.Settings.Default;
 			}
 		}
 

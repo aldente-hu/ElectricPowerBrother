@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
 
-namespace SQLiteNetTest
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 
 	public class GnuplotTrinityChart

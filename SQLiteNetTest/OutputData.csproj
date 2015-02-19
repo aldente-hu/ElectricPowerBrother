@@ -7,8 +7,8 @@
     <ProjectGuid>{3772129D-9889-4797-A358-5B1BACAF8763}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SQLiteNetTest</RootNamespace>
-    <AssemblyName>SQLiteNetTest</AssemblyName>
+    <RootNamespace>HirosakiUniversity.Aldente.ElectricPowerBrother</RootNamespace>
+    <AssemblyName>OutputData</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SQLiteNetTest.Properties {
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

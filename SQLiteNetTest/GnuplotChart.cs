@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using ElectricPowerData;
 
-namespace SQLiteNetTest
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 	// for gnuplot
 	public class GnuplotChart : ConsumptionData
