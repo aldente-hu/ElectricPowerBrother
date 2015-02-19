@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace TenkiChecker
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 {
+	using Data;
+
+
 	// 01/21/2015 by aldente : ほとんどConsumptionXmlGeneratorのコピペ．
 	public class TemperatureXmlGenerator : TemperatureData
 	{

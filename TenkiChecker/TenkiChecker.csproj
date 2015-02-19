@@ -7,7 +7,7 @@
     <ProjectGuid>{3337E0D8-E92D-4123-A6B9-D0D7DDEB4675}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TenkiChecker</RootNamespace>
+    <RootNamespace>HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker</RootNamespace>
     <AssemblyName>TenkiChecker</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -87,6 +87,10 @@
     <ProjectReference Include="..\ElectricPowerData\ElectricPowerData.csproj">
       <Project>{c67b9075-00f2-49e3-bfd0-4e4e77885743}</Project>
       <Name>ElectricPowerData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Helpers\Helpers.csproj">
+      <Project>{5331c2be-b25d-4a8b-854c-c9489480d52a}</Project>
+      <Name>Helpers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

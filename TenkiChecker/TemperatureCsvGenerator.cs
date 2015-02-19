@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace TenkiChecker
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 {
+	using Data;
 
 	public class TemperatureCsvGenerator : TemperatureData
 	{

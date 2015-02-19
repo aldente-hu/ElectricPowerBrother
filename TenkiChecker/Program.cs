@@ -8,8 +8,9 @@ using System.Xml.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace TenkiChecker
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 {
+	using Data;
 
 	class Program
 	{
@@ -33,6 +34,8 @@ namespace TenkiChecker
 		// 1とか2とか付く変数は，各インスタンスで保持した方がいいのかもしれない．
 		static DateTime NewestData2 = new DateTime(0);
 		static DateTime NewestData3 = new DateTime(0);
+
+
 
 		static void Main(string[] args)
 		{

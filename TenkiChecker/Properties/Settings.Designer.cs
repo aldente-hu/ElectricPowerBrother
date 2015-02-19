@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TenkiChecker.Properties {
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
