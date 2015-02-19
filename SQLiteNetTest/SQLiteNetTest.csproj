@@ -79,7 +79,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Ticker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -92,6 +91,10 @@
     <ProjectReference Include="..\ElectricPowerData\ElectricPowerData.csproj">
       <Project>{c67b9075-00f2-49e3-bfd0-4e4e77885743}</Project>
       <Name>ElectricPowerData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Helpers\Helpers.csproj">
+      <Project>{5331c2be-b25d-4a8b-854c-c9489480d52a}</Project>
+      <Name>Helpers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using System.Threading;
 
-namespace SQLiteNetTest
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
 	public class Ticker
 	{

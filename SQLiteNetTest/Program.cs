@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-//using SQLite;
 using System.Data.SQLite;
+
+using HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers;
 
 namespace SQLiteNetTest
 {
