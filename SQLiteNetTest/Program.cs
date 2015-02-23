@@ -96,10 +96,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				ChartDestination = MySettings.TrinitySvgOutputPath
 			};
 			
-			ticker04 = new Ticker((state) =>
+			ticker04 = new Ticker();
+			ticker04.Callback = (state) =>
 			{
 				GnuplotChartBase.GenerateGraph(pltGenerator);
-			});
+			};
 			ticker04.StartTimer(34 * 1000, 60 * 1000);
 			
 

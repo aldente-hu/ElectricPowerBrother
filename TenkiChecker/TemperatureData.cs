@@ -31,7 +31,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			//   - temperature integer
 			// temperatureは摂氏温度の10倍の値を保持する．
 
+			
+			public override DateTime GetLatestDataTime()
+			{
+				return GetLatestTime();
+			}
 
+			[Obsolete("GetLatestDataTimeメソッドを使用して下さい．")]
 			public DateTime GetLatestTime()
 			{
 				using (var connection = new SQLiteConnection(this.ConnectionString))
@@ -86,6 +92,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				return GetTemperatures(from, to);
 			}
 
+			// 02/20/2015 by aldente : 非同期にしてみた．
 			public void InsertTemperature(DateTime time, decimal temperature)
 			{
 				using (var connection = new SQLiteConnection(this.ConnectionString))
@@ -95,7 +102,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					{
 						command.CommandText = string.Format(
 							"INSERT INTO temperatures VALUES({0}, {1})", Convert.TimeToInt(time), TemperatureToInt(temperature));
-						command.ExecuteNonQuery();
+						//command.ExecuteNonQuery();
+						command.ExecuteNonQueryAsync();
 					}
 					connection.Close();
 				}

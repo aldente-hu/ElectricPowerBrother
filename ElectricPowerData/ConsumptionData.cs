@@ -18,7 +18,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		{ }
 
 
+		public override DateTime GetLatestDataTime()
+		{
+			return GetRikoLatestTime();
+			// いずれGetRikoLatestTimeの実装で置き換えよう，と考え中．
+		}
 
+		[Obsolete("GetLatestDataTimeメソッドを使用して下さい．")]
 		public DateTime GetRikoLatestTime()
 		{
 			using (var connection = new SQLiteConnection(this.ConnectionString))
@@ -202,25 +208,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		}
 
 
-		// ☆Ticker用メソッドを定義しよう！
-		public Action<DateTime> UpdateAction { get; set; }
-
-		public DateTime Update(DateTime latestData)
-		{
-			var current = GetRikoLatestTime();
-			if (current > latestData)
-			{
-				// ここをデリゲート化したい！？
-				UpdateAction.Invoke(current);
-
-				// UpdateActionでは，こういう処理を行う．
-				//OutputDailyXml(DailyXmlDestination);
-				//OutputTrinityXml(current, DetailXmlDestination);
-				//Output24HoursXml(LatestXmlDestination);
-			}
-			return current;
-		}
-		// ☆ここまで．
 
 
 

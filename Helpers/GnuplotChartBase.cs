@@ -19,11 +19,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		// 直接コマンドを送るとうまくいかないことがあったような気がするので，
 		// いったんpltファイルを生成するようにしてみる．
 
+		// (1.1.2.3)同期処理にしたので，変数を再びローカル変数に戻す．
+		// (1.1.2.2)非同期処理に備えて，これらの変数(GenerateGraphのローカル変数であったもの)をstaticにしておく．
+		//static Process process;
+		//static string pltFile;
 
+		// 02/23/2014 by aldente : (1.1.2.0)一時ファイルを削除する処理を追加．
 		// GnuplotChartからのコピペ．
 		public static void GenerateGraph(PltFileGeneratorBase pltGenerator)
 		{
-			string pltFile = Path.GetTempFileName();
+			var pltFile = Path.GetTempFileName();
 
 			using (StreamWriter writer = new StreamWriter(pltFile, false, new UTF8Encoding(false)))
 			{
@@ -35,14 +40,37 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 			if (!string.IsNullOrEmpty(GnuplotBinaryPath))
 			{
 				// 非同期で実行する．
-				using (var process = new Process())
+				// ↑非同期実行では一時ファイルを削除できなかったので，やむをえず同期実行にしてみる．
+
+				//if (process != null) { process.Dispose(); }
+				var process = new Process();
 				{
 					process.StartInfo.FileName = GnuplotBinaryPath;
 					process.StartInfo.Arguments = pltFile;
 					process.StartInfo.CreateNoWindow = true;
 					process.StartInfo.UseShellExecute = false;	// これを設定しないと，CreateNoWindowは無視される．
+					//process.EnableRaisingEvents = true;	// (1.1.2.2)これを設定しないと，Exitedイベントが発生しない！
+					//process.Exited += (sender, e) =>
+					//{
+					//	Console.WriteLine("We're deleting this file! : {0}", pltFile);	// for debug (1.1.2.1)
+					//	File.Delete(pltFile);
+					//};
 					process.Start();
+					if (process.WaitForExit(60 * 1000))
+					{
+						Console.WriteLine("We're deleting this file! : {0}", pltFile);	// for debug (1.1.2.1)
+						File.Delete(pltFile);
+					}
+					else
+					{
+						// タイムアウト
+						Console.WriteLine("gnuplotのプロセスがタイムアウトしたよ！");
+					}
+					process.Dispose();
 				}
+				
+	
+
 			}
 
 		}

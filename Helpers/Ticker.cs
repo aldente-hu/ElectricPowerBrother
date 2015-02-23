@@ -13,13 +13,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 
 		Timer timer;
 
-		public TimerCallback Callback { get; protected set; }
+		//public TimerCallback Callback { get; protected set; }
+		public TimerCallback Callback { get; set; }
 
 		#region *コンストラクタ(Ticker)
-		public Ticker(TimerCallback callback)
-		{
-			this.Callback = callback;
-		}
+		//public Ticker(TimerCallback callback)
+		//{
+		//	this.Callback = callback;
+		//}
+
+		public Ticker() { }
 
 		public Ticker(Func<DateTime, DateTime> updateFunction) {
 			this.Callback = (state) =>
@@ -30,12 +33,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		DateTime NewestData { get; set; }
 		#endregion
 
+		// コールバックに与える引数．
+		public object CallbackArgument { get; set; }
 
 		public void StartTimer(int dueTime, int period)
 		{
 			// コンストラクタでcallbackが設定されるはずなので，ここで確認はしない！
-			timer = new System.Threading.Timer(Callback, null, dueTime, period);
+			timer = new System.Threading.Timer(Callback, CallbackArgument, dueTime, period);
 		}
 
+
 	}
+
+
 }

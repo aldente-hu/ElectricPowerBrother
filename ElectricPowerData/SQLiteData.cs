@@ -32,7 +32,34 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			this._fileName = fileName;
 		}
 
+
+		#region Ticker関連
+
+		public virtual DateTime GetLatestDataTime() { return new DateTime(0); }
+
+		public Action<DateTime> UpdateAction { get; set; }
+
+		public DateTime Update(DateTime latestData)
+		{
+			// ※GetLatestDataTimeが設定されていない場合のことはとりあえず考えない．
+			var current = GetLatestDataTime();
+			if (current > latestData)
+			{
+				UpdateAction.Invoke(current);
+
+				// UpdateActionでは，こういう処理を行う．
+				//OutputDailyXml(DailyXmlDestination);
+				//OutputTrinityXml(current, DetailXmlDestination);
+				//Output24HoursXml(LatestXmlDestination);
+			}
+			return current;
+		}
+
+		#endregion
+
+
 		// System.Convertと紛らわしいですかねぇ？
+		#region Convertクラス
 		public static class Convert
 		{
 			// DateTime型か，DateTimeOffset型かは後々見直すことにする．
@@ -60,6 +87,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			}
 
 		}
+		#endregion
 
 	}
 }
