@@ -14,6 +14,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	{
 		static Properties.Settings MySettings
 		{
+			// (1.1.1.0)TrinityCsvDestinationに，(TrinityDataRootPathからの)相対パスあるいは絶対パスを入れられるようにした．
 			get
 			{
 				return HirosakiUniversity.Aldente.ElectricPowerBrother.Properties.Settings.Default;
@@ -80,7 +81,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			var csvGenerator = new ConsumptionCsvGenerator(MySettings.DatabaseFile);
 			csvGenerator.CommentOutHeader = false;
 			csvGenerator.UpdateAction = (current) => {
-				csvGenerator.OutputTrinityCsv(current, MySettings.TrinityCsvDestination);
+				var csvDestination = System.IO.Path.IsPathRooted(MySettings.TrinityCsvDestination) ?
+					MySettings.TrinityCsvDestination :
+					System.IO.Path.Combine(MySettings.TrinityDataRootPath, MySettings.TrinityCsvDestination);
+				csvGenerator.OutputTrinityCsv(current, csvDestination);
 			};
 
 			ticker03 = new Ticker(csvGenerator.Update);
@@ -93,12 +97,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				Height = 600,
 				FontSize = 18,
 				RootPath = MySettings.TrinityDataRootPath,
-				ChartDestination = MySettings.TrinitySvgOutputPath
+				ChartDestination = MySettings.TrinitySvgOutputPath,
+				TrinityCsvPath = MySettings.TrinityCsvDestination,
+				TemperatureCsvPath = MySettings.TemperatureCsvPath
 			};
 			
 			ticker04 = new Ticker();
 			ticker04.Callback = (state) =>
 			{
+				// 温度の範囲をプローブする．
+				//using (var reader = new System.IO.StreamReader(MySettings.))
 				GnuplotChartBase.GenerateGraph(pltGenerator);
 			};
 			ticker04.StartTimer(34 * 1000, 60 * 1000);

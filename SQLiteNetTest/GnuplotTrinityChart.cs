@@ -31,6 +31,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public int FontSize { get; set; }
 
+		/// <summary>
+		/// Trinityデータのファイルパスを，絶対パスまたは(RootPathからの)相対パスで指定します．
+		/// </summary>
+		public string TrinityCsvPath { get; set; }
+
+		/// <summary>
+		/// 気温データのファイルパスを，絶対パスまたは(RootPathからの)相対パスで指定します．
+		/// </summary>
+		public string TemperatureCsvPath { get; set; }
 
 		public override void Generate(StreamWriter writer)
 		{
@@ -58,10 +67,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			writer.WriteLine("set grid y2tics");
 			writer.WriteLine("set key left top autotitle columnheader");	// これを使うと文字エンコーディングがおかしくなる？
 
-			// ※決め打ちを解消しましょう！
 			// プロットするデータの設定
 			writer.WriteLine("set datafile separator ','");
-			writer.WriteLine("plot 'public/himichu/trinity.csv' using 1:2 w lines lw 3 lc rgbcolor '#FF0000', 'public/himichu/trinity.csv' using 1:3 w lines lc rgbcolor '#FF3399', 'public/himichu/trinity.csv' using 1:4 w lines lc rgbcolor '#FF99CC', 'public/himichu/today_temperature.csv' using 1:2 w lines lw 3 lc rgbcolor '#0000CC' axis x1y2");
+			writer.WriteLine(string.Format(
+				"plot '{0}' using 1:2 w lines lw 3 lc rgbcolor '#FF0000', '{0}' using 1:3 w lines lc rgbcolor '#FF3399', '{0}' using 1:4 w lines lc rgbcolor '#FF99CC', '{1}' using 1:2 w lines lw 3 lc rgbcolor '#0000CC' axis x1y2",
+				TrinityCsvPath,
+				TemperatureCsvPath)
+			);
 
 			writer.WriteLine("set output");
 			writer.WriteLine("exit");
