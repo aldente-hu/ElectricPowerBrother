@@ -45,6 +45,31 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		{
 			// ※決め打ちだらけだけど，まあとりあえず．
 
+			// (1.1.2.0)温度の範囲をプローブする．
+			decimal max_temp = -1;
+			decimal min_temp = 0;
+			using (var reader = new System.IO.StreamReader(this.GetAbsolutePath(TemperatureCsvPath)))	// ←これ相対パスで大丈夫だっけ？←ダメっぽい．
+			{
+				decimal temp;
+				var cols = reader.ReadLine().Split(',');
+				if (cols.Length > 1 && Decimal.TryParse(cols[1], out temp))
+				{
+					if (max_temp < temp) { max_temp = temp; }
+					if (min_temp > temp) { min_temp = temp; }
+				}
+			}
+
+			max_temp = Decimal.Ceiling(max_temp);
+			min_temp = Decimal.Floor(min_temp);
+
+			int step_temp = 1;
+			var diff = max_temp - min_temp;
+			while (diff > 8 * step_temp)
+			{
+				step_temp++;
+			}
+			max_temp = min_temp + 8 * step_temp;
+
 
 			writer.WriteLine(string.Format("cd '{0}'", RootPath));
 			writer.WriteLine(string.Format("set terminal svg enhanced size {0},{1} fsize {2}", this.Width, this.Height, this.FontSize));
@@ -60,8 +85,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			writer.WriteLine("set yrange [ 50.0 : 130.0 ]");
 			writer.WriteLine("set ytics border 50,10,130");
 			writer.WriteLine("set y2label '気温 [℃]'");
-			writer.WriteLine("set y2range [ -8.0 : 8.0 ]");
-			writer.WriteLine("set y2tics border -8,2,8");
+			writer.WriteLine(string.Format("set y2range [ {0} : {1} ]", min_temp, max_temp));
+			writer.WriteLine(string.Format("set y2tics border {0},{2},{1}", min_temp, max_temp, step_temp));
 
 			// レイアウトの設定
 			writer.WriteLine("set grid y2tics");

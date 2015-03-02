@@ -105,8 +105,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			ticker04 = new Ticker();
 			ticker04.Callback = (state) =>
 			{
-				// 温度の範囲をプローブする．
-				//using (var reader = new System.IO.StreamReader(MySettings.))
 				GnuplotChartBase.GenerateGraph(pltGenerator);
 			};
 			ticker04.StartTimer(34 * 1000, 60 * 1000);
