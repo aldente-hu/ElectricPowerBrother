@@ -8,7 +8,8 @@ using System.Net;
 using System.Net.Mail;
 using System.Configuration;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helper
+// (1.1.4.1) 名前空間を修正．
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
 	// (1.1.4.0)メール送信用
 	public class Jappajil

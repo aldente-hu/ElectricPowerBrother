@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helper
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
 	public class JappajilConfiguration : ConfigurationSection
 	{
