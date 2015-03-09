@@ -24,13 +24,18 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		public string UserName {get; set;}
 		public string Password {get; set;}
 
+		public string POPServer { get; set; }
+
 		public Jappajil(string server, int port = 25)
 		{
 			this.Server = server;
 			this.Port = port;
 			this._client = new SmtpClient(server, port);
+
+			this.POPServer = string.Empty;
 		}
 
+		// (1.1.5.0)POP before SMTPに対応．
 		public void Post(MailMessage message)
 		{
 			if (string.IsNullOrEmpty(this.UserName))
@@ -39,13 +44,57 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 			}
 			else
 			{
-				_client.EnableSsl = true;
-				_client.Credentials = new NetworkCredential(this.UserName, this.Password);
+				// (1.1.5.1)条件文を修正．
+				if (!string.IsNullOrEmpty(POPServer))
+				{
+					_client.EnableSsl = false;	// (1.1.5.2)追加．
+					// POP before SMTP
+					POPAuthentication(POPServer);
+				}
+				else
+				{
+					// SMTP認証
+					Console.WriteLine("Try SMTP Authentication.");
+					_client.EnableSsl = true;
+					_client.Credentials = new NetworkCredential(this.UserName, this.Password);
+				}
 			}
 
 			_client.Send(message);
+			
 		}
 
+		// (1.1.5.0)POP before SMTPの認証を行います．
+		protected void POPAuthentication(string server)
+		{
+			using (System.Net.Sockets.TcpClient pop = new System.Net.Sockets.TcpClient())
+			{
+				pop.SendTimeout = 10000;
+				pop.ReceiveTimeout = 10000;
+				pop.Connect(server, 110);
+
+				using (System.Net.Sockets.NetworkStream nws = pop.GetStream())
+				{
+					System.IO.StreamWriter sw = new System.IO.StreamWriter(nws);
+					var sr = new System.IO.StreamReader(nws);
+					String res = string.Empty;
+
+					sw.NewLine = "\r\n";
+					res += sr.ReadLine();
+
+					sw.AutoFlush = true;
+					sw.WriteLine("USER {0}", UserName);
+					res += sr.ReadLine();
+					sw.WriteLine("PASS {0}", Password);
+					res += sr.ReadLine();
+					sw.WriteLine("QUIT");
+					res += sr.ReadLine();
+
+					nws.Close();
+				}
+				pop.Close();
+			}
+		}
 		/*
 					string tanuki = "*****@hirosaki-u.ac.jp";
 			SmtpClient client = new SmtpClient("smtp.*****.*****", 587);

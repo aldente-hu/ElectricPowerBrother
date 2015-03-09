@@ -7,6 +7,10 @@ using System.Configuration;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
+	// アプリケーションの設定には，app.configファイルと.settingsの2通りがあるらしい．
+	// ここのクラスは前者に対応したものだけど，使い勝手がいいのは後者なので，
+	// 後者を使うことにして，ここのクラスはなかったことにするかもしれない．
+
 	public class JappajilConfiguration : ConfigurationSection
 	{
 
@@ -147,6 +151,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 				return item.Address;
 			}
 		}
+
+		
 	}
 
 
