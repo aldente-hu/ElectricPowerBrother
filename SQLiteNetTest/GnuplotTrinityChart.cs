@@ -46,21 +46,25 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// ※決め打ちだらけだけど，まあとりあえず．
 
 			// (1.1.2.0)温度の範囲をプローブする．
-			decimal max_temp = -1;
-			decimal min_temp = 0;
-			using (var reader = new System.IO.StreamReader(this.GetAbsolutePath(TemperatureCsvPath)))	// ←これ相対パスで大丈夫だっけ？←ダメっぽい．
+			decimal? max_temp = null;
+			decimal? min_temp = null;
+			var path = this.GetAbsolutePath(TemperatureCsvPath);
+			using (var reader = new System.IO.StreamReader(path))	// ←これ相対パスで大丈夫だっけ？←ダメっぽい．
 			{
-				decimal temp;
-				var cols = reader.ReadLine().Split(',');
-				if (cols.Length > 1 && Decimal.TryParse(cols[1], out temp))
+				while (!reader.EndOfStream)
 				{
-					if (max_temp < temp) { max_temp = temp; }
-					if (min_temp > temp) { min_temp = temp; }
+					decimal temp;
+					var cols = reader.ReadLine().Split(',');
+					if (cols.Length > 1 && Decimal.TryParse(cols[1], out temp))
+					{
+						if (!max_temp.HasValue || max_temp < temp) { max_temp = temp; }
+						if (!min_temp.HasValue || min_temp > temp) { min_temp = temp; }
+					}
 				}
 			}
 
-			max_temp = Decimal.Ceiling(max_temp);
-			min_temp = Decimal.Floor(min_temp);
+			max_temp = max_temp.HasValue ? Decimal.Ceiling(max_temp.Value) : 2;
+			min_temp = min_temp.HasValue ? Decimal.Floor(min_temp.Value) : -4;
 
 			int step_temp = 1;
 			var diff = max_temp - min_temp;
@@ -81,9 +85,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			writer.WriteLine("set xlabel '時刻 [Hour]'");
 			writer.WriteLine("set xrange [ 0.0 : 24.0 ]");
 			writer.WriteLine("set xtics border mirror norotate 0,1,24");
+
+			var y1_max = 120;	// (1.1.2.1) 40-120 に変更．
+			var y1_min = 40;
 			writer.WriteLine("set ylabel '10分間電力消費量 [kWh]'");
-			writer.WriteLine("set yrange [ 50.0 : 130.0 ]");
-			writer.WriteLine("set ytics border 50,10,130");
+			writer.WriteLine(string.Format("set yrange [ {0} : {1} ]", y1_min, y1_max));
+			writer.WriteLine(string.Format("set ytics border {0},10,{1}", y1_min, y1_max));
+
 			writer.WriteLine("set y2label '気温 [℃]'");
 			writer.WriteLine(string.Format("set y2range [ {0} : {1} ]", min_temp, max_temp));
 			writer.WriteLine(string.Format("set y2tics border {0},{2},{1}", min_temp, max_temp, step_temp));
