@@ -13,19 +13,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 	public class ConsumptionData : SQLiteData
 	{
 
+		#region *コンストラクタ(ConsumptionData) ; 実質的実装はなし
 		public ConsumptionData(string fileName)
 			: base(fileName)
 		{ }
+		#endregion
 
 
+		#region *最新データの時刻を取得(GetLatestDataTime)
+		/// <summary>
+		/// 最新データの時刻(ch1, ch2のデータが揃っている時刻)を取得します．
+		/// </summary>
+		/// <returns></returns>
 		public override DateTime GetLatestDataTime()
-		{
-			return GetRikoLatestTime();
-			// いずれGetRikoLatestTimeの実装で置き換えよう，と考え中．
-		}
-
-		[Obsolete("GetLatestDataTimeメソッドを使用して下さい．")]
-		public DateTime GetRikoLatestTime()
 		{
 			using (var connection = new SQLiteConnection(this.ConnectionString))
 			{
@@ -41,7 +41,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			}
 
 		}
+		#endregion
 
+		// privateでいいのでは？
+		#region *指定したchの最新データの時刻を取得(GetLatestTime)
+		/// <summary>
+		/// 指定したチャンネルの最新データの時刻を取得します．
+		/// </summary>
+		/// <param name="connection"></param>
+		/// <param name="ch"></param>
+		/// <returns></returns>
 		protected DateTime GetLatestTime(SQLiteConnection connection, int ch)
 		{
 			using (SQLiteCommand command = connection.CreateCommand())
@@ -57,8 +66,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				}
 			}
 		}
+		#endregion
+
 
 		// (1.1.1.0)新しい方からn件のデータを取得します(ch1と2の和)．
+		#region *最近のデータを取得(GetRecentData)
+		/// <summary>
+		/// 新しい方からn件のデータ(ch1とch2の和)を取得します．
+		/// </summary>
+		/// <param name="n">データを取得する数．</param>
+		/// <returns></returns>
 		public IDictionary<DateTime, int> GetRecentData(int n)
 		{
 			IDictionary<DateTime, int> data = new Dictionary<DateTime, int>();
@@ -87,8 +104,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			}
 			return data;
 		}
+		#endregion
 
 		// before以前3週間の隔日の合計を取得します．
+		#region *日合計を取得(GetLatestDaily)
+		/// <summary>
+		/// 指定した日以前の3週間についての日合計を取得します．
+		/// </summary>
+		/// <param name="before">指定した日以前のデータを取得します．自身は含みません．</param>
+		/// <returns></returns>
 		public IDictionary<DateTime, int> GetLatestDaily(DateTime before)
 		{
 			// キーがdate，値がtotalに対応．
@@ -121,9 +145,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			return dailyConsumptions;
 
 		}
-
+		#endregion
 
 		// dateの各hour毎の合計を取得します．
+		#region *1時間ごとのデータを取得(GetHourlyConsumptions)
+		/// <summary>
+		/// 指定した日の1時間毎のデータを取得します(ch1とch2の合計)．
+		/// </summary>
+		/// <param name="date">データ取得の対象日．</param>
+		/// <param name="completed_only">trueであれば，データが揃っている時間だけを返します．</param>
+		/// <returns></returns>
 		public IDictionary<int, int> GetHourlyConsumptions(DateTime date, bool completed_only = true)
 		{
 			// キーがhour，値がtotalに対応．
@@ -157,8 +188,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			return hourlyConsumptions;
 
 		}
+		#endregion
 
 		// from自身は含まず，to自身は含みます．
+		#region *消費量データを取得(GetDetailConsumptions)
+		/// <summary>
+		/// 指定した期間のデータ(ch1とch2の合計)を取得します．
+		/// </summary>
+		/// <param name="from">期間の始点です．この時刻のデータは含まれません．</param>
+		/// <param name="to">期間の終点です．この時刻のデータが含まれます．</param>
+		/// <returns></returns>
 		public IDictionary<DateTime, int> GetDetailConsumptions(DateTime from, DateTime to)
 		{
 			var detailConsumptions = new Dictionary<DateTime, int>();
@@ -187,10 +226,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 			return detailConsumptions;
 		}
+		#endregion
 
 
-
-		// 現在の日時に対して，trinityを決定します．
+		#region *trinityを決定(DefineTrinity)
+		/// <summary>
+		/// 指定した日時に対して，trinityを決定します．
+		/// </summary>
+		/// <param name="current">trinityを決定する対象の日時．</param>
+		/// <returns></returns>
 		public IDictionary<string, DateTime> DefineTrinity(DateTime current)
 		{
 			var trinity = new Dictionary<string,DateTime>();
@@ -207,8 +251,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			trinity["標準"] = consumptions.Skip((size - 1) / 2).First().Key + timeOfDay;
 			return trinity;
 		}
+		#endregion
 
+		// ※↓これ使ってるの？
 		// timeの1時間前は含まない．
+		#region *前後1時間のデータを取得(Around1hour)
+		/// <summary>
+		/// 指定した時刻の前後1時間のデータ(ch1とch2の合計)を，時刻順(古→新)の配列として返します．
+		/// </summary>
+		/// <param name="time"></param>
+		/// <returns></returns>
 		public int[] Around1hour(DateTime time)
 		{
 			var consumptions = new List<int>();
@@ -236,7 +288,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			return consumptions.ToArray();
 
 		}
-
+		#endregion
 
 
 
