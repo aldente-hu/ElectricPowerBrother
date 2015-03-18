@@ -56,19 +56,21 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helper
 			XName feed = XName.Get("feed", NAMESPACE);
 
 			XName link = XName.Get("link", NAMESPACE);
-			XName rel = XName.Get("rel", NAMESPACE);
+
+			//XName rel = XName.Get("rel", NAMESPACE);
+			string rel = "rel";
 
 			XElement root = new XElement(XName.Get("feed", NAMESPACE),
 				new XElement(XName.Get("title", NAMESPACE), Title),
 				new XElement(XName.Get("author", NAMESPACE), new XElement(XName.Get("name", NAMESPACE), Author)),
-				new XElement(XName.Get("updated", NAMESPACE), UpdatedAt.ToLongTimeString()),
+				new XElement(XName.Get("updated", NAMESPACE), UpdatedAt.ToString(@"yyyy-MM-dd\THH:mm:sszzz")),
 				from entry in Entries select entry.OutputElement()
  			);
-			if (string.IsNullOrEmpty(SelfLink))
+			if (!string.IsNullOrEmpty(SelfLink))
 			{
 				root.Add(new XElement(link, new XAttribute(rel, "self"), SelfLink));
 			}
-			if (string.IsNullOrEmpty(AlternateLink))
+			if (!string.IsNullOrEmpty(AlternateLink))
 			{
 				root.Add(new XElement(link, new XAttribute(rel, "alternate"), AlternateLink));
 			}
@@ -108,11 +110,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helper
 		{
 			XElement element = new XElement(XName.Get("entry", NAMESPACE),
 				new XElement(XName.Get("title", NAMESPACE), Title),
-				new XElement(XName.Get("published", NAMESPACE), PublishedAt.ToLongTimeString()),
+				new XElement(XName.Get("published", NAMESPACE), PublishedAt.ToString(@"yyyy-MM-dd\THH:mm:sszzz")),
 				new XElement(XName.Get("id", NAMESPACE), ID),
-				new XElement(XName.Get("content", NAMESPACE), new XAttribute(XName.Get("type", NAMESPACE), "text"), Content)
+				new XElement(XName.Get("content", NAMESPACE), new XAttribute("type", "text"), Content)
 			);
-
 			return element;
 		}
 
