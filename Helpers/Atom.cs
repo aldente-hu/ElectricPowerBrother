@@ -8,7 +8,9 @@ using System.Xml.Linq;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
+	// Atomという名前空間を用意した方がいいかも？
 
+	#region AtomFeedクラス
 	public class AtomFeed
 	{
 		const string NAMESPACE = "http://www.w3.org/2005/Atom";
@@ -79,7 +81,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 			return new XDocument(root);
 		}
 	}
+	#endregion
 
+	#region AtomEntryクラス
 	public class AtomEntry
 	{
 		const string NAMESPACE = "http://www.w3.org/2005/Atom";
@@ -118,5 +122,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		}
 
 	}
+	#endregion
+
 
 }

@@ -11,7 +11,9 @@ using System.Configuration;
 // (1.1.4.1) 名前空間を修正．
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
+
 	// (1.1.4.0)メール送信用
+	#region Jappajilクラス
 	public class Jappajil
 	{
 		// この2つはコンストラクタで設定する．
@@ -21,11 +23,24 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
  		//public int Port {get;}
 		readonly SmtpClient _client;
 
+		/// <summary>
+		/// POP/SMTPのユーザ名を取得／設定します．
+		/// SMTP認証やPOP before SMTP認証を行わない場合は，空にしておいて下さい．
+		/// </summary>
 		public string UserName {get; set;}
+
+		/// <summary>
+		/// POP/SMTPのパスワードを取得／設定します．
+		/// </summary>
 		public string Password {get; set;}
 
+		/// <summary>
+		/// POPサーバのアドレスを取得／設定します．
+		/// 空でない値を設定すると，常にPOP before SMTP認証を試みます．
+		/// </summary>
 		public string POPServer { get; set; }
 
+		#region *コンストラクタ(Jappajil)
 		public Jappajil(string server, int port = 25)
 		{
 			this.Server = server;
@@ -34,6 +49,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 
 			this.POPServer = string.Empty;
 		}
+		#endregion
+
 
 		// (1.1.5.0)POP before SMTPに対応．
 		public void Post(MailMessage message)
@@ -54,7 +71,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 				else
 				{
 					// SMTP認証
-					Console.WriteLine("Try SMTP Authentication.");
+					//Console.WriteLine("Try SMTP Authentication.");
 					_client.EnableSsl = true;
 					_client.Credentials = new NetworkCredential(this.UserName, this.Password);
 				}
@@ -96,10 +113,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 			}
 		}
 		/*
-					string tanuki = "*****@hirosaki-u.ac.jp";
+			string tanuki = "*****@hirosaki-u.ac.jp";
 			SmtpClient client = new SmtpClient("smtp.*****.*****", 587);
 			client.EnableSsl = true;
 			client.Credentials = new NetworkCredential("jm####@hirosaki-u.ac.jp", "**********");
+
+		  ただし，これをやると，Return-Pathが jm####@hirosaki-u.ac.jp になる
+		  (こちらで設定しても上書きされる)ので使いにくい． 
 		*/
 
 		/*
@@ -115,6 +135,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		//client.Send(message);
 
 	}
+	#endregion
 
 
 
