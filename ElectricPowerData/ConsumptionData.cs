@@ -58,6 +58,36 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			}
 		}
 
+		// (1.1.1.0)新しい方からn件のデータを取得します(ch1と2の和)．
+		public IDictionary<DateTime, int> GetRecentData(int n)
+		{
+			IDictionary<DateTime, int> data = new Dictionary<DateTime, int>();
+			var time = GetLatestDataTime();
+
+			using (var connection = new SQLiteConnection(this.ConnectionString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = connection.CreateCommand())
+				{
+					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+					command.CommandText = string.Format(
+						"select e_time, sum(consumption) as total from consumptions_10min where e_time <= {0} and e_time > {1} and ch in (1, 2) group by e_time",
+						Convert.TimeToInt(time), Convert.TimeToInt(time.AddMinutes(-10 * n)));
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							DateTime data_time = Convert.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+							int total = System.Convert.ToInt32(reader["total"]);
+							//Console.WriteLine("{0} : {1}", date, total);
+							data.Add(data_time, total);
+						}
+					}
+				}
+			}
+			return data;
+		}
+
 		// before以前3週間の隔日の合計を取得します．
 		public IDictionary<DateTime, int> GetLatestDaily(DateTime before)
 		{
