@@ -7,7 +7,7 @@
     <ProjectGuid>{5331C2BE-B25D-4A8B-854C-C9489480D52A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HirosakiUniversity.Aldente.ElectricPowerBrother.Helper</RootNamespace>
+    <RootNamespace>HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers</RootNamespace>
     <AssemblyName>ElectricPowerBrotherHelpers</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

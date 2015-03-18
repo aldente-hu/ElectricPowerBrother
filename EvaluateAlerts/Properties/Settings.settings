@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="HirosakiUniversity.Aldente.ElectricPowerBrother.EvaluateAlerts.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="DatabaseFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\ep.sqlite3</Value>
+    </Setting>
+    <Setting Name="AlertLevels" Type="System.String" Scope="User">
+      <Value Profile="(Default)">←後でカスタム型を作成する！</Value>
+    </Setting>
+    <Setting Name="AtomFeedDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\alert.atom</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

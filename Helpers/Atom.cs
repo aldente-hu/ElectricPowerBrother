@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using System.Xml.Linq;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helper
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
 
 	public class AtomFeed
