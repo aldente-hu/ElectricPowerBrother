@@ -22,7 +22,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		// ひどいモデルだなぁ．
 		public AlertData(string fileName) : base(fileName) { }
 
-
 		public int GetCurrentRank()
 		{
 			using (var connection = new SQLiteConnection(this.ConnectionString))
@@ -114,15 +113,41 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 		}
 
+		// (1.1.2.0)
+		#region *データを追加(InsertData)
+		/// <summary>
+		/// データを追加します．
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="region"></param>
+		public void InsertData(AlertElement data, int region = 1)
+		{
+			using (var connection = new SQLiteConnection(this.ConnectionString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = connection.CreateCommand())
+				{
+					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+					command.CommandText = string.Format(
+						"INSERT INTO alerts VALUES({0}, {1}, {2}, {3})",
+						region, Convert.TimeToInt(data.DataTime), Convert.TimeToInt(data.DeclaredAt), data.Rank);
+					command.ExecuteNonQuery();
+				}
+			}
+		}
+		#endregion
 
 	}
 
+	// (1.1.1.2)
+	#region AlertElement構造体
 	public struct AlertElement
 	{
 		public DateTime DeclaredAt;
 		public DateTime DataTime;
 		public int Rank;
 	}
+	#endregion
 
 
 }

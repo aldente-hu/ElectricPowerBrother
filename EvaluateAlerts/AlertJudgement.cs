@@ -65,14 +65,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			public void Judge()
 			{
 				// time時点で最新のデータをn件取得する．
-				var recent_data = c_data.GetRecentData(3);
+				var recent_data = c_data.GetRecentData(3).OrderByDescending(d => d.Key);
 				var current_rank = data.GetCurrentRank();
 
-				int new_rank = Check(current_rank, recent_data.OrderByDescending(d => d.Key).Select(d => d.Value).ToArray());
+				int new_rank = Check(current_rank, recent_data.Select(d => d.Value).ToArray());
 				if (new_rank != current_rank)
 				{
 					// 記録する．
-					Console.WriteLine("New rank : {0}, previous rank : {1}", new_rank, current_rank);
+					data.InsertData(new AlertElement { 
+						DataTime=recent_data.First().Key, DeclaredAt = DateTime.Now, Rank = new_rank });
+					// ログを出力してもいいかも！
+					//Console.WriteLine("New rank : {0}, previous rank : {1}", new_rank, current_rank);
 				}
 			}
 
