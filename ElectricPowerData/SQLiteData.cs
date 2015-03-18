@@ -57,10 +57,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 		#endregion
 
-		// (1.1.1.0)いったんprotectedにしてみる．
+
 		// System.Convertと紛らわしいですかねぇ？
 		#region Convertクラス
-		protected static class Convert
+		public static class Convert
 		{
 			// DateTime型か，DateTimeOffset型かは後々見直すことにする．
 
