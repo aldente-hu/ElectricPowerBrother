@@ -115,6 +115,26 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		public string ChartDestination { get; set; }
 
 		public abstract void Generate(StreamWriter writer);
+
+		// (1.1.3.0)
+		protected string GetAbsolutePath(string path)
+		{
+			if (Path.IsPathRooted(path))
+			{
+				return path;
+			}
+			else
+			{
+				if (Path.IsPathRooted(RootPath))
+				{
+					return Path.Combine(RootPath, path);
+				}
+				else
+				{
+					throw new InvalidOperationException("RootPathプロパティにルートが含まれていません．");
+				}
+			}
+		}
 	}
 
 

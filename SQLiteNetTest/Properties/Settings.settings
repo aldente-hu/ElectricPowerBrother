@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SQLiteNetTest.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="HirosakiUniversity.Aldente.ElectricPowerBrother.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="DailyXmlDestination" Type="System.String" Scope="User">
@@ -30,10 +30,16 @@
       <Value Profile="(Default)">B:\ElectricPower</Value>
     </Setting>
     <Setting Name="TrinitySvgOutputPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">public/himichu/trinity.svg</Value>
+      <Value Profile="(Default)">public\himichu\trinity.svg</Value>
     </Setting>
     <Setting Name="LatestXmlDestination" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\24hours.xml</Value>
+    </Setting>
+    <Setting Name="TemperatureCsvPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">public\himichu\today_temperature.csv</Value>
+    </Setting>
+    <Setting Name="AtomDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\latest.atom</Value>
     </Setting>
   </Settings>
 </SettingsFile>

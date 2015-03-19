@@ -97,6 +97,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 		}
 
+		// (1.1.2.2) 実装を修正．
 		// 01/21/2015 by aldente
 		/// <summary>
 		/// 最新24時間分の電力消費量をxmlで出力します．
@@ -105,7 +106,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// <param name="destination"></param>
 		public void Output24HoursXml(string destination)
 		{
-			DateTime latest = GetRikoLatestTime();
+			DateTime latest = GetLatestDataTime();
 
 			XDocument doc = new XDocument(new XElement("consumptions"));
 			var root = doc.Root;
