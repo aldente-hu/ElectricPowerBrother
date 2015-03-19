@@ -11,18 +11,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	using Data;
 
 	// (1.2.0)
+	#region CunsumptionAtomGeneratorクラス
 	public class ConsumptionAtomGenerator : ConsumptionData
 	{
 
-		//public AtomFeed Feed { get { return _feed; } }
-
-		#region *コンストラクタ(ConsumptionAtomGenerator)
-		public ConsumptionAtomGenerator(string fileName) : base(fileName) {
-			//_feed = new AtomFeed();
-		}
+		#region *コンストラクタ(ConsumptionAtomGenerator) ; 実質的な実装はなし
+		public ConsumptionAtomGenerator(string fileName) : base(fileName) {	}
 		#endregion
 
-		//AtomFeed _feed;
 		public string Destination { get; set; }
 
 		public string Author { get; set; }
@@ -43,6 +39,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		string _entryIDBase = string.Empty;
 		#endregion
 
+		#region *Atomフィードを出力(Output)
+		/// <summary>
+		/// 指定した時刻時点でのAtomフィードを出力します．
+		/// </summary>
+		/// <param name="latestDataTime"></param>
 		public void Output(DateTime latestDataTime)
 		{
 			var time = latestDataTime;
@@ -90,7 +91,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 			}
 		}
-
+		#endregion
 
 
 		// これはどこで定義すべきか？
@@ -132,5 +133,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		#endregion
 
 	}
+	#endregion
 
 }

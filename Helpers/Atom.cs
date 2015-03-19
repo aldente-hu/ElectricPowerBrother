@@ -15,7 +15,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 	{
 		const string NAMESPACE = "http://www.w3.org/2005/Atom";
 	
-
 		/// <summary>
 		/// タイトル．必須．
 		/// </summary>
@@ -48,11 +47,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 
 		public IList<AtomEntry> Entries { get; private set; }
 
+		#region *コンストラクタ(AtomFeed)
 		public AtomFeed()
 		{
 			Entries = new List<AtomEntry>();
 		}
+		#endregion
 
+		// ※このメソッド名ってGenerateDocumentの方がいいのでは？
+		#region *Atomフィードを生成(OutputDocument)
 		public XDocument OutputDocument()
 		{
 			XName feed = XName.Get("feed", NAMESPACE);
@@ -80,6 +83,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 
 			return new XDocument(root);
 		}
+		#endregion
+
 	}
 	#endregion
 
@@ -109,7 +114,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		/// </summary>
 		public string Content { get; set; }
 
-
+		// このメソッド名はGenerateElementの方がいいのでは？
+		#region *Atomエントリ要素を生成(OutputElement)
 		public XElement OutputElement()
 		{
 			XElement element = new XElement(XName.Get("entry", NAMESPACE),
@@ -120,6 +126,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 			);
 			return element;
 		}
+		#endregion
 
 	}
 	#endregion

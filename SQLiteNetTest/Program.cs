@@ -12,6 +12,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 	class Program
 	{
+
+		#region *[static]MySettingsプロパティ
 		static Properties.Settings MySettings
 		{
 			// (1.1.1.0)TrinityCsvDestinationに，(TrinityDataRootPathからの)相対パスあるいは絶対パスを入れられるようにした．
@@ -20,11 +22,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				return HirosakiUniversity.Aldente.ElectricPowerBrother.Properties.Settings.Default;
 			}
 		}
+		#endregion
 
+		#region *[static]コンストラクタ(Program)
 		static Program()
 		{
 			GnuplotChartBase.GnuplotBinaryPath = MySettings.GnuplotBinaryPath;
 		}
+		#endregion
 
 
 		// staticである必要はある？
@@ -33,7 +38,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		static Ticker ticker02;
 		static Ticker ticker03;
 		static Ticker ticker04;
-		static Ticker ticker05;
+		static Ticker ticker05;	// (1.2.0)電力量のatom出力用．
 
 		static void Main(string[] args)
 		{
