@@ -28,10 +28,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 
 		// staticである必要はある？
+		// ↑必要な場合があるみたい．TenkiCheckerのProgram.csを参照．
 		static Ticker ticker01;
 		static Ticker ticker02;
 		static Ticker ticker03;
 		static Ticker ticker04;
+		static Ticker ticker05;
 
 		static void Main(string[] args)
 		{
@@ -60,7 +62,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				xmlGenerator.Output24HoursXml(MySettings.LatestXmlDestination);
 			};
 
-			//ticker01.Callback = UpdateXmlFiles;
 			ticker01 = new Ticker(xmlGenerator.Update);
 			ticker01.StartTimer(0, 60 * 1000);
 
@@ -102,13 +103,31 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				TemperatureCsvPath = MySettings.TemperatureCsvPath
 			};
 			
+
 			ticker04 = new Ticker();
+			// Tickerの動作の設定方法は2通り．
+			// 01～03のように引数で動作を与える方法と，
+			// ↓のようにCallbackプロパティを直接設定する方法がある．
+			// 両者の違いは何だっけ？最新データの時刻が変わった時にだけ動作するのが前者だったっけ？
 			ticker04.Callback = (state) =>
 			{
 				GnuplotChartBase.GenerateGraph(pltGenerator);
 			};
-			ticker04.StartTimer(34 * 1000, 60 * 1000);
-			
+			ticker04.StartTimer(34 * 1000, 120 * 1000);
+
+
+			ConsumptionAtomGenerator atomGenerator = new ConsumptionAtomGenerator(MySettings.DatabaseFile);
+			atomGenerator.ID = @"http://den.st.hirosaki-u.ac.jp/consumptions/";
+			atomGenerator.SelfLink = @"http://den.st.hirosaki-u.ac.jp/latest.atom";
+			atomGenerator.Author = "電力量計測システム";
+			atomGenerator.Title = "理工学部電力消費量";
+			atomGenerator.AlternateLink = "http://den.st.hirosaki-u.ac.jp/";
+			atomGenerator.Destination = MySettings.AtomDestination;
+			atomGenerator.UpdateAction = (current) => {
+				atomGenerator.Output(current);
+			};
+			ticker05 = new Ticker(atomGenerator.Update);
+			ticker05.StartTimer(3 * 1000, 60 * 1000);
 
 			Console.WriteLine("Press the Enter key to end program.");
 			Console.ReadKey();

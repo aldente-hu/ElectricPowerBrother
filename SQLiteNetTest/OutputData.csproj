@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsumptionAtomGenerator.cs" />
     <Compile Include="ConsumptionCsvGenerator.cs" />
     <Compile Include="ConsumptionXmlGenerator.cs" />
     <Compile Include="GnuplotChart.cs" />

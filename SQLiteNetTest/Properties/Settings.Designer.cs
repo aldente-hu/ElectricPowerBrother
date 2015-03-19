@@ -166,5 +166,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Properties {
                 this["TemperatureCsvPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\latest.atom")]
+        public string AtomDestination {
+            get {
+                return ((string)(this["AtomDestination"]));
+            }
+            set {
+                this["AtomDestination"] = value;
+            }
+        }
     }
 }

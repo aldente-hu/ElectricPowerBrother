@@ -38,5 +38,8 @@
     <Setting Name="TemperatureCsvPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">public\himichu\today_temperature.csv</Value>
     </Setting>
+    <Setting Name="AtomDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\latest.atom</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
