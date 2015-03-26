@@ -208,9 +208,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = string.Format(
-						"select e_time, sum(consumption) as total from consumptions_10min where e_time > {0} and e_time <= {1} and ch in (1, 2) group by e_time",
-						Convert.TimeToInt(from), Convert.TimeToInt(to));
+					command.CommandText = 
+						"select e_time, sum(consumption) as total from consumptions_10min where e_time > @1 and e_time <= @2 and ch in (1, 2) group by e_time";
+					command.Parameters.Add(new SQLiteParameter("@1", Convert.TimeToInt(from)));
+					command.Parameters.Add(new SQLiteParameter("@2", Convert.TimeToInt(to)));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -220,6 +221,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 							detailConsumptions.Add(e_time, total);
 						}
 					}
+
 				}
 				connection.Close();
 			}
@@ -228,6 +230,42 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		}
 		#endregion
 
+		// (1.1.3)
+		public IDictionary<DateTime, IDictionary<int, int>> GetParticularConsumptions(DateTime from, DateTime to)
+		{
+			var data = new Dictionary<DateTime, IDictionary<int,int>>();
+
+			using (var connection = new SQLiteConnection(ConnectionString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = connection.CreateCommand())
+				{
+					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+					command.CommandText =
+						"select e_time, ch, consumption from consumptions_10min where e_time > @1 and e_time <= @2 and ch in (1, 2)";
+					command.Parameters.Add(new SQLiteParameter("@1", Convert.TimeToInt(from)));
+					command.Parameters.Add(new SQLiteParameter("@2", Convert.TimeToInt(to)));
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							DateTime e_time = Convert.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+							int ch = System.Convert.ToInt32(reader["ch"]);
+							int consumption = System.Convert.ToInt32(reader["consumption"]);
+							if (!data.Keys.Contains(e_time))
+							{
+								data.Add(e_time, new Dictionary<int, int>());
+							}
+							data[e_time].Add(ch, consumption);	// e_timeとchがともに重複することはないはずだが….
+						}
+					}
+
+				}
+				connection.Close();
+			}
+			return data;
+
+		}
 
 		#region *trinityを決定(DefineTrinity)
 		/// <summary>
