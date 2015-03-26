@@ -39,6 +39,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		static Ticker ticker03;
 		static Ticker ticker04;
 		static Ticker ticker05;	// (1.2.0)電力量のatom出力用．
+		static Ticker ticker06;	// (1.2.1)Variableなcsvの出力用．
 
 		static void Main(string[] args)
 		{
@@ -133,6 +134,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			};
 			ticker05 = new Ticker(atomGenerator.Update);
 			ticker05.StartTimer(3 * 1000, 60 * 1000);
+
+			ConsumptionVariableCsvGenerator vcsvGenerator = new ConsumptionVariableCsvGenerator(MySettings.DatabaseFile);
+			vcsvGenerator.Destination = MySettings.VariableCsvDestination;
+			vcsvGenerator.SpanHour = MySettings.VariableCsvSpanHour;
+			vcsvGenerator.SplitByHour = MySettings.VariableCsvSplitByHour;
+			vcsvGenerator.Riko2CorrectionFactor = 1;
+			ticker06 = new Ticker(vcsvGenerator.OutputCsv);
+			ticker06.StartTimer(8 * 1000, 60 * 1000);
+
+
 
 			Console.WriteLine("Press the Enter key to end program.");
 			Console.ReadKey();

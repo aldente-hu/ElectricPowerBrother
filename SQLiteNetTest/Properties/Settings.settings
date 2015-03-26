@@ -41,5 +41,14 @@
     <Setting Name="AtomDestination" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\latest.atom</Value>
     </Setting>
+    <Setting Name="VariableCsvDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\4hours.csv</Value>
+    </Setting>
+    <Setting Name="VariableCsvSpanHour" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4</Value>
+    </Setting>
+    <Setting Name="VariableCsvSplitByHour" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
