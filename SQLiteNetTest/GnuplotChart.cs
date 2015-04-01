@@ -12,9 +12,12 @@ using System.Diagnostics;
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 	using Data;
+	using Helpers;
+
+	// 今は使わないかなぁ．
 
 	// for gnuplot
-	public class GnuplotChart : ConsumptionData
+	public class GnuplotChart : ConsumptionData, IPlugin
 	{
 
 		public string TemplatePath { get; set; }
@@ -104,6 +107,32 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 		}
 
+
+		#region (1.3.3)プラグイン化
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			foreach (var attribute in config.Attributes())
+			{
+				switch(config.Name.LocalName)
+				{
+					case "TemplatePath":
+						// グラフのファイルの出力先なども，このTemplate内で指定する．
+						this.TemplatePath = attribute.Value;
+						break;
+					case "PltOutputPath":
+						this.OutputPath = attribute.Value;
+						break;
+					case "GnuplotBinaryPath":
+						// こんなところで指定するよりも，パスを通してしまった方が早い気がする．
+						this.GnuplotBinaryPath = attribute.Value;
+						break;
+				}
+			}
+
+			this.UpdateAction = (time) => { GenerateGraph(time); };
+
+		}
+		#endregion
 
 	}
 }

@@ -140,7 +140,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			vcsvGenerator.SpanHour = MySettings.VariableCsvSpanHour;
 			vcsvGenerator.SplitByHour = MySettings.VariableCsvSplitByHour;
 			vcsvGenerator.Riko2CorrectionFactor = 1;
-			ticker06 = new Ticker(vcsvGenerator.OutputCsv);
+			ticker06 = new Ticker(vcsvGenerator.Update);
 			ticker06.StartTimer(8 * 1000, 60 * 1000);
 
 

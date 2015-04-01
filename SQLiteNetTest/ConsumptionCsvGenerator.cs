@@ -9,8 +9,9 @@ using System.IO;
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 	using Data;
+	using Helpers;
 
-	public class ConsumptionCsvGenerator : ConsumptionData
+	public class ConsumptionCsvGenerator : ConsumptionData, IPlugin
 	{
 		public ConsumptionCsvGenerator(string fileName) : base(fileName)
 		{ }
@@ -94,7 +95,30 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 		}
 
+		#region (1.3.1)プラグイン実装
 
+		// Destinationは必須．
+		// CommentOutHeaderは任意．
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			foreach (var attribute in config.Attributes())
+			{
+				switch (attribute.Name.LocalName)
+				{
+					case "CommentOutHeader":
+						this.CommentOutHeader = (bool)attribute;
+						break;
+				}
+			}
+			this.UpdateAction = (date) => {
+				var path = config.Attribute("Destination").Value;
+				var destination = Path.IsPathRooted(path) ? path : Path.Combine(config.Document.Root.Attribute("DataRootPath").Value, path);
+				OutputTrinityCsv(date, destination);
+			};
+		}
+
+		#endregion
 	}
 
 

@@ -11,7 +11,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 	public class Ticker
 	{
 
-		Timer timer;
+		public Timer MyTimer { get; set; }
 
 		//public TimerCallback Callback { get; protected set; }
 		public TimerCallback Callback { get; set; }
@@ -39,7 +39,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		public void StartTimer(int dueTime, int period)
 		{
 			// コンストラクタでcallbackが設定されるはずなので，ここで確認はしない！
-			timer = new System.Threading.Timer(Callback, CallbackArgument, dueTime, period);
+			MyTimer = new System.Threading.Timer(Callback, CallbackArgument, dueTime, period);
 		}
 
 

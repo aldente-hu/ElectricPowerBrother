@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TenkiChecker", "TenkiChecke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helpers", "Helpers\Helpers.csproj", "{5331C2BE-B25D-4A8B-854C-C9489480D52A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainProcedure", "MainProcedure\MainProcedure.csproj", "{65B05F5F-88DA-4DA0-BA9D-4C691A517686}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,17 @@ Global
 		{5331C2BE-B25D-4A8B-854C-C9489480D52A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{5331C2BE-B25D-4A8B-854C-C9489480D52A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{5331C2BE-B25D-4A8B-854C-C9489480D52A}.Release|x86.ActiveCfg = Release|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Release|x86.ActiveCfg = Release|x86
+		{65B05F5F-88DA-4DA0-BA9D-4C691A517686}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

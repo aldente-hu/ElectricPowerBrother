@@ -14,7 +14,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	/// <summary>
 	/// かつてのGnuplotTrinityChartクラスに対応しています．
 	/// </summary>
-	public class GnuplotTrinityChart : PltFileGeneratorBase
+	public class GnuplotTrinityChart : PltFileGeneratorBase, IUpdatingPlugin
 	{
 		/// <summary>
 		/// 出力するグラフの横幅を取得／設定します．
@@ -74,12 +74,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			max_temp = min_temp + 8 * step_temp;
 
-
-			writer.WriteLine(string.Format("cd '{0}'", RootPath));
+			if (string.IsNullOrEmpty(this.RootPath))
+			{
+				writer.WriteLine(string.Format("cd '{0}'", RootPath));
+			}
 			writer.WriteLine(string.Format("set terminal svg enhanced size {0},{1} fsize {2}", this.Width, this.Height, this.FontSize));
 			writer.WriteLine(string.Format("set output '{0}'", ChartDestination));	// ※とりあえず決め打ち．
 			writer.WriteLine("set encoding utf8");
-			writer.WriteLine("set title \"電力消費量 (理工学部＋α)\"");	// 全角の"＋"は使わない方がよい．
+			writer.WriteLine("set title \"電力消費量 (理工学部＋α)\"");	// 出力フォーマットによっては全角の"＋"は使わない方がよい．
 
 			// 各軸の設定
 			writer.WriteLine("set xlabel '時刻 [Hour]'");
@@ -143,6 +145,70 @@ plot 'public/himichu/trinity.csv' using 1:2 w lines lw 3 lc rgbcolor "#FF0000" t
 
 set output
 		 */
+
+		#region (1.3.3)プラグイン化
+
+		// (1.3.3.2)とりあえずのコンストラクタ．
+		public GnuplotTrinityChart(string databaseFile) : base()
+		{ }
+		public GnuplotTrinityChart() : base() { }
+
+		public void Update()
+		{
+			DateTime updated1 = new FileInfo(this.TemperatureCsvPath).LastWriteTime;
+			DateTime updated2 = new FileInfo(this.TrinityCsvPath).LastWriteTime;
+
+			var latestData = updated1 > updated2 ? updated1 : updated2;
+			if (latestData > _current)
+			{
+				GnuplotChartBase.GenerateGraph(this);
+			}
+			_current = latestData;
+		}
+		DateTime _current;
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			foreach (var attribute in config.Attributes())
+			{
+				switch(attribute.Name.LocalName)
+				{
+					case "TemperatureSource":
+						this.TemperatureCsvPath = attribute.Value;
+						break;
+					case "TrinitySource":
+						this.TrinityCsvPath = attribute.Value;
+						break;
+					case "Destination":
+						this.ChartDestination = attribute.Value;
+						break;
+					case "DataRoot":
+						this.RootPath = attribute.Value;
+						break;
+				}
+			}
+			var element = config.Element("ChartFormat");
+			if (element != null)
+			{
+				foreach (var attribute in element.Attributes())
+				{
+					switch(attribute.Name.LocalName)
+					{
+						case "Width":
+							this.Width = (int)attribute;
+							break;
+						case "Height":
+							this.Height = (int)attribute;
+							break;
+						case "FontSize":
+							this.FontSize = (int)attribute;
+							break;
+					}
+				}
+			}
+		}
+
+		#endregion
 
 
 	}

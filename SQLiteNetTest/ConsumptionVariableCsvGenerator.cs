@@ -8,23 +8,45 @@ using System.IO;
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 	using Data;
+	using Helpers;
 
+	// (1.3.1)
+	// ↓プラグイン化して無理矢理解決．
 	// (1.2.1)
 	// グラフが1つだけならいいけど，複数のグラフを出すにはどうする？
 	// 呼び出し元の問題では...．いま1つのTickerに関連づけているものをTaskとかスレッドとかプロセスに分けてしまえばいいのでは？
-	public class ConsumptionVariableCsvGenerator : ConsumptionData
+	public class ConsumptionVariableCsvGenerator : ConsumptionData, IPlugin
 	{
 		#region *コンストラクタ(ConsumptionVariableCsvGenerator)
 		public ConsumptionVariableCsvGenerator(string fileName)
 			: base(fileName)
-		{ }
+		{
+			this.Riko2CorrectionFactor = 1.0;
+			this.SpanHour = 4.0;
+		}
 		#endregion
 
 
+		/// <summary>
+		/// 正時で区切るか否かの値を取得／設定します．
+		/// </summary>
 		public bool SplitByHour { get; set; }
+
+		/// <summary>
+		/// 表示する時間範囲をhour単位で取得／設定します．既定値は4.0です．
+		/// </summary>
 		public double SpanHour { get; set; }
+
+		/// <summary>
+		/// ファイルの出力先を取得／設定します．
+		/// </summary>
 		public string Destination { get; set; }
+
+		/// <summary>
+		/// 既定値は1.0です．
+		/// </summary>
 		public double Riko2CorrectionFactor { get; set; }
+
 		public Func<IDictionary<int, int>, double> RikoCorrection
 		{
 			get
@@ -84,24 +106,24 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			return data;
 		}
 
-
-		public DateTime OutputCsv(DateTime previousDataTime)
+		// (1.3.2)返り値をDateTimeからvoidに変更．
+		public void OutputCsv(DateTime previousDataTime)
 		{
-			var new_data_time = this.GetLatestDataTime();
-			if (new_data_time <= previousDataTime)
-			{
-				return new_data_time;
-			}
+			//var new_data_time = this.GetLatestDataTime();
+			//if (new_data_time >= previousDataTime)	// (1.3.1.2)これまで不等号が逆だった？
+			//{
+			//	return new_data_time;
+			//}
 
 			IDictionary<DateTime, double> data;
 			if (this.Riko2CorrectionFactor == 1)
 			{
 				// IDictionary<DateTime, int>をIDictionary<DateTime, double>にキャストすることはできなかった．
-				data = GetDataForCsv(new_data_time);
+				data = GetDataForCsv(previousDataTime);
 			}
 			else
 			{
-				data = GetCorrectedDataForCsv(new_data_time, this.RikoCorrection);
+				data = GetCorrectedDataForCsv(previousDataTime, this.RikoCorrection);
 			}
 			using (StreamWriter writer = new StreamWriter(this.Destination, false, Encoding.GetEncoding("csWindows31J")))
 			{
@@ -117,8 +139,36 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 			}
 
-			return previousDataTime;
+			//return previousDataTime;
 		}
+
+		#region (1.3.1)プラグイン化
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			foreach (var attribute in config.Attributes())
+			{
+				switch(attribute.Name.LocalName)
+				{
+					case "Destination":
+						this.Destination = attribute.Value;
+						break;
+					case "SplitByHour":
+						this.SplitByHour = (bool)attribute;
+						break;
+					case "SpanHour":
+						this.SpanHour = (double)attribute;
+						break;
+					case "Riko2CorrectionFactor":
+						this.Riko2CorrectionFactor = (double)attribute;
+						break;
+				}
+			}
+
+			this.UpdateAction = (time) => { OutputCsv(time); };
+		}
+
+		#endregion
 
 	}
 

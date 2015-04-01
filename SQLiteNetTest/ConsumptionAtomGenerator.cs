@@ -12,7 +12,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 	// (1.2.0)
 	#region CunsumptionAtomGeneratorクラス
-	public class ConsumptionAtomGenerator : ConsumptionData
+	public class ConsumptionAtomGenerator : ConsumptionData, IPlugin
 	{
 
 		#region *コンストラクタ(ConsumptionAtomGenerator) ; 実質的な実装はなし
@@ -132,6 +132,43 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		}
 		#endregion
 
+
+		#region (1.3.0)プラグイン化
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			foreach (var attribute in config.Attributes())
+			{
+				switch(attribute.Name.LocalName)
+				{
+					case "Destination":
+						this.Destination = attribute.Value;
+						break;
+					case "Title":
+						this.Title = attribute.Value;
+						break;
+					case "Author":
+						this.Author = attribute.Value;
+						break;
+					case "SelfLink":
+						this.SelfLink = attribute.Value;
+						break;
+					case "AlternateLink":
+						this.AlternateLink = attribute.Value;
+						break;
+					case "Id":
+						this.ID = attribute.Value;
+						break;
+					case "EntryIdBase":
+						this.EntryIDBase = attribute.Value;
+						break;
+				}
+			}
+			this.UpdateAction = (date) => { Output(date); };
+
+		}
+
+		#endregion
 	}
 	#endregion
 
