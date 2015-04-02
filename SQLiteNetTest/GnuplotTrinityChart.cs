@@ -41,6 +41,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public string TemperatureCsvPath { get; set; }
 
+
 		public override void Generate(StreamWriter writer)
 		{
 			// ※決め打ちだらけだけど，まあとりあえず．
@@ -74,7 +75,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			max_temp = min_temp + 8 * step_temp;
 
-			if (string.IsNullOrEmpty(this.RootPath))
+			if (!string.IsNullOrEmpty(this.RootPath))
 			{
 				writer.WriteLine(string.Format("cd '{0}'", RootPath));
 			}
@@ -155,8 +156,8 @@ set output
 
 		public void Update()
 		{
-			DateTime updated1 = new FileInfo(this.TemperatureCsvPath).LastWriteTime;
-			DateTime updated2 = new FileInfo(this.TrinityCsvPath).LastWriteTime;
+			DateTime updated1 = new FileInfo(this.GetAbsolutePath(this.TemperatureCsvPath)).LastWriteTime;
+			DateTime updated2 = new FileInfo(this.GetAbsolutePath(this.TrinityCsvPath)).LastWriteTime;
 
 			var latestData = updated1 > updated2 ? updated1 : updated2;
 			if (latestData > _current)
