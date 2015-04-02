@@ -54,6 +54,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		}
 		#endregion
 
+		// (1.1.10.1)feedのid要素を出力(今まで出力していなかった...)
 		// ※このメソッド名ってGenerateDocumentの方がいいのでは？
 		#region *Atomフィードを生成(OutputDocument)
 		public XDocument OutputDocument()
@@ -66,6 +67,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 			string rel = "rel";
 
 			XElement root = new XElement(XName.Get("feed", NAMESPACE),
+				new XElement(XName.Get("id", NAMESPACE), ID),
 				new XElement(XName.Get("title", NAMESPACE), Title),
 				new XElement(XName.Get("author", NAMESPACE), new XElement(XName.Get("name", NAMESPACE), Author)),
 				new XElement(XName.Get("updated", NAMESPACE), UpdatedAt.ToString(@"yyyy-MM-dd\THH:mm:sszzz")),

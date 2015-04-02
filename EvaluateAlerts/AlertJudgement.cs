@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Xml;
+using System.Xml.Linq;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
@@ -14,13 +15,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	namespace EvaluateAlerts
 	{
 
-		public class AlertJudgement
+		public class AlertJudgement : IUpdatingPlugin
 		{
 			IDictionary<int, AlertLevel> levels;
 
 			readonly AlertData data;
 			readonly ConsumptionData c_data;
 
+			// (1.1.0)レベルの決め打ちを解消．Configureメソッドから(のみ)設定できます．
 			#region *コンストラクタ(AlertJudgement)
 			public AlertJudgement(string databaseFile) : this()
 			{
@@ -33,6 +35,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				levels = new Dictionary<int, AlertLevel>();
 
 				// 決め打ちでレベルを用意してみる．
+				/*
 				this.DefineLevel(new AlertLevel
 				{
 					Rank = 16,
@@ -47,7 +50,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					InBorder = (data) => { return data.Take(2).Min() >= 97; },
 					OutBorder = (data) => { return data.Take(2).Max() < 92; }
 				});
-
+				*/
 			}
 			#endregion
 
@@ -74,10 +77,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					// 記録する．
 					data.InsertData(new AlertElement { 
 						DataTime=recent_data.First().Key, DeclaredAt = DateTime.Now, Rank = new_rank });
+					this.Inserted(this, EventArgs.Empty);
 					// ログを出力してもいいかも！
 					//Console.WriteLine("New rank : {0}, previous rank : {1}", new_rank, current_rank);
 				}
 			}
+
+			public event EventHandler Inserted = delegate { };
 
 			int Check(int current_rank, int[] recent_data)
 			{
@@ -104,17 +110,23 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 
 
+			public string FeedTitle { get; set; }
+			public string FeedAuthor { get; set; }
+			public string FeedID { get; set; }
+			public string FeedSelfLink { get; set; }
 
+			// (1.1.1)Titleなどをプロパティ化．
 			// (1.0.1)
+			#region *AlertをAtomFeedで通知(OutputAtomFeed)
 			public void OutputAtomFeed(string destination, int n = 6)
 			{
 				var feed = new AtomFeed
 				{
-					ID = "http://den.st.hirosaki-u.ac.jp/riko-alert",
-					Title = "デマンド注意報",
-					Author = "電力量計測システム",
+					ID = this.FeedID,
+					Title = this.FeedTitle,
+					Author = this.FeedAuthor,
 					UpdatedAt = DateTime.Now,
-					SelfLink = "http://den.st.hirosaki-u.ac.jp/alert.atom",
+					SelfLink = this.FeedSelfLink,
 				};
 
 				// 6件取得．
@@ -128,7 +140,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					var current_long_time = current.DataTime.ToString("M月d日HH時mm分");
 					AtomEntry entry = new AtomEntry
 					{
-						ID = "http://den.st.hirosaki-u.ac.jp/alert" + SQLiteData.Convert.TimeToInt(current.DeclaredAt),
+						ID = this.FeedID + SQLiteData.Convert.TimeToInt(current.DeclaredAt),
 						PublishedAt = current.DeclaredAt
 					};
 
@@ -167,9 +179,75 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				{
 					feed.OutputDocument().WriteTo(writer);
 				}
-				
+
+			}
+			#endregion
+
+			#region (1.1.0)プラグイン化
+
+			public void Update()
+			{
+				DateTime latestDataTime = c_data.GetLatestDataTime();
+				if (latestDataTime > _current)
+				{
+					Judge();
+					_current = latestDataTime;
+				}
+			}
+			DateTime _current;
+
+			public void Configure(System.Xml.Linq.XElement config)
+			{
+				foreach (var element in config.Elements())
+				{
+					switch(element.Name.LocalName)
+					{
+						case "Levels":
+							// レベルの定義を別のプラグインで行おうとすると，さらなるリフレクションが必要になるが...
+							// AlertJudgementとレベル定義を一体化してしまった方がよい？
+							// ↑とすると，ここで読み込むべき設定はほとんどない？パラメータをいじる程度か．
+							foreach (var level_element in element.Elements("Level"))
+							{
+								this.DefineLevel(new AlertLevel(level_element));
+							}
+							break;
+						case "Atom":
+							foreach (var attribute in element.Attributes())
+							{
+								switch (attribute.Name.LocalName)
+								{
+									case "Destination":
+										this.Inserted += (sender, e) => { this.OutputAtomFeed(attribute.Value); };
+										break;
+									case "Id":
+										this.FeedID = attribute.Value;
+										break;
+									case "Author":
+										this.FeedAuthor = attribute.Value;
+										break;
+									case "Title":
+										this.FeedTitle = attribute.Value;
+										break;
+									case "SelfLink":
+										this.FeedSelfLink = attribute.Value;
+										break;
+								}
+							}
+							break;
+						// メール送信は後で設定？
+						// <Mail SmtpServer="localhost" From="jappajil@...." ... >
+						//   <To Address="kitsune@...." />
+						//   <To Address="usagi@...." />
+						//   <To Address="tanuki@...." />
+						// </Mail>
+						case "Mail":
+							//foreach (var element)
+							break;
+					}
+				}
 			}
 
+			#endregion
 
 		}
 
@@ -179,6 +257,55 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		{
 			public int Rank { get; set; }
 			public string Name { get; set; }
+
+			// (1.1.0)
+			#region *コンストラクタ(AlertLevel)
+			public AlertLevel() { }
+ 
+			public AlertLevel(XElement element)
+			{
+
+				this.Rank = (int)element.Attribute("Rank");
+				this.Name = (string)element.Attribute("Name");
+
+
+				this.InBorder = GenerateBorder(element.Element("In"));
+				this.OutBorder = GenerateBorder(element.Element("Out"));
+			}
+
+			static Predicate<int[]> GenerateBorder(XElement element)
+			{
+				// ボーダーと一致する場合は，厳しい方に倒す．
+				double border = (double)element.Attribute("Border");
+				int span = (int)element.Attribute("Span");
+				switch (element.Name.LocalName)
+				{
+					case "In":
+						switch ((string)element.Attribute("Method"))
+						{
+							case "Minimum":
+								return data => { return data.Take(span).Min() >= border; };
+							case "Maximum":
+								return data => { return data.Take(span).Max() >= border; };
+							default:	// especially "Average":
+								return data => { return data.Take(span).Average() >= border; };
+						}
+					case "Out":
+						switch ((string)element.Attribute("Method"))
+						{
+							case "Minimum":
+								return data => { return data.Take(span).Min() < border; };
+							case "Maximum":
+								return data => { return data.Take(span).Max() < border; };
+							default:	// especially "Average":
+								return data => { return data.Take(span).Average() < border; };
+						}
+					default:
+						throw new ArgumentException();
+				}
+
+			}
+			#endregion
 
 			/// <summary>
 			/// 発令条件を満たしたときにtrueを返します．
