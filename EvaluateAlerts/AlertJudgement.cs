@@ -115,6 +115,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			public string FeedID { get; set; }
 			public string FeedSelfLink { get; set; }
 
+
 			// (1.1.1)Titleなどをプロパティ化．
 			// (1.0.1)
 			#region *AlertをAtomFeedで通知(OutputAtomFeed)
@@ -183,6 +184,71 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			#endregion
 
+
+
+			#region (1.2.0)メール送信を実装．(とりあえず POP before SMTP 認証のみ．)
+			private void SendMail(bool separate_destinations)
+			{
+				System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+				message.From = new System.Net.Mail.MailAddress(this.MailFrom);
+
+				// messageを作成する．
+				// TODO: Bodyのブラッシュアップが必要！
+				var recent_data = data.GetRecentData(2);
+				var times = recent_data.Keys.OrderByDescending(k => k).ToArray();
+
+				var current = recent_data[times[0]];
+				var current_time = current.DataTime.ToString("HH時mm分");
+				var current_long_time = current.DataTime.ToString("M月d日HH時mm分");
+
+				string body = string.Format("{0} 発表\n\n", current_long_time);
+
+				if (recent_data[times[0]].Rank > recent_data[times[1]].Rank)
+				{
+					// レベルが上昇．
+					var name = levels[current.Rank].Name;
+					message.Subject = string.Format("{0}発令({1})", name, current_time);
+					body += string.Format("{0}が発令されました．\n\n", name);
+
+				}
+				else if (recent_data[times[0]].Rank < recent_data[times[1]].Rank)
+				{
+					// レベルが下降．
+					var name = levels[recent_data[times[1]].Rank].Name;
+					message.Subject = string.Format("{0}解除({1})", name, current_time);
+					message.Body = string.Format("{1}に，{0}が解除されました．", name, current_long_time);
+					if (current.Rank > 0)
+					{
+						message.Body += string.Format("\n現在，{0}が発令されています．", levels[current.Rank].Name);
+					}
+
+				}
+				body += this.MailSignature;
+
+
+				// 送信する．
+				if (separate_destinations)
+				{
+					foreach (var to in MailDestinations)
+					{
+						message.To.Clear();
+						message.To.Add(to);
+						this.MailSender.Post(message);
+					}
+				}
+				else
+				{
+					foreach (var to in MailDestinations)
+					{
+						message.To.Add(to);
+					}
+					this.MailSender.Post(message);
+				}
+
+			}
+			#endregion
+
+
 			#region (1.1.0)プラグイン化
 
 			public void Update()
@@ -239,14 +305,53 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						//   <To Address="kitsune@...." />
 						//   <To Address="usagi@...." />
 						//   <To Address="tanuki@...." />
+						//   <Signature><![CDATA[～～～～～～]]>
+						//   </Signature>
 						// </Mail>
 						case "Mail":
-							//foreach (var element)
+							int? port = (int?)element.Attribute("Port");
+							MailSender = new Jappajil(element.Attribute("SmtpServer").Value, port ?? 25);
+
+							MailSender.POPServer = (string)element.Attribute("PopServer");
+							MailSender.UserName = (string)element.Attribute("UserName");
+							MailSender.Password = (string)element.Attribute("Password");
+
+							this.Inserted += (sender, e) => { this.SendMail(true);	/* 引数は決め打ち． */ };
+
+							this.MailFrom = element.Attribute("From").Value;
+
+							foreach (var child_element in element.Elements())
+							{
+								switch (child_element.Name.LocalName)
+								{
+									case "To":
+										MailDestinations.Add(child_element.Attribute("Address").Value);
+										break;
+									case "Signature":
+										this.MailSignature = child_element.Value;
+										break;
+								}
+							}
 							break;
 					}
 				}
 			}
 
+			#endregion
+
+			public Jappajil MailSender
+			{ get; set; }
+
+			public string MailFrom { get; set; }
+			/// <summary>
+			/// メール本文の末尾につく署名です．
+			/// </summary>
+			public string MailSignature { get; set; }
+			//public string PopServer { get; set; }
+
+			#region *MailDestinationsプロパティ
+			public IList<string> MailDestinations { get { return _mailDestinations; } }
+			IList<string> _mailDestinations = new List<string>();
 			#endregion
 
 		}
