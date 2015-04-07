@@ -97,16 +97,18 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						return level.Key;
 					}
 				}
+				// (1.2.1.2)修正．
 				// 現在より下のランクのレベルに達したか？
-				foreach (var level in levels.OrderBy(l => l.Key).Where((l) => l.Key < current_rank))
+				foreach (var level in levels.OrderBy(l => l.Key).Where((l) => l.Key <= current_rank))
 				{
 					// OutBorderをチェック．
-					if (level.Value.OutBorder(recent_data))
+					if (!level.Value.OutBorder(recent_data))	// 解除基準を満たしていない．
 					{
 						return level.Key;
 					}
 				}
-				return current_rank;
+				// (1.2.1.4)修正．
+				return 0;	// 全ての解除基準を満たしたということ！
 			}
 
 
@@ -220,7 +222,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					// レベルが下降．
 					var name = levels[recent_data[times[1]].Rank].Name;
 					message.Subject = string.Format("{0}解除({1})", name, current_time);
-					message.Body = string.Format("{1}に，{0}が解除されました．", name, current_long_time);
+					body += string.Format("{1}に，{0}が解除されました．", name, current_long_time);	// (1.2.1.5)修正．
 					if (current.Rank > 0)
 					{
 						message.Body += string.Format("\n現在，{0}が発令されています．", levels[current.Rank].Name);
@@ -231,6 +233,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				message.Body = body;	// (1.2.1.1)本文をmessageに設定(それまでされていなかったorz)．
 
+				// (1.2.1.3)デバッグ用のログ表示を追加．
 				// 送信する．
 				if (separate_destinations)
 				{
@@ -239,6 +242,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						message.To.Clear();
 						message.To.Add(to);
 						this.MailSender.Post(message);
+						Console.WriteLine("{0} にメールを送信しました．", to);
 					}
 				}
 				else
@@ -248,6 +252,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						message.To.Add(to);
 					}
 					this.MailSender.Post(message);
+					Console.WriteLine("みんな({0})にメールを送信しました．", string.Join(",", MailDestinations));
 				}
 
 			}
