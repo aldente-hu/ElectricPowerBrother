@@ -136,7 +136,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			// レイアウトの設定
 			writer.WriteLine("set grid y2tics");
-			writer.WriteLine("set key left top autotitle columnheader");	// これを使うと文字エンコーディングがおかしくなる？
+			writer.WriteLine("set key left top autotitle columnheader");	// これを使うと文字エンコーディングがおかしくなる？←場合がある．
 
 			// プロットするデータの設定
 			writer.WriteLine("set datafile separator ','");
