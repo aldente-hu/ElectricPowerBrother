@@ -185,15 +185,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#endregion
 
 
-
+			// (1.2.1)メールにReplyToを設定するように修正．
 			#region (1.2.0)メール送信を実装．(とりあえず POP before SMTP 認証のみ．)
 			private void SendMail(bool separate_destinations)
 			{
 				System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
 				message.From = new System.Net.Mail.MailAddress(this.MailFrom);
+				if (!string.IsNullOrEmpty(this.MailReplyTo))
+				{
+					message.Sender = new System.Net.Mail.MailAddress(this.MailReplyTo);
+					message.ReplyToList.Add(this.MailReplyTo);
+				}
 
-				// messageを作成する．
-				// TODO: Bodyのブラッシュアップが必要！
+				// message本文を作成する．
 				var recent_data = data.GetRecentData(2);
 				var times = recent_data.Keys.OrderByDescending(k => k).ToArray();
 
@@ -225,6 +229,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 				body += this.MailSignature;
 
+				message.Body = body;	// (1.2.1.1)本文をmessageに設定(それまでされていなかったorz)．
 
 				// 送信する．
 				if (separate_destinations)
@@ -319,6 +324,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 							this.Inserted += (sender, e) => { this.SendMail(true);	/* 引数は決め打ち． */ };
 
 							this.MailFrom = element.Attribute("From").Value;
+							this.MailReplyTo = element.Attribute("ReplyTo").Value;
 
 							foreach (var child_element in element.Elements())
 							{
@@ -341,6 +347,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			public Jappajil MailSender
 			{ get; set; }
+
+			/// <summary>
+			/// Sender(すなわちReturn-Path？)やReplyToに設定されるアドレスを取得／設定します．
+			/// </summary>
+			public string MailReplyTo { get; set; }
 
 			public string MailFrom { get; set; }
 			/// <summary>
