@@ -35,9 +35,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			query["chxp"] = "2,100";	// 軸ラベルの位置(縦軸のMAXの位置に，縦軸の単位を表示させる．)
 
 			var x_label = GetXLabel(dataTime);
-			query["chxr"] = string.Format("1,{0},{1}", ChartMinY, ChartMaxY);	// y軸のラベル範囲
+			query["chxr"] = string.Format("1,{0},{1},{2}", ChartMinY, ChartMaxY, ChartLabelYInterval);	// y軸のラベル範囲
 			query["chxl"] = "2:|[kW]|0:" + BuildXLabel(x_label);	// 軸のラベル
-			query["chg"] = string.Format("8.333,{0},5,5,{1},0", 100 * ChartLabelYInterval / ChartRangeY, x_label.Keys.Min() / 2.16);	// GridLine．格子状のライン．xのステップ，yのステップ,破線の長さ,破線の間隔,xのオフセット,yのオフセット．
+			query["chg"] = string.Format("8.333,{0},5,5,{1},0", Math.Truncate(100.0 * 1000 * ChartLabelYInterval / ChartRangeY) / 1000, x_label.Keys.Min() / 2.16);	// GridLine．格子状のライン．xのステップ，yのステップ,破線の長さ,破線の間隔,xのオフセット,yのオフセット．
 
 			query["chxs"] = "0,000000,16|1,000000,16|2,000000,16,1";	// 軸ラベルのスタイル．インデックス,文字色,フォントサイズ,アラインメント．
 			if (!string.IsNullOrEmpty(this.ChartCaption))
