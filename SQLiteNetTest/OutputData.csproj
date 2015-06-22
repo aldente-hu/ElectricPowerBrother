@@ -75,9 +75,11 @@
     <Compile Include="ConsumptionCsvGenerator.cs" />
     <Compile Include="ConsumptionVariableCsvGenerator.cs" />
     <Compile Include="ConsumptionXmlGenerator.cs" />
+    <Compile Include="DailyCsvGenerator.cs" />
     <Compile Include="GnuplotChart.cs" />
     <Compile Include="GnuplotTrinityChart.cs" />
     <Compile Include="GoogleImageChart.cs" />
+    <Compile Include="MonthlyChart.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
