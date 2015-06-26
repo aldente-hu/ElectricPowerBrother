@@ -10,6 +10,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 	public class DailyCsvGenerator : IPlugin
 	{
+		public DateTime Update(DateTime latestData)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 

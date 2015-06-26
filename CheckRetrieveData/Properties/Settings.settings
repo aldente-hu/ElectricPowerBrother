@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="CheckRetrieveData.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="UserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tanuki</Value>
+    </Setting>
+    <Setting Name="Password" Type="System.String" Scope="User">
+      <Value Profile="(Default)">kitsune</Value>
+    </Setting>
+    <Setting Name="ConfigurationFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\loggers_config.xml</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
