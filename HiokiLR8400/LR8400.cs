@@ -23,6 +23,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			NetworkCredential _credential = new NetworkCredential();
 
+
+			// (1.0.1.1)GetDataViaFtpの結果を配列として保持してみる．
 			// time，もしくはそれより後のデータを取得します．(timeのデータが欲しい！それ以降のデータもあれば欲しい！)
 			public override IEnumerable<TimeSeriesDataInt> RetrieveCountsAfter(DateTime time, int max = -1)
 			{
@@ -46,7 +48,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				while (new_data.Time > time)
 				{
 					// 取りこぼしたデータがある(はずな)ので，ftp経由で補完する．
-					var old_data_series = GetDataViaFtp(time);
+					var old_data_series = GetDataViaFtp(time).ToArray();
 					if (old_data_series.Count() == 0)
 					{
 						yield break;
@@ -148,7 +150,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				var directory = string.Format("ftp://{1}/CF/HIOKI_LR8400/DATA/{0}/", time.ToString("yy-MM-dd"), this.Address);
 				Regex file_line = new Regex(@"(... \d+ \d\d:\d\d) (.+\.CSV)");
 
-				foreach (var line in ListDirectory(directory))
+				var file_lines = ListDirectory(directory).ToArray();
+				foreach (var line in file_lines)
 				{
 					var m = file_line.Match(line);
 					// "Apr 15 23:59"みたいな文字列をDateTime.Parseするにはなかなかな困難を伴う．
@@ -254,6 +257,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			#endregion
 
+			#region 設定関連
+
 			public override void Configure(System.Xml.Linq.XElement config)
 			{
 				// config.Name.LocalNameをチェックしますか？
@@ -281,6 +286,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// Chに関する情報は親クラスで設定する．
 				base.Configure(config);
 			}
+
+			#endregion
 
 		}
 
