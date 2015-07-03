@@ -27,18 +27,41 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers
 
 			#region StoragingPulseLogger実装
 
+			// (1.0.1.10)やっとうまくいったので，コードを整理．
+			// (1.0.1.1)最初のリクエストのステータスコードを確認．
 			// (0.0.5)とりあえず正常系のみ実装．
 			public override IEnumerable<TimeSeriesDataInt> RetrieveCountsAfter(DateTime time, int max = -1)
 			{
-				WebClient client = new WebClient();
 				DateTime now = DateTime.Now;
 
 				var path = string.Format("MEMORY.HTM?%3ACOMPORT%3AWEBORGDATE%20%20TOP,={0}&,={1}&,={2}&,={3}&,={4}&,=0&,=0&%3B%3ADUM=SEP&%3ACOMPORT%3AWEBORGDATE%20%20BOT,={5}&,={6}&,={7}&,={8}&,={9}&,=0&,=0&%3B%3ADUM=SEP",
 					time.Year % 100, time.Month,time.Day, time.Hour, time.Minute, now.Year % 100, now.Month, now.Day, now.Hour, now.Minute);
+				HttpWebRequest request = HttpWebRequest.CreateHttp(string.Format("http://{0}/{1}", Address, path));
 
-				client.OpenRead(string.Format("http://{0}/{1}", Address, path));
+				// (1.0.1.9)usingしてみる．→うまくいくようになった！
+				using (var response = (HttpWebResponse)request.GetResponse())
+				{
+					// (1.0.1.3)こうすればレスポンスヘッダを最後まで読み込む？←あまり変わらなかったorz
+					if (response.StatusCode == HttpStatusCode.OK)
+					{
+						foreach (var data in ParseData(time))
+						{
+							yield return data;
+						}
+					}
+				}
+			}
 
-				using (StreamReader reader = new StreamReader(client.OpenRead(string.Format("http://{0}/MEMPART.TXT", Address))))
+			#endregion
+
+			IEnumerable<TimeSeriesDataInt> ParseData(DateTime time)
+			{
+				//(1.0.1.5)WebClientがよくないのかなぁ．←HttpWebRequestを使うと落ちなくなった！？←ダメだったorz
+				var path = string.Format("http://{0}/MEMPART.TXT", Address);
+				HttpWebRequest request = HttpWebRequest.CreateHttp(path);	// (1.0.1.6)間違えた．
+
+				//WebClient client = GenerateWebClient().Result;
+				using (StreamReader reader = new StreamReader(request.GetResponse().GetResponseStream()))
 				{
 					bool header = true;
 					string date_string = string.Empty;
@@ -85,17 +108,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers
 								// 最初の行の時刻欄を用いてその判定を行う。
 								var offset = double.Parse(mc[0].Value);
 								if (offset == 0)
-								{ 
+								{
 									yield break;
 								}
-								
+
 								DateTime data_time = origin.Value.AddSeconds(offset);
 								if (data_time >= time)
 								{
 									Dictionary<int, int> data = new Dictionary<int, int>();
-									for(int i=1; i<mc.Count;i++)
+									for (int i = 1; i < mc.Count; i++)
 									{
-										data[i-1] = Convert.ToInt32(double.Parse(mc[i].Value));
+										data[i - 1] = Convert.ToInt32(double.Parse(mc[i].Value));
 									}
 									yield return new TimeSeriesDataInt { Data = data, Time = data_time };
 								}
@@ -109,10 +132,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers
 					}
 
 				}
+
 			}
 
-			#endregion
 
+			#region 設定関連
 
 			// <Hioki.Logger8420 IpAddress="" />
 
@@ -132,6 +156,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers
 				base.Configure(config);
 
 			}
+
+			#endregion
 
 		}
 
