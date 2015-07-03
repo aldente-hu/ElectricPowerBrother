@@ -19,6 +19,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		List<IPulseLogger> loggers = new List<IPulseLogger>();
 		DateTime last_data_time = DateTime.Today.AddHours(-2);
 
+		// (1.1.4)
+		public int LoggersCount
+		{
+			get
+			{
+				return this.loggers.Count;
+			}
+		}
 		/*
 		public Environment()
 		{
@@ -84,24 +92,39 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 		}
 
-
+		// (1.1.4.2)tryの範囲を縮小．
+		// (1.1.3.3)例外処理を追加．
 		public void Run()
 		{
 			DateTime next_data_time = last_data_time.AddMinutes(10);
 			Console.WriteLine("Here we go! : {0}", next_data_time);
 
+			IEnumerable<IDictionary<DateTime, TimeSeriesDataDouble>> results;
 			// 並列動作でデータを取って来て欲しい．
 			Task<IDictionary<DateTime, TimeSeriesDataDouble>>[] tasks
 				= loggers.Select(logger => logger.GetDataAfterTask(next_data_time)).ToArray();
-
-			foreach (var task in tasks)
+			try
 			{
-				task.Start();
+				foreach (var task in tasks)
+				{
+					task.Start();
+				}
+				if (!Task.WaitAll(tasks, 40 * 1000))
+				{
+					// これでtasksの各要素は破棄されるのだろうか？
+					return;
+				}
 			}
-			Task.WaitAll(tasks);
-
-			// IEnumerableよりDictionaryを返した方が便利ですかねぇ？
-			var results = tasks.Select(t => t.Result);
+			catch(AggregateException ex)
+			{
+				foreach (Exception inner in ex.InnerExceptions)
+				{
+					Console.WriteLine(inner.Message);
+				}
+				Console.WriteLine("Something is wrong.");
+				return;
+			}
+			results = tasks.Select(t => t.Result);
 
 			while (results.All(result => { return result.Keys.Contains(next_data_time); }))
 			{
@@ -174,16 +197,24 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				var doc = System.Xml.Linq.XDocument.Load(reader);
 				environment = new Environment(doc.Root.Element("Loggers"));
 			}
+			Console.WriteLine("Hello.");
 			while (true)
 			{
-				environment.Run();
 				var key = Console.ReadKey();
-				if (key.KeyChar != 'r')
+				if (key.KeyChar == 'r')
+				{
+					environment.Run();
+				}
+				else if (key.KeyChar == 'l')
+				{
+					Console.WriteLine("Loggers : {0}", environment.LoggersCount);
+				}
+				else
 				{
 					break;
 				}
 			}
-			
+			Console.WriteLine("Bye.");
 		}
 
 

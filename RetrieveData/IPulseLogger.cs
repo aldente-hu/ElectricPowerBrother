@@ -56,6 +56,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 
 
+
 				while (time < DateTime.Now)
 				{
 					TimeSeriesDataDouble data;
@@ -64,7 +65,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						yield return data;
 						// ここでは削除を行わない！(取得したデータを使う準備ができているかどうかわからないから．)
 						//storagedData.Remove(time);
-						time.AddMinutes(10);
+						time = time.AddMinutes(10);	// (0.2.1.2)この間違いが多すぎ！
 					}
 					else
 					{
