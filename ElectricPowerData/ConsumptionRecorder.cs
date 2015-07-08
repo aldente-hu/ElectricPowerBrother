@@ -19,7 +19,29 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			public ConsumptionRecorder(string fileName) : base(fileName)
 			{ }
 
+			// (1.1.4.1)int=>doubleなIDictionaryにも対応．
+			#region *データをDBに追加(InsertData)
+
+			public void InsertData(DateTime time, IDictionary<int, double> data)
+			{
+				var insert_queries = data.Select(
+					ch_data => string.Format("INSERT INTO consumptions_10min VALUES({0}, {1}, {2})",
+										Convert.TimeToInt(time), ch_data.Key, Math.Truncate(ch_data.Value))
+				);
+				InsertData(insert_queries);
+			}
+
 			public void InsertData(DateTime time, IDictionary<int, int> data)
+			{
+				var insert_queries = data.Select(
+					ch_data => string.Format("INSERT INTO consumptions_10min VALUES({0}, {1}, {2})",
+										Convert.TimeToInt(time), ch_data.Key, ch_data.Value)
+				);
+				InsertData(insert_queries);
+			}
+
+			// (1.1.4.2)コミットの位置を修正．
+			void InsertData(IEnumerable<string> queries)
 			{
 				using (var connection = new SQLiteConnection(this.ConnectionString))
 				{
@@ -31,16 +53,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						{
 							using (SQLiteCommand command = connection.CreateCommand())
 							{
-								foreach (var ch_data in data)
+								foreach (var query in queries)
 								{
-									command.CommandText = string.Format(
-										"INSERT INTO consumptions_10min VALUES({0}, {1}, {2})", Convert.TimeToInt(time), ch_data.Key, ch_data.Value);
+									command.CommandText = query;
 									command.ExecuteNonQuery();
-									//command.ExecuteNonQueryAsync();
-
-									// コミットする．
-									transaction.Commit();
 								}
+								// コミットする．
+								transaction.Commit();
 							}
 						}
 						catch (Exception ex)
@@ -52,9 +71,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 					connection.Close();
 				}
-
 			}
 
+			#endregion
 
 		}
 		#endregion

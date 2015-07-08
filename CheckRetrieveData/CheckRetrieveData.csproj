@@ -58,6 +58,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ElectricPowerData\ElectricPowerData.csproj">
+      <Project>{c67b9075-00f2-49e3-bfd0-4e4e77885743}</Project>
+      <Name>ElectricPowerData</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RetrieveData\RetrieveData.csproj">
       <Project>{374c3d51-1d0c-4372-bb45-36cebd78f169}</Project>
       <Name>RetrieveData</Name>

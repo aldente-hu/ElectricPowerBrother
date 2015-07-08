@@ -25,25 +25,13 @@ namespace CheckRetrieveData.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("tanuki")]
-        public string UserName {
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\ep.sqlite3")]
+        public string DatabaseFileName {
             get {
-                return ((string)(this["UserName"]));
+                return ((string)(this["DatabaseFileName"]));
             }
             set {
-                this["UserName"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("kitsune")]
-        public string Password {
-            get {
-                return ((string)(this["Password"]));
-            }
-            set {
-                this["Password"] = value;
+                this["DatabaseFileName"] = value;
             }
         }
         

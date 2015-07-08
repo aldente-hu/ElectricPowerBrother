@@ -13,11 +13,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 	using PulseLoggers;
 	using RetrieveData;
+	using Data;
 
 	public class Environment
 	{
 		List<IPulseLogger> loggers = new List<IPulseLogger>();
-		DateTime last_data_time = DateTime.Today.AddHours(-2);
+		//DateTime last_data_time = DateTime.Today.AddHours(-2);
 
 		// (1.1.4)
 		public int LoggersCount
@@ -64,9 +65,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 		}
 		*/
+		readonly ConsumptionRecorder db;
 
-		public Environment(System.Xml.Linq.XElement loggers)
+		#region *コンストラクタ(Environment)
+		public Environment(string databaseFile, System.Xml.Linq.XElement loggers)
 		{
+			db = new ConsumptionRecorder(databaseFile);
+
 			foreach (var elem_logger in loggers.Elements())
 			{
 				// リフレクションでクラスを探し当てる．
@@ -91,14 +96,18 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				this.loggers.Add(logger);
 			}
 		}
+		#endregion
 
+
+		// (1.1.5)データをDBに保存するかどうかを指定する引数を追加．
 		// (1.1.4.2)tryの範囲を縮小．
 		// (1.1.3.3)例外処理を追加．
-		public void Run()
+		#region *トリガ動作を実行(Run)
+		public void Run(bool saving = false)
 		{
-			DateTime next_data_time = last_data_time.AddMinutes(10);
+			DateTime next_data_time = db.GetLatestDataTime().AddMinutes(10);
 			Console.WriteLine("Here we go! : {0}", next_data_time);
-
+			
 			IEnumerable<IDictionary<DateTime, TimeSeriesDataDouble>> results;
 			// 並列動作でデータを取って来て欲しい．
 			Task<IDictionary<DateTime, TimeSeriesDataDouble>>[] tasks
@@ -140,81 +149,95 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					Console.Write("{0} -> {1}  ", data.Key, data.Value);
 				}
 				Console.WriteLine();
-				last_data_time = next_data_time;
+
+				// DBにデータを保存する．
+				if (saving)
+				{
+					db.InsertData(next_data_time, sum.Data);
+				}
+
+				//last_data_time = next_data_time;
 				next_data_time = next_data_time.AddMinutes(10);
 			}
 			Console.WriteLine("That's all.");
 		}
+		#endregion
 
+		public void TimerCallback(object state)
+		{
+			Run(true);
+		}
 
 	}
 
 	class Program
 	{
 
+		// (1.1.7)static変数にする．
+		static Environment environment;
 
-
+	
+		// (1.1.6.2)switchってcharも使えるんだっけ．
+		// (1.1.6)DB書き込みテストコマンドを追加．
 		static void Main(string[] args)
 		{
 
-			//List<IPulseLogger> loggers = new List<IPulseLogger>();
+			System.Threading.Timer timer = null;
 
-
-			// ロガーにアクセスしてデータをとる．これをparallelにできないか？
-
-			//var data = loggers[0].GetCountsAfter(time);
-			//var data2 = loggers[1].GetCountsAfter(time);
-
-
-			/*
-			switch (time.Second % 2)
-			{
-				case 0:
-					OutputData(loggers[0].GetCountsAfter(time));
-					break;
-				case 1:
-
-					Hioki8420 logger2 = new Hioki8420 { Address = System.Net.IPAddress.Parse("192.168.4.4") };
-					OutputData(loggers[1].GetCountsAfter(time));
-					break;
-			}
-			*/
-
-			/*
-			using (System.Threading.Timer timer = new System.Threading.Timer(
-				(state) => { TimerTicked(null, EventArgs.Empty); }, null, 0, 20 * 1000))
-			{
-
-				Console.WriteLine("That's all.");
-			*/
-
-			Environment environment;
 			//var environment = new Environment();
 			using (XmlReader reader = XmlReader.Create(
 				new FileStream(CheckRetrieveData.Properties.Settings.Default.ConfigurationFile, FileMode.Open, FileAccess.Read),
 				new XmlReaderSettings()))
 			{
 				var doc = System.Xml.Linq.XDocument.Load(reader);
-				environment = new Environment(doc.Root.Element("Loggers"));
+				environment = new Environment(
+														CheckRetrieveData.Properties.Settings.Default.DatabaseFileName, 
+														doc.Root.Element("Loggers"));
 			}
 			Console.WriteLine("Hello.");
 			while (true)
 			{
 				var key = Console.ReadKey();
-				if (key.KeyChar == 'r')
-				{
-					environment.Run();
-				}
-				else if (key.KeyChar == 'l')
-				{
-					Console.WriteLine("Loggers : {0}", environment.LoggersCount);
-				}
-				else
-				{
-					break;
+				switch(key.KeyChar)
+				{ case 'r':
+						environment.Run(false);
+						break;
+					case 's':
+						environment.Run(true);
+						break;
+					case 'l':
+						Console.WriteLine("Loggers : {0}", environment.LoggersCount);
+						break;
+					case 't':
+						var db = new ConsumptionRecorder(CheckRetrieveData.Properties.Settings.Default.DatabaseFileName);
+						Dictionary<int, double> test_data = new Dictionary<int, double>();
+						test_data.Add(11, 28.0);
+						test_data.Add(12, 37.0);
+						test_data.Add(13, 5.0);
+						test_data.Add(14, 7.0);
+						test_data.Add(15, 18.0);
+						db.InsertData(DateTime.Now, test_data);
+						break;
+					case 'a':
+						if (timer == null)
+						{
+							timer = new System.Threading.Timer(environment.TimerCallback, null, 0, 80 * 1000);
+						}
+						else
+						{
+							Console.WriteLine("Timer has already started running.");
+						}
+						break;
+					default:
+						if (timer != null)
+						{
+							timer.Dispose();
+						}
+						Console.WriteLine("Bye.");
+						return;
 				}
 			}
-			Console.WriteLine("Bye.");
+
 		}
 
 
