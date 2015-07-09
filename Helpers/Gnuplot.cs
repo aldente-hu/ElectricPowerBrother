@@ -9,12 +9,11 @@ using System.Diagnostics;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
-
-	// 今のところstaticなクラスになっているけど，どうしますかねぇ？
-	public class GnuplotChartBase
+	// (1.1.11)GnuplotChartBaseクラスのコピペで誕生．
+	#region Gnuplotクラス
+	public static class Gnuplot
 	{
-		// これはstaticでいいよね？
-		public static string GnuplotBinaryPath { get; set; }
+		public static string BinaryPath { get; set; }
 
 		// 直接コマンドを送るとうまくいかないことがあったような気がするので，
 		// いったんpltファイルを生成するようにしてみる．
@@ -37,7 +36,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 				//OutputCommands(writer, rootPath, outputFileName);
 			}
 
-			if (!string.IsNullOrEmpty(GnuplotBinaryPath))
+			if (!string.IsNullOrEmpty(BinaryPath))
 			{
 				// 非同期で実行する．
 				// ↑非同期実行では一時ファイルを削除できなかったので，やむをえず同期実行にしてみる．
@@ -45,16 +44,20 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 				//if (process != null) { process.Dispose(); }
 				var process = new Process();
 				{
-					process.StartInfo.FileName = GnuplotBinaryPath;
+					process.StartInfo.FileName = BinaryPath;
 					process.StartInfo.Arguments = pltFile;
 					process.StartInfo.CreateNoWindow = true;
 					process.StartInfo.UseShellExecute = false;	// これを設定しないと，CreateNoWindowは無視される．
+					// { // 非同期実行のコード
 					//process.EnableRaisingEvents = true;	// (1.1.2.2)これを設定しないと，Exitedイベントが発生しない！
 					//process.Exited += (sender, e) =>
 					//{
 					//	Console.WriteLine("We're deleting this file! : {0}", pltFile);	// for debug (1.1.2.1)
 					//	File.Delete(pltFile);
 					//};
+					// }
+
+					// { // 同期実行のコード
 					process.Start();
 					if (process.WaitForExit(60 * 1000))
 					{
@@ -66,12 +69,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 						// タイムアウト
 						Console.WriteLine("gnuplotのプロセスがタイムアウトしたよ！");
 					}
+					// }
+
 					process.Dispose();
 				}
-				
-	
-
 			}
+
 
 		}
 
@@ -79,7 +82,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 
 		public static void DrawTestChart(string destination)
 		{
-			ProcessStartInfo startInfo = new ProcessStartInfo(GnuplotBinaryPath);
+			ProcessStartInfo startInfo = new ProcessStartInfo(BinaryPath);
 			startInfo.UseShellExecute = false; // ↓を設定するためには，←の設定が必須！
 			startInfo.RedirectStandardInput = true;	// これが必須！
 			startInfo.RedirectStandardOutput = true;
@@ -106,37 +109,5 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		#endregion
 
 	}
-
-
-
-	public abstract class PltFileGeneratorBase
-	{
-		public string RootPath { get; set; }
-		public string ChartDestination { get; set; }
-
-		public abstract void Generate(StreamWriter writer);
-
-		// (1.1.3.0)
-		protected string GetAbsolutePath(string path)
-		{
-			if (Path.IsPathRooted(path))
-			{
-				return path;
-			}
-			else
-			{
-				if (Path.IsPathRooted(RootPath))
-				{
-					return Path.Combine(RootPath, path);
-				}
-				else
-				{
-					throw new InvalidOperationException("RootPathプロパティにルートが含まれていません．");
-				}
-			}
-		}
-	}
-
-
-
+	#endregion
 }

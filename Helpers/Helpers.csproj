@@ -41,7 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Atom.cs" />
-    <Compile Include="GnuplotChartBase.cs" />
+    <Compile Include="Gnuplot.cs" />
+    <Compile Include="PltFileGeneratorBase.cs" />
     <Compile Include="Jappajil.cs" />
     <Compile Include="JappajilConfiguration.cs" />
     <Compile Include="Plugin.cs" />
