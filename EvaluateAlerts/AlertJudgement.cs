@@ -85,30 +85,42 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			public event EventHandler Inserted = delegate { };
 
+			// (1.2.1.6)解除チェック周辺のアルゴリズムを修正．
+			// 新しい警報レベルを返します．
 			int Check(int current_rank, int[] recent_data)
 			{
+				// 発令(InBorder)については，高い方から順にチェックし，高い方を満たしていればそれより低いのはチェックしません．
+				// 「高いレベルの発令条件を満たすならばそれより低いレベルは全て満たす」ように設定して下さい．
+				// (プログラムではそのチェックを行わないので，設定する人の責任で行って下さい．)
 
 				// 現在より上のランクのレベルに達したか？
 				foreach (var level in levels.OrderBy(l => -l.Key).Where((l) => l.Key > current_rank))
 				{
-					// Inborderをチェック．
+					// InBorderをチェック．
 					if (level.Value.InBorder(recent_data))
 					{
 						return level.Key;
 					}
 				}
+
+				// 解除(OutBorder)については，低い方から順にチェックし，低い方を満たしていればそれより高いのはチェックしません．
+				// 「低いレベルの解除条件を満たすならばそれより高いレベルは全て満たす」ように設定して下さい．
+				// (プログラムではそのチェックを行わないので，設定する人の責任で行って下さい．)
+
+				// (1.2.1.6)さらに修正．
 				// (1.2.1.2)修正．
 				// 現在より下のランクのレベルに達したか？
 				foreach (var level in levels.OrderBy(l => l.Key).Where((l) => l.Key <= current_rank))
 				{
 					// OutBorderをチェック．
-					if (!level.Value.OutBorder(recent_data))	// 解除基準を満たしていない．
+					if (level.Value.OutBorder(recent_data))	// 解除基準を満たした．
 					{
 						return level.Key;
 					}
 				}
+				// (1.2.1.6)修正．
 				// (1.2.1.4)修正．
-				return 0;	// 全ての解除基準を満たしたということ！
+				return current_rank;	// 現状維持．
 			}
 
 
