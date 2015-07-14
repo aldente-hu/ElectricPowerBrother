@@ -103,9 +103,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					}
 				}
 
-				// 解除(OutBorder)については，低い方から順にチェックし，低い方を満たしていればそれより高いのはチェックしません．
+				// (1.2.1.7)さらに修正(「解除されたレベル」より1つ低いレベルを返さなければいけないのだった)．
+				// (1.2.1.6)解除(OutBorder)については，低い方から順にチェックし，低い方を満たしていればそれより高いのはチェックしません．
 				// 「低いレベルの解除条件を満たすならばそれより高いレベルは全て満たす」ように設定して下さい．
 				// (プログラムではそのチェックを行わないので，設定する人の責任で行って下さい．)
+				int new_rank = 0;
 
 				// (1.2.1.6)さらに修正．
 				// (1.2.1.2)修正．
@@ -115,12 +117,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					// OutBorderをチェック．
 					if (level.Value.OutBorder(recent_data))	// 解除基準を満たした．
 					{
-						return level.Key;
+						return new_rank;
+					}
+					else
+					{
+						new_rank = level.Key;
 					}
 				}
 				// (1.2.1.6)修正．
 				// (1.2.1.4)修正．
-				return current_rank;	// 現状維持．
+				return current_rank;	// 現状維持．(レベル設定の変更がなければnew_rankと等しいはず．)
 			}
 
 
