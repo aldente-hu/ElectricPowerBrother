@@ -230,9 +230,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		}
 		#endregion
 
+		// (1.1.5) chを指定できるようにしました．
 		// (1.1.3)
-		public IDictionary<DateTime, IDictionary<int, int>> GetParticularConsumptions(DateTime from, DateTime to)
+		/// <summary>
+		/// e_timeがfromより後でtoまでのデータを全て返します．
+		/// </summary>
+		/// <param name="from"></param>
+		/// <param name="to"></param>
+		/// <returns></returns>
+		public IDictionary<DateTime, IDictionary<int, int>> GetParticularConsumptions(DateTime from, DateTime to, params int[] channels)
 		{
+
 			var data = new Dictionary<DateTime, IDictionary<int,int>>();
 
 			using (var connection = new SQLiteConnection(ConnectionString))
@@ -242,9 +250,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText =
-						"select e_time, ch, consumption from consumptions_10min where e_time > @1 and e_time <= @2 and ch in (1, 2)";
-					command.Parameters.Add(new SQLiteParameter("@1", Convert.TimeToInt(from)));
-					command.Parameters.Add(new SQLiteParameter("@2", Convert.TimeToInt(to)));
+						"select e_time, ch, consumption from consumptions_10min where e_time > @from and e_time <= @to and ch in (@ch)";
+					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(from)));
+					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(to)));
+					command.Parameters.Add(new SQLiteParameter("@ch", string.Join(",", channels)));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -265,6 +274,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			}
 			return data;
 
+		}
+
+		public IDictionary<DateTime, IDictionary<int, int>> GetParticularConsumptions(DateTime from, DateTime to)
+		{
+			// かつての実装．
+			return GetParticularConsumptions(from, to, 1, 2);
 		}
 
 		#region *trinityを決定(DefineTrinity)
