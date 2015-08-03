@@ -8,7 +8,8 @@
             <Calendar HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="179" Height="180"
                       Name="csv_calender" />
                 <Button Content="出力" HorizontalAlignment="Left" Margin="224,52,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
-                <Button Content="Hourly" HorizontalAlignment="Left" Margin="224,108,0,0" VerticalAlignment="Top" Width="100" Click="HourlyButton_Click"/>
+                <Button Content="Hourly" HorizontalAlignment="Left" Margin="224,81,0,0" VerticalAlignment="Top" Width="100" Click="HourlyButton_Click"/>
+                <Button Content="pltお試し" HorizontalAlignment="Left" Margin="224,137,0,0" VerticalAlignment="Top" Width="100" Click="PltButton_Click"/>
             </Grid>
         </GroupBox>
 

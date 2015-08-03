@@ -29,9 +29,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				InitializeComponent();
 			}
 
+			public static string DatabaseFile = @"B:\ep.sqlite3";
+
 			public void OutputCsv()
 			{
-				var generator = new Legacy.DailyCsvGenerator(@"B:\ep.sqlite3");
+				var generator = new Legacy.DailyCsvGenerator(DatabaseFile);
 				generator.CsvRoot = @"B:\detail\";
 				generator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
 
@@ -48,7 +50,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			private void HourlyButton_Click(object sender, RoutedEventArgs e)
 			{
-				var generator = new Legacy.DailyHourlyCsvGenerator(@"B:\ep.sqlite3");
+				var generator = new Legacy.DailyHourlyCsvGenerator(DatabaseFile);
 				generator.CsvRoot = @"B:\data\";
 				generator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
 
@@ -57,6 +59,30 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					generator.OutputOneDay(csv_calender.SelectedDate.Value);
 				}
 			}
+
+			private void PltButton_Click(object sender, RoutedEventArgs e)
+			{
+				if (csv_calender.SelectedDate.HasValue)
+				{
+					OutputLegacyChartPlt(csv_calender.SelectedDate.Value);
+			}
+			}
+
+			public void OutputLegacyChartPlt(DateTime date)
+			{
+				var generator = new Legacy.MonthlyChart(DatabaseFile);
+				generator.Width = 800;
+				generator.Height = 360;
+				generator.SeriesNo = 2;
+				generator.Maximum = 800;
+				generator.Minimum = 0;
+				generator.SeriesName = "riko";
+				generator.SourceRootPath = @"B:\data\";
+				generator.ChartDestination = @"B:\data\Y2015_08\riko.png";
+				//generator.CurrentDate = DateTime.Today;
+				generator.OtameshiPlt(DateTime.Today, @"B:\otameshi.plt");
+			}
+
 
 		}
 	}
