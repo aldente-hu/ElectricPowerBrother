@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputData", "SQLiteNetTest\OutputData.csproj", "{3772129D-9889-4797-A358-5B1BACAF8763}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hioki8420", "Hioki8420\Hioki8420.csproj", "{17F5D2FB-7F93-465F-9830-C735AF65C61F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiokiLR8400", "HiokiLR8400\HiokiLR8400.csproj", "{9FD19697-3711-4FFB-9624-5E1DAD4037FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlPanel", "ControlPanel\ControlPanel.csproj", "{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -138,6 +140,16 @@ Global
 		{9FD19697-3711-4FFB-9624-5E1DAD4037FB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{9FD19697-3711-4FFB-9624-5E1DAD4037FB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{9FD19697-3711-4FFB-9624-5E1DAD4037FB}.Release|x86.ActiveCfg = Release|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DFEE14CC-DF73-4216-9EC1-8E4E70A5255B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

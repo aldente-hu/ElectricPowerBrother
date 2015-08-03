@@ -249,11 +249,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+
+					// IN演算子でCommandParameterを使う方法がわからないので，string.Formatでごまかす．
+					// intなので，SQLインジェクションの心配はないよね？
 					command.CommandText =
-						"select e_time, ch, consumption from consumptions_10min where e_time > @from and e_time <= @to and ch in (@ch)";
+						string.Format("select e_time, ch, consumption from consumptions_10min where e_time > @from and e_time <= @to and ch in ({0})", string.Join(",", channels));
 					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(from)));
 					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(to)));
-					command.Parameters.Add(new SQLiteParameter("@ch", string.Join(",", channels)));
+					//command.Parameters.Add(new SQLiteParameter("@ch", channels));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
