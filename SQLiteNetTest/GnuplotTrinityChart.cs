@@ -197,7 +197,7 @@ set output
 			var latestData = updated1 > updated2 ? updated1 : updated2;
 			if (latestData > _current)
 			{
-				GnuplotChartBase.GenerateGraph(this);
+				Gnuplot.GenerateGraph(this);
 			}
 			_current = latestData;
 		}

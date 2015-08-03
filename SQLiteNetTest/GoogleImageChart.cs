@@ -12,10 +12,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	using Helpers;
 
 	// (1.3.5)
+	#region GoogleImageChartクラス
 	public class GoogleImageChart : ConsumptionData, IPlugin
 	{
 		public GoogleImageChart(string databaseFile) : base(databaseFile) { }
 
+		#region *グラフを出力(DrawChart)
 		public void DrawChart(DateTime dataTime)
 		{
 			var client = new System.Net.WebClient();
@@ -61,6 +63,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 
 		}
+		#endregion
+
+		#region プロパティ
 
 		/// <summary>
 		/// グラフの出力先を取得／設定します．
@@ -113,6 +118,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public int? DataCh { get; set; }
 
+		#endregion
+
 		ICollection<int> GetDataArray(DateTime latestTime)
 		{
 			// 100分率データを返す．
@@ -129,6 +136,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			return System.Convert.ToInt32(Math.Truncate(((original - ChartOffsetY) * ChartMagnificationY)));
 		}
 
+		#region *[static]X軸ラベルのデータを取得(GetXLabel)
 		public static IDictionary<int, string> GetXLabel(DateTime latestTime)
 		{
 			// キーがデータ点の位置(先頭が0)，値がその位置に対応するキャプション．
@@ -149,7 +157,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			return labels;
 		}
+		#endregion
 
+		#region *[static]設定コマンド用のX軸ラベルを出力(BuildXLabel)
 		public static string BuildXLabel(IDictionary<int, string> labelData)
 		{
 			// "||||||15:00||||||||||||||||||18:00||||||||||||||||||21:00||||(中略)|||02:10"のような感じの文字列になる．
@@ -165,7 +175,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			return label_builder.ToString();
 		}
+		#endregion
 
+
+		#region *設定を行う(Configure)
 		public void Configure(System.Xml.Linq.XElement config)
 		{
 			// <Config Destination=""
@@ -215,6 +228,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			this.UpdateAction = (time) => { DrawChart(time); };
 		}
+		#endregion
+
 	}
+	#endregion
 
 }
