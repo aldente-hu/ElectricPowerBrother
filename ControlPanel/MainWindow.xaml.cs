@@ -24,24 +24,50 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public partial class MainWindow : Window
 		{
+			Legacy.DailyCsvGenerator dataCsvGenerator;
+			Legacy.DailyHourlyCsvGenerator detailCsvGenerator;
+
 			public MainWindow()
 			{
 				InitializeComponent();
+
+				dataCsvGenerator = new Legacy.DailyCsvGenerator(DatabaseFile);
+				dataCsvGenerator.CsvRoot = @"B:\detail\";
+				dataCsvGenerator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
+				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "理工学部", Channels = new int[] { 1, 2 } });
+				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
+				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "1号館", Channels = new int[] { 1 } });
+				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "2号館", Channels = new int[] { 2 } });
+				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "総情センター", Channels = new int[] { 3 } });
+
+
+				detailCsvGenerator = new Legacy.DailyHourlyCsvGenerator(DatabaseFile);
+				detailCsvGenerator.CsvRoot = @"B:\data\";
+				detailCsvGenerator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
+				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "理工学部", Channels = new int[] { 1, 2 } });
+				//dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
+				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "1号館", Channels = new int[] { 1 } });
+				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "2号館", Channels = new int[] { 2 } });
+				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "総情センター", Channels = new int[] { 3 } });
+
 			}
 
 			public static string DatabaseFile = @"B:\ep.sqlite3";
 
 			public void OutputCsv()
 			{
-				var generator = new Legacy.DailyCsvGenerator(DatabaseFile);
-				generator.CsvRoot = @"B:\detail\";
-				generator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
-
 				if (csv_calender.SelectedDate.HasValue)
 				{
-					generator.OutputOneDay(csv_calender.SelectedDate.Value);
+					dataCsvGenerator.OutputOneDay(csv_calender.SelectedDate.Value);
+				}
 			}
+
+			public void OutputAllCsv()
+			{
+				detailCsvGenerator.UpdateFiles(DateTime.Now);
 			}
+
+
 
 			private void Button_Click(object sender, RoutedEventArgs e)
 			{
@@ -50,13 +76,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			private void HourlyButton_Click(object sender, RoutedEventArgs e)
 			{
-				var generator = new Legacy.DailyHourlyCsvGenerator(DatabaseFile);
-				generator.CsvRoot = @"B:\data\";
-				generator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
 
 				if (csv_calender.SelectedDate.HasValue)
 				{
-					generator.OutputOneDay(csv_calender.SelectedDate.Value);
+					detailCsvGenerator.OutputOneDay(csv_calender.SelectedDate.Value);
 				}
 			}
 
@@ -65,14 +88,21 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				if (csv_calender.SelectedDate.HasValue)
 				{
 					OutputLegacyChartPlt(csv_calender.SelectedDate.Value);
+				}
 			}
+
+			private void CsvAllButton_Click(object sender, RoutedEventArgs e)
+			{
+				OutputAllCsv();
 			}
 
 			public void OutputLegacyChartPlt(DateTime date)
 			{
-				var generator = new Legacy.MonthlyChart(DatabaseFile);
-				generator.Width = 800;
-				generator.Height = 360;
+				var consumption_table = new Data.ConsumptionData(DatabaseFile);
+
+				var generator = new Legacy.MonthlyChart();
+				generator.Width = 640;
+				generator.Height = 480;
 				generator.SeriesNo = 2;
 				generator.Maximum = 800;
 				generator.Minimum = 0;
@@ -80,7 +110,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				generator.SourceRootPath = @"B:\data\";
 				generator.ChartDestination = @"B:\data\Y2015_08\riko.png";
 				//generator.CurrentDate = DateTime.Today;
-				generator.OtameshiPlt(DateTime.Today, @"B:\otameshi.plt");
+				generator.MonthlyTotal = consumption_table.GetMonthlyTotal(date, 1, 2);	// チャンネルは決め打ち！
+				generator.OtameshiPlt(date, @"B:\otameshi.plt");
 			}
 
 

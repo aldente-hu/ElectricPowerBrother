@@ -10,6 +10,7 @@
                 <Button Content="出力" HorizontalAlignment="Left" Margin="224,52,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
                 <Button Content="Hourly" HorizontalAlignment="Left" Margin="224,81,0,0" VerticalAlignment="Top" Width="100" Click="HourlyButton_Click"/>
                 <Button Content="pltお試し" HorizontalAlignment="Left" Margin="224,137,0,0" VerticalAlignment="Top" Width="100" Click="PltButton_Click"/>
+                <Button Content="CSV一斉" HorizontalAlignment="Left" Margin="10,195,0,0" VerticalAlignment="Top" Width="100" Click="CsvAllButton_Click"/>
             </Grid>
         </GroupBox>
 
