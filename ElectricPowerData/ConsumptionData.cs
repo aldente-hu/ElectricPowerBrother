@@ -285,6 +285,55 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			return GetParticularConsumptions(from, to, 1, 2);
 		}
 
+		// (1.1.6)
+		public int GetMonthlyTotal(DateTime month, params int[] channels)
+		{
+			// monthが 08/31 なら，8月の合計，
+			// monthが 09/01 00:00 なら8月の合計，
+			// monthが 09/01 00:01 なら9月の合計を返す．
+
+			month = month.AddSeconds(-1);
+			var from = new DateTime(month.Year, month.Month, 1);
+			var to = from.AddDays(31);
+			to = to.AddDays(to.Day - 1);
+
+			return GetTotal(from, to, channels);
+		}
+
+		// (1.1.6)
+		public int GetTotal(DateTime from, DateTime to, params int[] channels)
+		{
+			using (var connection = new SQLiteConnection(ConnectionString))
+			{
+				connection.Open();
+				using (SQLiteCommand command = connection.CreateCommand())
+				{
+					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+
+					// IN演算子でCommandParameterを使う方法がわからないので，string.Formatでごまかす．
+					// intなので，SQLインジェクションの心配はないよね？
+					command.CommandText =
+						string.Format("select sum(consumption) as total from consumptions_10min where e_time > @from and e_time <= @to and ch in ({0})", string.Join(",", channels));
+					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(from)));
+					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(to)));
+					//command.Parameters.Add(new SQLiteParameter("@ch", channels));
+					using (var reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							return System.Convert.ToInt32(reader["total"]);
+						}
+						// こんなことあるのか？
+						throw new ApplicationException("データベースから合計値が得られませんでした．");
+					}
+
+				}
+				//connection.Close();
+			}
+
+		}
+
+
 		#region *trinityを決定(DefineTrinity)
 		/// <summary>
 		/// 指定した日時に対して，trinityを決定します．
