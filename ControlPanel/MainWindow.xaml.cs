@@ -24,15 +24,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public partial class MainWindow : Window
 		{
-			Legacy.DailyCsvGenerator dataCsvGenerator;
-			Legacy.DailyHourlyCsvGenerator detailCsvGenerator;
+			Legacy.DailyHourlyCsvGenerator dataCsvGenerator;
+			Legacy.DailyCsvGenerator detailCsvGenerator;
 
 			public MainWindow()
 			{
 				InitializeComponent();
 
-				dataCsvGenerator = new Legacy.DailyCsvGenerator(DatabaseFile);
-				dataCsvGenerator.CsvRoot = @"B:\detail\";
+				dataCsvGenerator = new Legacy.DailyHourlyCsvGenerator(DatabaseFile);
+				dataCsvGenerator.CsvRoot = @"B:\data\";
 				dataCsvGenerator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
 				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "理工学部", Channels = new int[] { 1, 2 } });
 				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
@@ -41,8 +41,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "総情センター", Channels = new int[] { 3 } });
 
 
-				detailCsvGenerator = new Legacy.DailyHourlyCsvGenerator(DatabaseFile);
-				detailCsvGenerator.CsvRoot = @"B:\data\";
+				detailCsvGenerator = new Legacy.DailyCsvGenerator(DatabaseFile);
+				detailCsvGenerator.CsvRoot = @"B:\detail\";
 				detailCsvGenerator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
 				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "理工学部", Channels = new int[] { 1, 2 } });
 				//dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
@@ -58,7 +58,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				if (csv_calender.SelectedDate.HasValue)
 				{
-					dataCsvGenerator.OutputOneDay(csv_calender.SelectedDate.Value);
+					detailCsvGenerator.OutputOneDay(csv_calender.SelectedDate.Value);
 				}
 			}
 
@@ -67,7 +67,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				detailCsvGenerator.UpdateFiles(DateTime.Now);
 			}
 
-
+			public void CreateZip(DateTime month)
+			{
+				detailCsvGenerator.CreateArchive(month);
+			}
 
 			private void Button_Click(object sender, RoutedEventArgs e)
 			{
@@ -79,7 +82,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				if (csv_calender.SelectedDate.HasValue)
 				{
-					detailCsvGenerator.OutputOneDay(csv_calender.SelectedDate.Value);
+					dataCsvGenerator.OutputOneDay(csv_calender.SelectedDate.Value);
 				}
 			}
 
@@ -94,6 +97,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			private void CsvAllButton_Click(object sender, RoutedEventArgs e)
 			{
 				OutputAllCsv();
+			}
+
+
+			private void CreateZipButton_Click(object sender, RoutedEventArgs e)
+			{
+				if (csv_calender.SelectedDate.HasValue)
+				{
+					CreateZip(csv_calender.SelectedDate.Value);
+				}
 			}
 
 			public void OutputLegacyChartPlt(DateTime date)

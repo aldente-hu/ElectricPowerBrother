@@ -7,6 +7,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 
 using System.Xml.Linq;
+using System.IO.Compression;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
@@ -117,6 +118,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						var directory = Path.GetDirectoryName(target);
 						if (!Directory.Exists(directory))
 						{
+							// 前の月のアーカイブ化を行う．
+							var prev_month = date_origin.AddMonths(-1);
+							CreateArchive(prev_month);
+
 							Directory.CreateDirectory(directory);
 						}
 						// ファイルを新規作成する．
@@ -149,83 +154,28 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				return csv_last_data;
 
 
-				// 旧実装
+			}
 
-				// 07/31 02:00 -> 07/31 00:00
-				// 07/31 00:00 -> 07/30 00:00
-/*				DateTime date_origin = (latestData.TimeOfDay == TimeSpan.Zero)
-					? latestData.AddDays(-1) : latestData - latestData.TimeOfDay;
-
-				// date_originの日のファイルが存在するか確認．
-				string target = Path.Combine(CsvRoot, DailyCsvDestinationGenerator.Generate(date_origin));
-				if (!File.Exists(target))
+			// (1.3.10)
+			/// <summary>
+			/// 指定した月のcsvファイルを1つのzipファイルにまとめます．
+			/// </summary>
+			/// <param name="month"></param>
+			public void CreateArchive(DateTime month)
+			{
+				var name = DailyCsvDestinationGenerator.GenerateDirectory(month);
+				var dir = Path.Combine(this.CsvRoot, name);
+				if (Directory.Exists(dir))
 				{
-					// なければ，その前日のファイルについて同様のことを行う．
-					if (recursiveCount < RECURSIVE_COUNT_LIMIT)
+					var zip = Path.Combine(dir, name + ".zip");
+					using (var zip_file = ZipFile.Open(zip, ZipArchiveMode.Create))
 					{
-						if (date_origin == UpdateFiles(date_origin, recursiveCount + 1))
+						foreach (var file in Directory.GetFiles(dir, "*.csv", SearchOption.TopDirectoryOnly))
 						{
-							return;
+							zip_file.CreateEntryFromFile(file, Path.GetFileName(file));
 						}
 					}
-					else
-					{ return; }
 				}
-
-				// あれば，そのファイルを開く．
-				DateTime csv_last_data;
-				using (var file = File.Open(target, FileMode.Open, FileAccess.ReadWrite))
-				{
-					// ファイルに記録された最新の時刻を取得する．
-					Match last_match = null;
-					using (StreamReader reader = new StreamReader(file))
-					{
-						while(!reader.EndOfStream)
-						{
-							var line = reader.ReadLine();
-							var time_pattern = new Regex(@"^(\d\d)(?:\:(\d\d))?,");
-							var m = time_pattern.Match(line);
-							if (m.Success)
-							{
-								last_match = m;
-							}
-						}
-					}
-
-					if (last_match == null)
-					{
-						throw new ApplicationException("データのないCSVファイルがあります！");
-					}
-
-					int hour = int.Parse(last_match.Groups[1].Value);
-					int min = 0;
-					if (last_match.Groups[2].Captures.Count > 0)
-					{
-						min = int.Parse(last_match.Groups[2].Captures[0].Value);
-					}
-					csv_last_data = date_origin.AddMinutes(hour * 60 + min);
-
-					// ※chの決め打ちも解消しましょう．
-					var data = this.GetParticularConsumptions(csv_last_data, latestData, 1,2,3);
-
-					// ※とりあえずdetailから考える．
-
-					// こういうときってfileのポインタはどこにあるの？末尾？
-					using (StreamWriter writer = new StreamWriter(file))
-					{
-						foreach (var onetime in data.OrderBy(d => d.Key))
-						{
-							// onetime.Value : { 1 => 36, 2 => 39, 3 => 4 }
-							OutputDataRow(writer, onetime.Key, onetime.Value);
-						}
-					}
-
-				}
-					
-
-				// 記録すべきデータがあれば，書き込む．
- * 
- * */
 			}
 
 
@@ -440,6 +390,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			public static string Generate(DateTime date)
 			{
 				return date.ToString(@"\Yyyyy_MM/\Ddd_01.c\sv");
+			}
+
+			// (1.3.10)
+			public static string GenerateDirectory(DateTime month)
+			{
+				return month.ToString(@"\Yyyyy_MM");
 			}
 		}
 		#endregion
