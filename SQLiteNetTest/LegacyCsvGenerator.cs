@@ -37,15 +37,23 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			public DailyCsvGenerator(string databaseFile) : base(databaseFile)
 			{ }
 
+			// (1.3.9.3)削除．
 			/// <summary>
 			/// データが1時間ごとかどうかを示す値を取得／設定します．
 			/// </summary>
-			public bool IsHourly { get; set; }
+			//public bool IsHourly { get; set; }
 
-			private string TimeFormat
+			#region *TimeFormatプロパティ
+			/// <summary>
+			/// CSVに時刻を書き込むときに適用するフォーマットを取得／設定します．
+			/// </summary>
+			protected string TimeFormat
 			{
-				get { return this.IsHourly ? "HH" : "HH:mm"; }
+				get { return _timeFormat; }
+				set { _timeFormat = value; }
 			}
+			string _timeFormat = "HH:mm";
+			#endregion
 
 			public string CsvRoot
 			{ get; set; }
@@ -65,7 +73,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			const int RECURSIVE_COUNT_LIMIT = 31;
 
-			// UpdateActionに設定する？
+			// UpdateActionに設定する？→(1.3.9.3)UpdateActionに設定(Configureメソッド内)．
 			// 更新したファイルの最新データの時刻を返す．
 			public DateTime UpdateFiles(DateTime latestData, int recursiveCount = 0)
 			{
@@ -237,63 +245,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				return date_end == UpdateFiles(date_end, RECURSIVE_COUNT_LIMIT);
 
-				// 旧実装
-
-
-				// 07/31 02:00 -> 07/31 00:00
-				// 07/31 00:00 -> 07/31 00:00
-/*				DateTime date_origin = date - date.TimeOfDay;
-				DateTime date_end = date_origin.AddDays(1);
-
-				// date_originの日のファイルが存在するか確認．
-				string target = Path.Combine(CsvRoot, DailyCsvDestinationGenerator.Generate(date));
-
-				DateTime csv_last_data;
-				StreamWriter writer = null;
-
-				try
-				{
-					if (File.Exists(target))
-					{
-						// あれば，そのファイルを開く．
-						csv_last_data = this.RetrieveLatestTime(target, date_origin);
-						writer = new StreamWriter(File.Open(target, FileMode.Append, FileAccess.Write), this.CsvEncoding);
-					}
-					else
-					{
-						csv_last_data = date_origin;
-
-						// 月別のディレクトリがなければ作る．
-						var directory = Path.GetDirectoryName(target);
-						if (!Directory.Exists(directory))
-						{
-							Directory.CreateDirectory(directory);
-						}
-						// ファイルを新規作成する．
-						writer = new StreamWriter(File.Open(target, FileMode.CreateNew, FileAccess.Write), this.CsvEncoding);
-						OutputHeader(writer, date_origin);
-
-					}
-
-					// fileを再使用することはできない！(writerをDisposeすると，fileもDisposeされる．)
-
-					// ※chの決め打ちも解消しましょう．
-					var data = this.GetParticularConsumptions(csv_last_data, date_end, 1, 2, 3);
-
-					csv_last_data = Record(writer, csv_last_data, data);
-				}
-
-				finally
-				{
-					if (writer != null)
-					{
-						writer.Dispose();
-					}
-				}
-  
-				return csv_last_data == date_end;
-
- */ }
+			}
 
 			protected virtual DateTime Record(StreamWriter writer, DateTime csv_last_data, IDictionary<DateTime, IDictionary<int, int>> data)
 			{
@@ -347,13 +299,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 
 
-			// <LegacyCsvGenerator root="B:\data" encoding="Shift_JIS">
+			// <Config root="B:\data" encoding="Shift_JIS">
 			//    <Column name="理工学部" ch="1+2" />
 			//    <Column name="1号館" ch="1" />
 			//    <Column name="2号館" ch="2" />
 			//    <Column name="総情センター" ch="3" />
-			// </LegacyCsvGenerator>
+			// </Config>
 
+			// (1.3.9.3) UpdateActionを設定．
 			// (1.3.9) 実装開始．
 			public void Configure(System.Xml.Linq.XElement config)
 			{
@@ -374,6 +327,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					Columns.Add(CsvColumn.Generate(element));
 				}
 
+
+				this.UpdateAction = (time) => UpdateFiles(time);
 			}
 
 			public IList<CsvColumn> Columns { get { return _columns; } }
@@ -435,7 +390,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		public class DailyHourlyCsvGenerator : DailyCsvGenerator
 		{
 			public DailyHourlyCsvGenerator(string databaseFile) : base(databaseFile)
-			{ }
+			{ TimeFormat = "HH"; }
 
 			protected override DateTime Record(StreamWriter writer, DateTime csv_last_data, IDictionary<DateTime, IDictionary<int, int>> data)
 			{
