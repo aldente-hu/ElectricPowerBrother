@@ -82,15 +82,12 @@
     <Compile Include="GnuplotTrinityChart.cs" />
     <Compile Include="GoogleImageChart.cs" />
     <Compile Include="LegacyMonthlyChart.cs" />
-    <Compile Include="MonthlyChart.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -8,19 +8,28 @@ using System.Threading;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
+
+	// タイマを内蔵していて，指定された動作を繰り返し実行します．
+	// 前回実行した時刻(あるいは前回処理したデータの時刻)を記憶しているようですが，どう使うのでしょうか？？？
+	// ↑いまは使っていないっぽいorz
+
+
+	#region Tickerクラス
 	public class Ticker
 	{
 
+		#region プロパティ
+
 		public Timer MyTimer { get; set; }
 
-		//public TimerCallback Callback { get; protected set; }
 		public TimerCallback Callback { get; set; }
 
+		// コールバックに与える引数．
+		public object CallbackArgument { get; set; }
+
+		#endregion
+
 		#region *コンストラクタ(Ticker)
-		//public Ticker(TimerCallback callback)
-		//{
-		//	this.Callback = callback;
-		//}
 
 		public Ticker() { }
 
@@ -33,17 +42,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		DateTime NewestData { get; set; }
 		#endregion
 
-		// コールバックに与える引数．
-		public object CallbackArgument { get; set; }
-
+		#region *開始(StartTimer)
 		public void StartTimer(int dueTime, int period)
 		{
 			// コンストラクタでcallbackが設定されるはずなので，ここで確認はしない！
 			MyTimer = new System.Threading.Timer(Callback, CallbackArgument, dueTime, period);
 		}
+		#endregion
 
 
 	}
+	#endregion
 
 
 }

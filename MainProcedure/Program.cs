@@ -156,38 +156,5 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 	}
 
-	public class PluginTicker
-	{
-		public int Count { get; set; }
-		public int Interval { get; set; }
-
-		readonly IPluginBase _plugin;
-		DateTime _latestDataTime;
-
-		public PluginTicker(IPluginBase plugin)
-		{
-			this._plugin = plugin;
-		}
-
-		public void OnTick(object sender, EventArgs e)
-		{
-			++Count;
-			if (Count >= Interval)
-			{
-				Count = 0;
-				// 手抜き実装？
-				if (_plugin is IUpdatingPlugin)
-				{
-					((IUpdatingPlugin)_plugin).Update();
-				}
-				else if (_plugin is IPlugin)
-				{
-					_latestDataTime = ((IPlugin)_plugin).Update(_latestDataTime);
-				}
-			}
-
-		}
-
-	}
 
 }
