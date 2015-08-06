@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputData", "SQLiteNetTest\OutputData.csproj", "{3772129D-9889-4797-A358-5B1BACAF8763}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputData", "OutputData\OutputData.csproj", "{3772129D-9889-4797-A358-5B1BACAF8763}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricPowerData", "ElectricPowerData\ElectricPowerData.csproj", "{C67B9075-00F2-49E3-BFD0-4E4E77885743}"
 EndProject

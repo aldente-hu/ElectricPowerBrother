@@ -103,7 +103,7 @@
       <Project>{5331c2be-b25d-4a8b-854c-c9489480d52a}</Project>
       <Name>Helpers</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SQLiteNetTest\OutputData.csproj">
+    <ProjectReference Include="..\OutputData\OutputData.csproj">
       <Project>{3772129d-9889-4797-a358-5b1bacaf8763}</Project>
       <Name>OutputData</Name>
     </ProjectReference>
