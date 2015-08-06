@@ -11,6 +11,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 {
 	// 実質staticクラスだけど，これでいいのか？
 	// (継承もされていないし，インスタンスも作られていない．このままならヘルパにした方がいいかも？)
+	/*
 	#region GnuplotChartBaseクラス
 	[Obsolete("Gnuplotクラスを使用して下さい．")]
 	public class GnuplotChartBase
@@ -113,16 +114,23 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 
 	}
 	#endregion
-
+	*/
 
 	// 実装例はGnuplotTrinityChartクラス．
 	#region PltFileGeneratorBaseクラス
 	public abstract class PltFileGeneratorBase
 	{
-		public string RootPath { get; set; }
-		public string ChartDestination { get; set; }
+		// (1.3.11) ChartDestinationプロパティをGnuplotTrinityChartクラスに移動．
 
-		public abstract void Generate(StreamWriter writer);
+		public string RootPath { get; set; }
+
+
+		// (1.2.0)引数にtimeを追加．timeを使わないならば，どんな値を与えても構いません．
+		public abstract void Generate(StreamWriter writer, DateTime time);
+		public void Generate(StreamWriter writer)
+		{
+			Generate(writer, DateTime.MinValue);
+		}
 
 		// (1.1.3.0)
 		/// <summary>

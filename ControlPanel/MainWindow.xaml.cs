@@ -26,6 +26,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		{
 			Legacy.DailyHourlyCsvGenerator dataCsvGenerator;
 			Legacy.DailyCsvGenerator detailCsvGenerator;
+			Legacy.MonthlyChart monthlyChartGenerator;
 
 			public MainWindow()
 			{
@@ -50,6 +51,18 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "2号館", Channels = new int[] { 2 } });
 				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "総情センター", Channels = new int[] { 3 } });
 
+				monthlyChartGenerator = new Legacy.MonthlyChart(DatabaseFile);
+				monthlyChartGenerator.Width = 640;
+				monthlyChartGenerator.Height = 480;
+				monthlyChartGenerator.SeriesNo = 2;
+				monthlyChartGenerator.Maximum = 800;
+				monthlyChartGenerator.Minimum = 0;
+				monthlyChartGenerator.SeriesName = "riko";
+				monthlyChartGenerator.SourceRootPath = @"B:\data\";
+				monthlyChartGenerator.MonthlyTotalChannels = new int[] { 1, 2 };
+
+				// (1.5.1)
+				Helpers.Gnuplot.BinaryPath = Properties.Settings.Default.GnuplotBinaryPath;
 			}
 
 			public static string DatabaseFile = @"B:\ep.sqlite3";
@@ -90,7 +103,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				if (csv_calender.SelectedDate.HasValue)
 				{
-					OutputLegacyChartPlt(csv_calender.SelectedDate.Value);
+					OutputLegacyChartPlt(csv_calender.SelectedDate.Value.AddDays(1));
+				}
+			}
+
+			// (0.1.5)
+			private void PngButton_Click(object sender, RoutedEventArgs e)
+			{
+				if (csv_calender.SelectedDate.HasValue)
+				{
+					OutputLegacyChart(csv_calender.SelectedDate.Value.AddDays(1));
 				}
 			}
 
@@ -108,22 +130,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 			}
 
-			public void OutputLegacyChartPlt(DateTime date)
+			void OutputLegacyChartPlt(DateTime date)
 			{
-				var consumption_table = new Data.ConsumptionData(DatabaseFile);
+				monthlyChartGenerator.OtameshiPlt(date, @"B:\otameshi.plt");
+			}
 
-				var generator = new Legacy.MonthlyChart();
-				generator.Width = 640;
-				generator.Height = 480;
-				generator.SeriesNo = 2;
-				generator.Maximum = 800;
-				generator.Minimum = 0;
-				generator.SeriesName = "riko";
-				generator.SourceRootPath = @"B:\data\";
-				generator.ChartDestination = @"B:\data\Y2015_08\riko.png";
-				//generator.CurrentDate = DateTime.Today;
-				generator.MonthlyTotal = consumption_table.GetMonthlyTotal(date, 1, 2);	// チャンネルは決め打ち！
-				generator.OtameshiPlt(date, @"B:\otameshi.plt");
+			// (0.1.5)
+			void OutputLegacyChart(DateTime date)
+			{
+				monthlyChartGenerator.DrawChartTest(date);
 			}
 
 

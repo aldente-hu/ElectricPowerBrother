@@ -41,9 +41,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public string TemperatureCsvPath { get; set; }
 
+		/// <summary>
+		/// グラフの出力先を取得／設定します．
+		/// </summary>
+		public string ChartDestination { get; set; }
 
-		public override void Generate(StreamWriter writer)
+		// (1.3.11)引数にtimeを追加(ただし未使用)．
+		public override void Generate(StreamWriter writer, DateTime time)
 		{
+			// timeは未使用．
+
 			// ※決め打ちだらけだけど，まあとりあえず．
 
 			// (1.3.4)電力量の範囲をプローブする．
@@ -185,10 +192,11 @@ set output
 		#region (1.3.3)プラグイン化
 
 		// (1.3.3.2)とりあえずのコンストラクタ．
-		public GnuplotTrinityChart(string databaseFile) : base()
-		{ }
+		//public GnuplotTrinityChart(string databaseFile) : base()
+		//{ }
 		public GnuplotTrinityChart() : base() { }
 
+		// (1.3.11)Gnuplot.Generateの引数を追加．
 		public void Update()
 		{
 			DateTime updated1 = new FileInfo(this.GetAbsolutePath(this.TemperatureCsvPath)).LastWriteTime;
@@ -197,7 +205,7 @@ set output
 			var latestData = updated1 > updated2 ? updated1 : updated2;
 			if (latestData > _current)
 			{
-				Gnuplot.GenerateGraph(this);
+				Gnuplot.GenerateChart(this, _current);
 			}
 			_current = latestData;
 		}

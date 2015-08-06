@@ -9,9 +9,10 @@
                       Name="csv_calender" />
                 <Button Content="出力" HorizontalAlignment="Left" Margin="224,52,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
                 <Button Content="Hourly" HorizontalAlignment="Left" Margin="224,81,0,0" VerticalAlignment="Top" Width="100" Click="HourlyButton_Click"/>
-                <Button Content="pltお試し" HorizontalAlignment="Left" Margin="224,137,0,0" VerticalAlignment="Top" Width="100" Click="PltButton_Click"/>
-                <Button Content="CSV一斉" HorizontalAlignment="Left" Margin="10,195,0,0" VerticalAlignment="Top" Width="100" Click="CsvAllButton_Click"/>
-                <Button Content="ZIP" HorizontalAlignment="Left" Margin="124,195,0,0" VerticalAlignment="Top" Width="65" Click="CreateZipButton_Click"/>
+                <Button Content="pltお試し" HorizontalAlignment="Left" Margin="10,195,0,0" VerticalAlignment="Top" Width="78" Click="PltButton_Click"/>
+                <Button Content="CSV一斉" HorizontalAlignment="Left" Margin="224,110,0,0" VerticalAlignment="Top" Width="100" Click="CsvAllButton_Click"/>
+                <Button Content="ZIP" HorizontalAlignment="Left" Margin="243,139,0,0" VerticalAlignment="Top" Width="65" Click="CreateZipButton_Click"/>
+                <Button Content="pngお試し" HorizontalAlignment="Left" Margin="111,195,0,0" VerticalAlignment="Top" Width="78" Click="PngButton_Click"/>
             </Grid>
         </GroupBox>
 

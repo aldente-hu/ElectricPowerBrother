@@ -13,7 +13,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 	#region Gnuplotクラス
 	public static class Gnuplot
 	{
+		/// <summary>
+		/// gnuplot.exeのパスを取得／設定します．
+		/// </summary>
 		public static string BinaryPath { get; set; }
+
+		// (1.2.0)メソッド名をGenerateChartに変更．
 
 		// 直接コマンドを送るとうまくいかないことがあったような気がするので，
 		// いったんpltファイルを生成するようにしてみる．
@@ -23,16 +28,21 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		//static Process process;
 		//static string pltFile;
 
-		// 02/23/2014 by aldente : (1.1.2.0)一時ファイルを削除する処理を追加．
+		// 02/23/2015 by aldente : (1.1.2.0)一時ファイルを削除する処理を追加．
 		// GnuplotChartからのコピペ．
-		public static void GenerateGraph(PltFileGeneratorBase pltGenerator)
+		#region *[static]グラフを出力(GenerateChart)
+		/// <summary>
+		/// 与えられたpltGeneratorをもとに，グラフを出力します．
+		/// </summary>
+		/// <param name="pltGenerator"></param>
+		public static void GenerateChart(PltFileGeneratorBase pltGenerator, DateTime time)
 		{
 			var pltFile = Path.GetTempFileName();
 
 			using (StreamWriter writer = new StreamWriter(pltFile, false, new UTF8Encoding(false)))
 			{
 				// 何らかの形でpltファイルを生成する．
-				pltGenerator.Generate(writer);
+				pltGenerator.Generate(writer, time);
 				//OutputCommands(writer, rootPath, outputFileName);
 			}
 
@@ -74,7 +84,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 					process.Dispose();
 				}
 			}
-
+		#endregion
 
 		}
 

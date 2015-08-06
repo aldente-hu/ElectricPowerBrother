@@ -14,7 +14,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	{
 		// (1.3.6)
 		#region MonthlyChartクラス
-		public class MonthlyChart : PltFileGeneratorBase, IUpdatingPlugin
+		public class MonthlyChart : PltFileGeneratorBase, IPlugin
 		{
 
 			#region プロパティ
@@ -34,7 +34,23 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// 描画対象のデータを取得／設定します．
 			/// 設定した月の初日から設定した日までが描画対象になります．
 			/// </summary>
-			public DateTime CurrentDate { get; set; }
+			//public DateTime CurrentDate { get; set; }
+
+			// ※このクラスはテーブルを継承していないので，↓の合計は外から与えるしかない．
+			// プロパティがいいのか，引数がいいのか...
+
+			// (1.3.11.2)削除．
+			// (1.3.8.2)
+			/// <summary>
+			/// 月間合計を取得／設定します．
+			/// </summary>
+			//public int MonthlyTotal { get; set; }
+
+			// (1.3.12)
+			/// <summary>
+			/// 表示する月間合計のチャンネルを取得／設定します．
+			/// </summary>
+			public int[] MonthlyTotalChannels { get; set; }
 
 			/// <summary>
 			/// 縦軸の最大値を取得／設定します．
@@ -61,6 +77,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// </summary>
 			public string SourceRootPath { get; set; }
 
+			// ※とりあえずグラフの出力先のルートも↑と同じにしておく．
+
 			#endregion
 
 			#region *[override]pltコマンド列を生成(Generate)
@@ -79,12 +97,38 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			*/
 
-			// 描画対象月(日)はCurrentDateプロパティで与えます．
-			public override void Generate(StreamWriter writer)
+			// とりあえずoverrideは無視して，理想的な引数を与えましょう．
+			// →で，もう継承を解除するか，継承元を変更するか...
+			public override void Generate(StreamWriter writer, DateTime hour)
 			{
+				// hour.Min should be 0!
+				//var hour = new DateTime(time.Year, time.Month, time.Day, time.Hour, 0, 0);
+
+				// ↑この処理は呼び出し元で行うべきだよなぁ．
+
+				// time       => month_origin
+				// 8/31 23:00 => 8/01 00:00
+				// 9/01 00:00 => 8/01 00:00
+				// 9/01 00:50 => 8/01 00:00 (Nothing to output!)
+				// 9/01 01:00 => 9/01 00:00
+
+				DateTime month_origin;
+				if (hour.Day == 1 && hour.Hour == 0)
+				{
+					month_origin = hour.AddMonths(-1);
+				}
+				else
+				{
+					month_origin = new DateTime(hour.Year, hour.Month, 1);
+				}
+
+
+
 				writer.WriteLine("set terminal png medium size {0},{1}", this.Width, this.Height);
-				writer.WriteLine("set output '{0}'", this.ChartDestination);
+				writer.WriteLine("set output '{0}'",
+					Path.Combine(GetAbsolutePath(SourceRootPath), MonthlyChartDestinationGenerator.Generate(hour, this.SeriesName)));
 				writer.WriteLine("set datafile separator ','");
+				writer.WriteLine("set key outside");
 
 				// 横軸
 				writer.WriteLine("set xlabel 'Time'");
@@ -111,11 +155,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 
 				// タイトル
-				writer.WriteLine("set title 'Power Consumption ({0}, {1})   Monthly Total {2} kWh'",
-					CurrentDate.ToString("yyyy.M"),
-					this.SeriesName,
-					33333	// ★月間トータルをどうやって取得する？？？
-				);
+				// (1.3.12)月間合計チャンネルの決め打ちを解消．
+				var title = string.Format("Power Consumption ({0}, {1})", month_origin.ToString("yyyy.M"), this.SeriesName);
+				if (MonthlyTotalChannels != null)
+				{
+					title += string.Format("   Monthly Total {0} kWh", _consumptionTable.GetTotal(month_origin, hour, MonthlyTotalChannels));
+				}
+				writer.WriteLine("set title '{0}'", title);
 
 
 				// プロット
@@ -134,8 +180,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				List<string> source_list = new List<string>();
 				var source_root = Path.IsPathRooted(this.SourceRootPath) ? this.SourceRootPath : Path.Combine(this.RootPath, this.SourceRootPath);
 
-				var date = new DateTime(CurrentDate.Year, CurrentDate.Month, 1);
-				while (date.Date <= CurrentDate.Date)
+				var date = month_origin;
+				// hourが00:00ならば，その前日までしかループされない．
+				while (date.Date < hour)
 				{
 					source_list.Add(
 						string.Format("'{0}' using 1:{2} w lp {1}", 
@@ -158,7 +205,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// [＋，＊，△，○，□](環境依存)
 				// MARKERS = [1, 3, 8, 6, 4].freeze
 				int marker = 4;
-				if (date.Date == this.CurrentDate.Date)
+				if (date.Date == DateTime.Today)
 				{
 					marker = 5;	//当日用マーカ('■')；環境依存
 				}
@@ -226,27 +273,53 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			#region (1.3.3)プラグイン化
 
+			// (1.3.11)やっぱり復活．
+			// (1.3.8.2)引数付きコンストラクタをコメントアウト．(うーん，このあたり混乱してるかもなぁ．)
 			// (1.3.3.2)とりあえずのコンストラクタ．
 			public MonthlyChart(string databaseFile)
 				: base()
-			{ }
-			public MonthlyChart() : base() { }
-
-			public void Update()
 			{
-/*
-				DateTime updated1 = new FileInfo(this.GetAbsolutePath(this.TemperatureCsvPath)).LastWriteTime;
-				DateTime updated2 = new FileInfo(this.GetAbsolutePath(this.TrinityCsvPath)).LastWriteTime;
-
-				var latestData = updated1 > updated2 ? updated1 : updated2;
-				if (latestData > _current)
-				{
-					Gnuplot.GenerateGraph(this);
-				}
-				_current = latestData;
-*/
+				this._consumptionTable = new Data.ConsumptionData(databaseFile);
 			}
-			DateTime _current;
+			//public MonthlyChart() : base() { }
+
+			readonly Data.ConsumptionData _consumptionTable;
+
+
+			public DateTime Update(DateTime lastUpdate)
+			{
+				var latest_data = _consumptionTable.GetLatestDataTime();
+
+				// hour.Min should be 0!
+				var latest_hour = new DateTime(latest_data.Year, latest_data.Month, latest_data.Day, latest_data.Hour, 0, 0);
+
+				// this.DrawChart(hour);
+				// 理想的にはこれだけの話．
+
+				if (lastUpdate >= latest_data)
+				{
+					return lastUpdate;
+				}
+				else
+				{
+					// Yearも一応チェックしておく．
+					while (lastUpdate.Month != latest_hour.Month || lastUpdate.Year != latest_hour.Year)
+					{
+						var next = new DateTime(lastUpdate.Year, lastUpdate.Month, lastUpdate.Day).AddMonths(1);
+						DrawChart(next);
+						lastUpdate = next;
+					}
+
+					if (latest_hour.Day != 1 || latest_hour.Hour != 0)
+					{
+						DrawChart(latest_hour);
+					}
+					return latest_hour;
+				}
+			}
+			
+			// ↓こういうのはPluginTickerのレイヤーで覚えていてもらう．
+			//DateTime _current;
 
 			public void Configure(System.Xml.Linq.XElement config)
 			{
@@ -260,9 +333,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						//case "TrinitySource":
 						//	this.TrinityCsvPath = attribute.Value;
 						//	break;
-						case "Destination":
-							this.ChartDestination = attribute.Value;
-							break;
+						//case "Destination":
+						//	this.ChartDestination = attribute.Value;
+						//	break;
 						case "DataRoot":
 							this.RootPath = attribute.Value;
 							break;
@@ -291,17 +364,66 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			#endregion
 
+			// (1.3.11)
+			protected void DrawChart(DateTime time)
+			{
+				// tempファイルのwriterをつくってGeneratePlt(writer, time)してgnuplot実行！！
+				// ...ということを，このメソッド1つでやってくれるんだった．
+				Gnuplot.GenerateChart(this, time);
+			}
+
+			#region テスト用メソッド
+
 			// (1.3.8) 試しに出力してみるメソッド．
 			public void OtameshiPlt(DateTime date, string destination)
 			{
-				this.CurrentDate = date;
+				//this.CurrentDate = date;
 				using (var writer = new StreamWriter(File.Open(destination, FileMode.Create, FileAccess.Write)))
 				{
-					this.Generate(writer);
+					this.Generate(writer, new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0));
 				}
 			}
 
+			// (1.3.11)
+			#region *グラフを試しに出力(DrawChartTest)
+			/// <summary>
+			/// DrawChartメソッドのお試し実行をします．
+			/// timeのHourより下の情報はメソッド内で切り捨てられます．
+			/// </summary>
+			/// <param name="time"></param>
+			public void DrawChartTest(DateTime time)
+			{
+				var hour = new DateTime(time.Year, time.Month, time.Day, time.Hour, 0, 0);
+				DrawChart(hour);
+			}
+			#endregion
 
+
+			#endregion
+
+
+		}
+		#endregion
+
+
+		// (1.3.11)
+		#region [static]DailyCsvDestinationGeneratorクラス
+		public static class MonthlyChartDestinationGenerator
+		{
+			// 2015年7月2日を表すDateTimeから， "public/data/Y2015_07/D02_01.csv"のような文字列を生成する．
+
+			// ルートの処理はどこで行う？
+
+			public static string Generate(DateTime date, string name)
+			{
+				// "g" -> "西暦"
+				return string.Format(date.ToString(@"\Yyyyy_MM/yyyyMM_{0}.pn\g"), name);
+			}
+
+			public static string GenerateDirectory(DateTime month)
+			{
+				return month.ToString(@"\Yyyyy_MM");
+			}
 		}
 		#endregion
 

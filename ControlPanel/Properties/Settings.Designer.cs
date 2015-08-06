@@ -22,5 +22,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.Propertie
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Progra~1\\gnuplot\\bin\\gnuplot.exe")]
+        public string GnuplotBinaryPath {
+            get {
+                return ((string)(this["GnuplotBinaryPath"]));
+            }
+            set {
+                this["GnuplotBinaryPath"] = value;
+            }
+        }
     }
 }
