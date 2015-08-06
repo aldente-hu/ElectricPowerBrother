@@ -60,6 +60,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				monthlyChartGenerator.SeriesName = "riko";
 				monthlyChartGenerator.SourceRootPath = @"B:\data\";
 				monthlyChartGenerator.MonthlyTotalChannels = new int[] { 1, 2 };
+				monthlyChartGenerator.BorderLine = 600;
 
 				// (1.5.1)
 				Helpers.Gnuplot.BinaryPath = Properties.Settings.Default.GnuplotBinaryPath;

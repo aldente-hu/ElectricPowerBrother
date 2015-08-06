@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.IO;
+using System.Xml.Linq;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
@@ -29,23 +30,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// </summary>
 			public int Height { get; set; }
 
-
-			/// <summary>
-			/// 描画対象のデータを取得／設定します．
-			/// 設定した月の初日から設定した日までが描画対象になります．
-			/// </summary>
-			//public DateTime CurrentDate { get; set; }
-
-			// ※このクラスはテーブルを継承していないので，↓の合計は外から与えるしかない．
-			// プロパティがいいのか，引数がいいのか...
-
-			// (1.3.11.2)削除．
-			// (1.3.8.2)
-			/// <summary>
-			/// 月間合計を取得／設定します．
-			/// </summary>
-			//public int MonthlyTotal { get; set; }
-
 			// (1.3.12)
 			/// <summary>
 			/// 表示する月間合計のチャンネルを取得／設定します．
@@ -68,7 +52,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			public string SeriesName { get; set; }
 
 			/// <summary>
-			/// ソースファイル内の系列の列番号を取得／設定します．
+			/// ソースファイル内の系列の列番号を取得／設定します(最初の列が1，ただし最初の列は時刻が入ると想定している)．
 			/// </summary>
 			public int SeriesNo { get; set; }
 
@@ -76,6 +60,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// CSVファイルのルートとなるディレクトリを，絶対パスまたはRootPathからの相対パスで取得／設定します．
 			/// </summary>
 			public string SourceRootPath { get; set; }
+
+			// (1.3.13)
+			/// <summary>
+			/// 点線(たぶん)でボーダーラインを表示する値を取得／設定します．
+			/// </summary>
+			public int? BorderLine { get; set; }
 
 			// ※とりあえずグラフの出力先のルートも↑と同じにしておく．
 
@@ -126,9 +116,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				writer.WriteLine("set terminal png medium size {0},{1}", this.Width, this.Height);
 				writer.WriteLine("set output '{0}'",
-					Path.Combine(GetAbsolutePath(SourceRootPath), MonthlyChartDestinationGenerator.Generate(hour, this.SeriesName)));
+						Path.Combine(
+							GetAbsolutePath(SourceRootPath),	// 出力先をSourceRootPathに固定している！しかもRootPathを考慮していない！
+							MonthlyChartDestinationGenerator.Generate(hour, this.SeriesName)
+						)
+				);
 				writer.WriteLine("set datafile separator ','");
 				writer.WriteLine("set key outside");
+				// もともとはこんな感じだった．何がどう作用しているのかは全くわからん．
+				// set key outside Right noreverse enhanced box linetype -2 linewidth 1.000 samplen 4 spacing 1 width 3 height -2 autotitles
 
 				// 横軸
 				writer.WriteLine("set xlabel 'Time'");
@@ -143,15 +139,30 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				{
 					writer.WriteLine("set yrange [{0} : {1}] noreverse nowriteback", this.Minimum, this.Maximum);
 					int span = 100;
+					int mytics = 5;
 					if (range < 200)
 					{
 						span = 20;
+						mytics = 4;
 					}
 					else if (range < 400)
 					{
 						span = 50;
 					}
 					writer.WriteLine("set ytics border mirror norotate {0},{2},{1}", this.Minimum, this.Maximum, span);
+					
+					// (1.3.13.1)補助目盛(主目盛りを何等分するかということ)．
+					// とりあえず常に出力する設定にしておく．
+					writer.WriteLine("set mytics {0}", mytics);
+				}
+
+
+
+				// (1.3.13)ボーダーライン
+				if (this.BorderLine.HasValue)
+				{
+					writer.WriteLine("set y2tics border mirror norotate (\"\" {0})", this.BorderLine.Value);
+					writer.WriteLine("set grid y2tics noxtics");
 				}
 
 				// タイトル
@@ -293,26 +304,36 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// hour.Min should be 0!
 				var latest_hour = new DateTime(latest_data.Year, latest_data.Month, latest_data.Day, latest_data.Hour, 0, 0);
 
-				// this.DrawChart(hour);
-				// 理想的にはこれだけの話．
+				// 最初の呼び出し．いつのデータまで描画されたかを知る手段はないので，とりあえず出力する．
+				if (lastUpdate.Ticks == 0)
+				{
+					this.DrawChart(latest_hour);
+					return latest_hour;
+					// 理想的にはこれだけの話．
+				}
 
-				if (lastUpdate >= latest_data)
+				if (lastUpdate >= latest_hour)
 				{
 					return lastUpdate;
 				}
 				else
 				{
+					// 7/31 23:00 -> 8/01 00:00
+					//   7月分だけ描画すればよい．これはAで行われる．
+					// 8/01 00:00 => 8/01 01:00
+					//   8月分だけ描画すればよい．これはBで行われる．
+
 					// Yearも一応チェックしておく．
 					while (lastUpdate.Month != latest_hour.Month || lastUpdate.Year != latest_hour.Year)
 					{
-						var next = new DateTime(lastUpdate.Year, lastUpdate.Month, lastUpdate.Day).AddMonths(1);
-						DrawChart(next);
+						var next = new DateTime(lastUpdate.Year, lastUpdate.Month, 1).AddMonths(1);
+						DrawChart(next);	// A
 						lastUpdate = next;
 					}
 
 					if (latest_hour.Day != 1 || latest_hour.Hour != 0)
 					{
-						DrawChart(latest_hour);
+						DrawChart(latest_hour);	// B
 					}
 					return latest_hour;
 				}
@@ -321,46 +342,121 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// ↓こういうのはPluginTickerのレイヤーで覚えていてもらう．
 			//DateTime _current;
 
-			public void Configure(System.Xml.Linq.XElement config)
+
+			// とりあえずDataRootは使わず，SourceRootPathに絶対パスを記述する運用にする．
+			// <Config source_root="～">
+			//   <ChartFormat width="640" height="480" />
+			//   <Series no="2" name="riko" />
+			//   <YValue max="800" min="0" border="600" />
+			//   <MonthlyTotal ch="1+2" />
+			// </Config>
+
+			// (1.3.14)本格的に整備．
+			#region *XMLから設定(Configure)
+			public void Configure(XElement config)
 			{
 				foreach (var attribute in config.Attributes())
 				{
 					switch (attribute.Name.LocalName)
 					{
-						//case "TemperatureSource":
-						//	this.TemperatureCsvPath = attribute.Value;
+						//case "DataRoot":
+						//	this.RootPath = attribute.Value;
 						//	break;
-						//case "TrinitySource":
-						//	this.TrinityCsvPath = attribute.Value;
-						//	break;
-						//case "Destination":
-						//	this.ChartDestination = attribute.Value;
-						//	break;
-						case "DataRoot":
-							this.RootPath = attribute.Value;
+						case "source_root":
+							this.SourceRootPath = attribute.Value;
 							break;
 					}
 				}
 				var element = config.Element("ChartFormat");
 				if (element != null)
 				{
-					foreach (var attribute in element.Attributes())
+					ConfigureChartFormat(element);
+				}
+				element = config.Element("Series");
+				if (element != null)
+				{
+					ConfigureSeries(element);
+				}
+				element = config.Element("YValue");
+				if (element != null)
+				{
+					ConfigureYValue(element);
+				}
+				element = config.Element("MonthlyTotal");
+				if (element != null)
+				{
+					ConfigureMonthlyTotal(element);
+				}
+			}
+
+			protected void ConfigureChartFormat(XElement format)
+			{
+				foreach (var attribute in format.Attributes())
+				{
+					switch (attribute.Name.LocalName)
 					{
-						switch (attribute.Name.LocalName)
-						{
-							case "Width":
-								this.Width = (int)attribute;
-								break;
-							case "Height":
-								this.Height = (int)attribute;
-								break;
-							//case "FontSize":
-							//	this.FontSize = (int)attribute;
-							//	break;
-						}
+						case "width":
+							this.Width = (int)attribute;
+							break;
+						case "height":
+							this.Height = (int)attribute;
+							break;
+						//case "FontSize":
+						//	this.FontSize = (int)attribute;
+						//	break;
 					}
 				}
 			}
+
+			protected void ConfigureSeries(XElement series)
+			{
+				foreach (var attribute in series.Attributes())
+				{
+					switch (attribute.Name.LocalName)
+					{
+						case "no":
+							this.SeriesNo = (int)attribute;
+							break;
+						case "name":
+							this.SeriesName = attribute.Value;
+							break;
+					}
+				}
+			}
+
+			protected void ConfigureYValue(XElement yValue)
+			{
+				foreach (var attribute in yValue.Attributes())
+				{
+					switch (attribute.Name.LocalName)
+					{
+						case "max":
+							this.Maximum = (int)attribute;
+							break;
+						case "min":
+							this.Minimum = (int)attribute;
+							break;
+						case "border":
+							this.BorderLine = (int)attribute;
+							break;
+					}
+				}
+			}
+
+			protected void ConfigureMonthlyTotal(XElement monthlyTotal)
+			{
+				foreach (var attribute in monthlyTotal.Attributes())
+				{
+					switch (attribute.Name.LocalName)
+					{
+						case "ch":
+							this.MonthlyTotalChannels = attribute.Value.Split('+',',').Select(d => int.Parse(d)).ToArray();
+							break;
+					}
+				}
+			}
+
+			#endregion
 
 			#endregion
 

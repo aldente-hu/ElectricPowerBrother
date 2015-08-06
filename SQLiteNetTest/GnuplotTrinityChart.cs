@@ -191,10 +191,12 @@ set output
 
 		#region (1.3.3)プラグイン化
 
+		// (1.3.14.1)引数は使っていないけど，MainProcedureでインスタンスを生成する際に必要になっている．(うーん...)
 		// (1.3.3.2)とりあえずのコンストラクタ．
-		//public GnuplotTrinityChart(string databaseFile) : base()
-		//{ }
-		public GnuplotTrinityChart() : base() { }
+		public GnuplotTrinityChart(string databaseFile)
+			: base()
+		{ }
+		//public GnuplotTrinityChart() : base() { }
 
 		// (1.3.11)Gnuplot.Generateの引数を追加．
 		public void Update()
