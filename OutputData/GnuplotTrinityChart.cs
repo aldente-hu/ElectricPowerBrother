@@ -14,7 +14,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	/// <summary>
 	/// かつてのGnuplotTrinityChartクラスに対応しています．
 	/// </summary>
-	public class GnuplotTrinityChart : PltFileGeneratorBase
+	public class GnuplotTrinityChart : PltFileGeneratorBase, IUpdatingPlugin
 	{
 		/// <summary>
 		/// 出力するグラフの横幅を取得／設定します．
@@ -41,9 +41,54 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public string TemperatureCsvPath { get; set; }
 
-		public override void Generate(StreamWriter writer)
+		/// <summary>
+		/// グラフの出力先を取得／設定します．
+		/// </summary>
+		public string ChartDestination { get; set; }
+
+		// (1.3.11)引数にtimeを追加(ただし未使用)．
+		public override void Generate(StreamWriter writer, DateTime time)
 		{
+			// timeは未使用．
+
 			// ※決め打ちだらけだけど，まあとりあえず．
+
+			// (1.3.4)電力量の範囲をプローブする．
+			// デフォルトを20-70ぐらいにする．
+
+			int? max_power = null;
+			int? min_power = null;
+ 
+			using (var reader = new System.IO.StreamReader(GetAbsolutePath(TrinityCsvPath)))
+			{
+				while (!reader.EndOfStream)
+				{
+					var cols = reader.ReadLine().Split(',');
+					// 最初の列は時刻なのでプローブしない．
+					for(int i=1; i<cols.Length; i++)
+					{
+						int power;
+						if (Int32.TryParse(cols[i], out power))
+						{
+							if (!max_power.HasValue || max_power < power) { max_power = power; }
+							if (!min_power.HasValue || min_power > power) { min_power = power; }
+						}
+					}
+				}
+			}
+			max_power = max_power.HasValue ? max_power : 70;
+			min_power = min_power.HasValue ? min_power : 20;
+
+			int bottom_power = (min_power.Value / 10) * 10;
+			int top_power = bottom_power + 50;
+			int y_ticks = 5;
+			while (top_power <= max_power)
+			{
+				top_power += 10;
+				y_ticks++;
+			}
+
+
 
 			// (1.1.2.0)温度の範囲をプローブする．
 			decimal? max_temp = null;
@@ -68,29 +113,29 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			int step_temp = 1;
 			var diff = max_temp - min_temp;
-			while (diff > 8 * step_temp)
+			while (diff > y_ticks * step_temp)
 			{
 				step_temp++;
 			}
-			max_temp = min_temp + 8 * step_temp;
+			max_temp = min_temp + y_ticks * step_temp;
 
-
-			writer.WriteLine(string.Format("cd '{0}'", RootPath));
+			if (!string.IsNullOrEmpty(this.RootPath))
+			{
+				writer.WriteLine(string.Format("cd '{0}'", RootPath));
+			}
 			writer.WriteLine(string.Format("set terminal svg enhanced size {0},{1} fsize {2}", this.Width, this.Height, this.FontSize));
 			writer.WriteLine(string.Format("set output '{0}'", ChartDestination));	// ※とりあえず決め打ち．
 			writer.WriteLine("set encoding utf8");
-			writer.WriteLine("set title \"電力消費量 (理工学部＋α)\"");	// 全角の"＋"は使わない方がよい．
+			writer.WriteLine("set title \"電力消費量 (理工学部＋α)\"");	// 出力フォーマットによっては全角の"＋"は使わない方がよい．
 
 			// 各軸の設定
 			writer.WriteLine("set xlabel '時刻 [Hour]'");
 			writer.WriteLine("set xrange [ 0.0 : 24.0 ]");
 			writer.WriteLine("set xtics border mirror norotate 0,1,24");
 
-			var y1_max = 120;	// (1.1.2.1) 40-120 に変更．
-			var y1_min = 40;
 			writer.WriteLine("set ylabel '10分間電力消費量 [kWh]'");
-			writer.WriteLine(string.Format("set yrange [ {0} : {1} ]", y1_min, y1_max));
-			writer.WriteLine(string.Format("set ytics border {0},10,{1}", y1_min, y1_max));
+			writer.WriteLine(string.Format("set yrange [ {0} : {1} ]", bottom_power, top_power));
+			writer.WriteLine(string.Format("set ytics border {0},10,{1}", bottom_power, top_power));
 
 			writer.WriteLine("set y2label '気温 [℃]'");
 			writer.WriteLine(string.Format("set y2range [ {0} : {1} ]", min_temp, max_temp));
@@ -98,7 +143,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			// レイアウトの設定
 			writer.WriteLine("set grid y2tics");
-			writer.WriteLine("set key left top autotitle columnheader");	// これを使うと文字エンコーディングがおかしくなる？
+			writer.WriteLine("set key left top autotitle columnheader");	// これを使うと文字エンコーディングがおかしくなる？←場合がある．
 
 			// プロットするデータの設定
 			writer.WriteLine("set datafile separator ','");
@@ -143,6 +188,73 @@ plot 'public/himichu/trinity.csv' using 1:2 w lines lw 3 lc rgbcolor "#FF0000" t
 
 set output
 		 */
+
+		#region (1.3.3)プラグイン化
+
+		// (1.3.14.1)引数は使っていないけど，MainProcedureでインスタンスを生成する際に必要になっている．(うーん...)
+		// (1.3.3.2)とりあえずのコンストラクタ．
+		public GnuplotTrinityChart(string databaseFile)
+			: base()
+		{ }
+		//public GnuplotTrinityChart() : base() { }
+
+		// (1.3.11)Gnuplot.Generateの引数を追加．
+		public void Update()
+		{
+			DateTime updated1 = new FileInfo(this.GetAbsolutePath(this.TemperatureCsvPath)).LastWriteTime;
+			DateTime updated2 = new FileInfo(this.GetAbsolutePath(this.TrinityCsvPath)).LastWriteTime;
+
+			var latestData = updated1 > updated2 ? updated1 : updated2;
+			if (latestData > _current)
+			{
+				Gnuplot.GenerateChart(this, _current);
+			}
+			_current = latestData;
+		}
+		DateTime _current;
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			foreach (var attribute in config.Attributes())
+			{
+				switch(attribute.Name.LocalName)
+				{
+					case "TemperatureSource":
+						this.TemperatureCsvPath = attribute.Value;
+						break;
+					case "TrinitySource":
+						this.TrinityCsvPath = attribute.Value;
+						break;
+					case "Destination":
+						this.ChartDestination = attribute.Value;
+						break;
+					case "DataRoot":
+						this.RootPath = attribute.Value;
+						break;
+				}
+			}
+			var element = config.Element("ChartFormat");
+			if (element != null)
+			{
+				foreach (var attribute in element.Attributes())
+				{
+					switch(attribute.Name.LocalName)
+					{
+						case "Width":
+							this.Width = (int)attribute;
+							break;
+						case "Height":
+							this.Height = (int)attribute;
+							break;
+						case "FontSize":
+							this.FontSize = (int)attribute;
+							break;
+					}
+				}
+			}
+		}
+
+		#endregion
 
 
 	}

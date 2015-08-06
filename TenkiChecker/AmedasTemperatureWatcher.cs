@@ -8,8 +8,8 @@ using System.Net;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 {
-
-	public class AmedasTemperatureWatcher : Data.TemperatureData
+	// (1.2.1) インターフェイスをIUpdatingPluginに変更．
+	public class AmedasTemperatureWatcher : Data.TemperatureData, Helpers.IUpdatingPlugin
 	{
 
 		static System.Globalization.CultureInfo JpCulture = new System.Globalization.CultureInfo("ja-JP");
@@ -18,6 +18,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 			: base(fileName)
 		{ }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="state">未使用です．</param>
 		public void GetNewData(object state)
 		{
 			var time = GetLatestDataTime();
@@ -33,14 +37,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 		{
 			// http://www.tenki.jp/amedas/2/5/31461.html からデータを取得する．
 
-			var source = @"http://www.tenki.jp/amedas/2/5/31461.html";
+			//var source = @"http://www.tenki.jp/amedas/2/5/31461.html";
+			// ↑Urlプロパティで設定して下さい．
 
 			System.Net.WebClient client = new WebClient();
 
 			try
 			{
 				//using (System.IO.Stream stream = await client.OpenReadTaskAsync(source))
-				using (System.IO.Stream stream = client.OpenRead(source))
+				using (System.IO.Stream stream = client.OpenRead(this.Url))
 				{
 					using (System.IO.StreamReader reader = new System.IO.StreamReader(stream, new UTF8Encoding(false)))
 					{
@@ -273,6 +278,33 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 				return null;
 			}
 		}
+
+
+
+		#region  (1.1.3)以下プラグイン用．
+
+		/// <summary>
+		/// その日のデータだけを出力するかどうかの値を取得／設定します．
+		/// falseであれば，最近24時間分の値を出力します．
+		/// </summary>
+		public string Url { get; set; }
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			// config.Name.LocalNameをチェックしますか？
+
+			this.Url = config.Attribute("Url").Value;
+
+			// UpdateActionを使わない！
+
+		}
+
+		public void Update()
+		{
+			GetNewData(null);
+		}
+
+		#endregion
 
 	}
 

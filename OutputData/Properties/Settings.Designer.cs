@@ -178,5 +178,41 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Properties {
                 this["AtomDestination"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\4hours.csv")]
+        public string VariableCsvDestination {
+            get {
+                return ((string)(this["VariableCsvDestination"]));
+            }
+            set {
+                this["VariableCsvDestination"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int VariableCsvSpanHour {
+            get {
+                return ((int)(this["VariableCsvSpanHour"]));
+            }
+            set {
+                this["VariableCsvSpanHour"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool VariableCsvSplitByHour {
+            get {
+                return ((bool)(this["VariableCsvSplitByHour"]));
+            }
+            set {
+                this["VariableCsvSplitByHour"] = value;
+            }
+        }
     }
 }

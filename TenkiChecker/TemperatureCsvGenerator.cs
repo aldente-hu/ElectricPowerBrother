@@ -9,7 +9,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 {
 	using Data;
 
-	public class TemperatureCsvGenerator : TemperatureData
+	public class TemperatureCsvGenerator : TemperatureData, Helpers.IPlugin
 	{
 
 		/// <summary>
@@ -48,6 +48,42 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 
 		}
 
+
+		#region  (1.1.1)以下プラグイン用．
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			// config.Name.LocalNameをチェックしますか？
+
+			var comment_out_header = (bool?)config.Attribute("CommentOutHeader");
+			if (comment_out_header.HasValue)
+			{
+				this.CommentOutHeader = comment_out_header.Value;
+			}
+
+			var use_date_header = (bool?)config.Attribute("UseDateHeader");
+			if (use_date_header.HasValue)
+			{
+				this.UseDateOnHeader = use_date_header.Value;
+			}
+
+			this.UpdateAction = (current) =>
+			{ this.OutputTodayCsv(current, (string)config.Attribute("Destination")); };
+
+			// あれ，Invokeはいらない？
+			// むしろUpdateをプラグイン化する必要がある．
+
+		}
+
+		// ※未使用？
+		// プラグイン用に共通のメソッドを与える．
+		public void Invoke(DateTime date, params string[] options)
+		{
+			// 最初のパラメータが出力先を与える．
+			this.OutputTodayCsv(date, options[0]);
+		}
+
+		#endregion
 
 	}
 

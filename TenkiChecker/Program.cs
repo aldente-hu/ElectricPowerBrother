@@ -35,9 +35,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 
 			var amedasWatcher = new AmedasTemperatureWatcher(MySettings.DatabaseFile);
 
-			ticker01 = new Ticker { Callback = amedasWatcher.GetNewData };
-			ticker01.StartTimer(14 * 1000, 270 * 1000);
-
+			//ticker01 = new Ticker { Callback = amedasWatcher.GetNewData };
+			//ticker01 = new Ticker(amedasWatcher.GetNewData);
+			//ticker01.StartTimer(14 * 1000, 270 * 1000);
 
 
 			var xmlGenerator = new TemperatureXmlGenerator(MySettings.DatabaseFile);

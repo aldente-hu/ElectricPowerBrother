@@ -1,0 +1,9 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="GnuplotBinaryPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Progra~1\gnuplot\bin\gnuplot.exe</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

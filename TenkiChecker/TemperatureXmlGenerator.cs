@@ -12,7 +12,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 
 
 	// 01/21/2015 by aldente : ほとんどConsumptionXmlGeneratorのコピペ．
-	public class TemperatureXmlGenerator : TemperatureData
+	public class TemperatureXmlGenerator : TemperatureData, Helpers.IPlugin
 	{
 		public TemperatureXmlGenerator(string fileName) : base(fileName)
 		{ }
@@ -84,6 +84,53 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 			OutputXmlDocument(doc, destination);
 
 		}
+
+
+
+		#region  (1.1.2)以下プラグイン用．
+
+		/// <summary>
+		/// その日のデータだけを出力するかどうかの値を取得／設定します．
+		/// falseであれば，最近24時間分の値を出力します．
+		/// </summary>
+		public bool OneDay { get; set; }
+
+		public void Configure(System.Xml.Linq.XElement config)
+		{
+			// config.Name.LocalNameをチェックしますか？
+
+			var one_day = (bool?)config.Attribute("OneDay");
+			if (one_day.HasValue)
+			{
+				this.OneDay = one_day.Value;
+			}
+
+			this.UpdateAction = (current) =>
+			{ this.Invoke(current, (string)config.Attribute("Destination")); };
+
+			// あれ，Invokeはいらない？
+			// むしろUpdateをプラグイン化する必要がある．
+
+		}
+
+
+		// プラグイン用に共通のメソッドを与える．
+		public void Invoke(DateTime date, params string[] options)
+		{
+			// 最初のパラメータが出力先を与える．
+			var destination = options[0];
+			if (OneDay)
+			{
+				this.OutputOneDayXml(date, destination);
+			}
+			else
+			{
+				this.Output24HoursXml(date, destination);
+			}
+		}
+
+
+		#endregion
 
 	}
 
