@@ -336,7 +336,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		// とりあえずここに書く．
 
 		// (1.3.7)
-		#region DailyHourlyCsvGeenratorクラス
+		#region DailyHourlyCsvGeneratorクラス
 		public class DailyHourlyCsvGenerator : DailyCsvGenerator
 		{
 			public DailyHourlyCsvGenerator(string databaseFile) : base(databaseFile)
