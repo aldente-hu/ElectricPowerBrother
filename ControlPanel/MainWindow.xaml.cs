@@ -28,22 +28,24 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			Legacy.DailyCsvGenerator detailCsvGenerator;
 			Legacy.MonthlyChart monthlyChartGenerator;
 
+			// (0.1.6)csvの出力先などにアプリケーション設定を適用．
+
 			public MainWindow()
 			{
 				InitializeComponent();
 
-				dataCsvGenerator = new Legacy.DailyHourlyCsvGenerator(DatabaseFile);
-				dataCsvGenerator.CsvRoot = @"B:\data\";
+				dataCsvGenerator = new Legacy.DailyHourlyCsvGenerator(Properties.Settings.Default.DatabaseFile);
+				dataCsvGenerator.CsvRoot = Properties.Settings.Default.DataRoot;
 				dataCsvGenerator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
 				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "理工学部", Channels = new int[] { 1, 2 } });
-				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
+				//dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
 				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "1号館", Channels = new int[] { 1 } });
 				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "2号館", Channels = new int[] { 2 } });
 				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "総情センター", Channels = new int[] { 3 } });
 
 
-				detailCsvGenerator = new Legacy.DailyCsvGenerator(DatabaseFile);
-				detailCsvGenerator.CsvRoot = @"B:\detail\";
+				detailCsvGenerator = new Legacy.DailyCsvGenerator(Properties.Settings.Default.DatabaseFile);
+				detailCsvGenerator.CsvRoot = Properties.Settings.Default.DetailRoot;
 				detailCsvGenerator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
 				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "理工学部", Channels = new int[] { 1, 2 } });
 				//dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
@@ -51,22 +53,22 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "2号館", Channels = new int[] { 2 } });
 				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "総情センター", Channels = new int[] { 3 } });
 
-				monthlyChartGenerator = new Legacy.MonthlyChart(DatabaseFile);
+				monthlyChartGenerator = new Legacy.MonthlyChart(Properties.Settings.Default.DatabaseFile);
 				monthlyChartGenerator.Width = 640;
 				monthlyChartGenerator.Height = 480;
 				monthlyChartGenerator.SeriesNo = 2;
 				monthlyChartGenerator.Maximum = 800;
 				monthlyChartGenerator.Minimum = 0;
 				monthlyChartGenerator.SeriesName = "riko";
-				monthlyChartGenerator.SourceRootPath = @"B:\data\";
+				monthlyChartGenerator.SourceRootPath = Properties.Settings.Default.DataRoot;
 				monthlyChartGenerator.MonthlyTotalChannels = new int[] { 1, 2 };
 				monthlyChartGenerator.BorderLine = 600;
 
-				// (1.5.1)
+				// (0.1.5.1)
 				Helpers.Gnuplot.BinaryPath = Properties.Settings.Default.GnuplotBinaryPath;
 			}
 
-			public static string DatabaseFile = @"B:\ep.sqlite3";
+			//public static string DatabaseFile = @"B:\ep.sqlite3";
 
 			public void OutputCsv()
 			{

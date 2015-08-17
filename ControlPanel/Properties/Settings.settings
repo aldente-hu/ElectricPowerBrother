@@ -5,5 +5,14 @@
     <Setting Name="GnuplotBinaryPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\Progra~1\gnuplot\bin\gnuplot.exe</Value>
     </Setting>
+    <Setting Name="DatabaseFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\ep.sqlite3</Value>
+    </Setting>
+    <Setting Name="DataRoot" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\data\</Value>
+    </Setting>
+    <Setting Name="DetailRoot" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\detail\</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

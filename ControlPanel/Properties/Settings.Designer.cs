@@ -34,5 +34,41 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.Propertie
                 this["GnuplotBinaryPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\ep.sqlite3")]
+        public string DatabaseFile {
+            get {
+                return ((string)(this["DatabaseFile"]));
+            }
+            set {
+                this["DatabaseFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\data\\")]
+        public string DataRoot {
+            get {
+                return ((string)(this["DataRoot"]));
+            }
+            set {
+                this["DataRoot"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\detail\\")]
+        public string DetailRoot {
+            get {
+                return ((string)(this["DetailRoot"]));
+            }
+            set {
+                this["DetailRoot"] = value;
+            }
+        }
     }
 }
