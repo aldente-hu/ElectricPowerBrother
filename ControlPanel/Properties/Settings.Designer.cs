@@ -70,5 +70,29 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.Propertie
                 this["DetailRoot"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\index_template.html")]
+        public string IndexPageTemplate {
+            get {
+                return ((string)(this["IndexPageTemplate"]));
+            }
+            set {
+                this["IndexPageTemplate"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\index.html")]
+        public string IndexPageDestination {
+            get {
+                return ((string)(this["IndexPageDestination"]));
+            }
+            set {
+                this["IndexPageDestination"] = value;
+            }
+        }
     }
 }

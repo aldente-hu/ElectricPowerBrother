@@ -59,13 +59,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					current_month = current_month.AddMonths(-1);
 				}
 
-				var pattern = new Regex(@"#\{([a-z][0-9a-z]*)\}");
+				var pattern = new Regex(@"#\{([a-z][0-9a-z_]*)\}");
 				using (var reader = new StreamReader(File.Open(this.Template, FileMode.Open, FileAccess.Read), this.CharacterEncoding))
 				{
 					while (!reader.EndOfStream)
 					{
 						var line = reader.ReadLine();
-						pattern.Replace(line, m => { return Replace(m.Value, current_month); });
+						writer.WriteLine(pattern.Replace(line, m => { return Replace(m.Groups[1].Value, current_month); }));
 					}
 				}
 			}

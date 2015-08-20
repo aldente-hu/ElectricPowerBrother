@@ -27,7 +27,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			Legacy.DailyHourlyCsvGenerator dataCsvGenerator;
 			Legacy.DailyCsvGenerator detailCsvGenerator;
 			Legacy.MonthlyChart monthlyChartGenerator;
+			Legacy.IndexPage indexPage;
 
+			// (0.1.7)IndexPageを追加．
 			// (0.1.6)csvの出力先などにアプリケーション設定を適用．
 
 			public MainWindow()
@@ -66,6 +68,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				// (0.1.5.1)
 				Helpers.Gnuplot.BinaryPath = Properties.Settings.Default.GnuplotBinaryPath;
+
+				indexPage = new Legacy.IndexPage(Properties.Settings.Default.DatabaseFile);
+				indexPage.Destination = Properties.Settings.Default.IndexPageDestination;
+				indexPage.Template = Properties.Settings.Default.IndexPageTemplate;
+				indexPage.CharacterEncoding = new UTF8Encoding(false);
+
 			}
 
 			//public static string DatabaseFile = @"B:\ep.sqlite3";
@@ -144,6 +152,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				monthlyChartGenerator.DrawChartTest(date);
 			}
 
+
+			// (0.1.7)
+			void OutputIndexPage()
+			{
+				indexPage.Generate();
+			}
+
+			private void buttonIndex_Click(object sender, RoutedEventArgs e)
+			{
+				OutputIndexPage();
+			}
 
 		}
 	}
