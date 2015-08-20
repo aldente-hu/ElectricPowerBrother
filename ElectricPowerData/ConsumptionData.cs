@@ -69,6 +69,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		#endregion
 
 
+		// (1.1.7)単独チャンネルにも対応．
 		// (1.1.1.0)新しい方からn件のデータを取得します(ch1と2の和)．
 		#region *最近のデータを取得(GetRecentData)
 		/// <summary>
@@ -77,6 +78,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		/// <param name="n">データを取得する数．</param>
 		/// <returns></returns>
 		public IDictionary<DateTime, int> GetRecentData(int n)
+		{
+			return GetRecentDataBase(n, "ch in (1, 2)");
+		}
+
+		public IDictionary<DateTime, int> GetRecentData(int n, int ch)
+		{
+			return GetRecentDataBase(n, string.Format("ch = {0}", ch));
+		}
+
+		IDictionary<DateTime, int> GetRecentDataBase(int n, string ch_condition)
 		{
 			IDictionary<DateTime, int> data = new Dictionary<DateTime, int>();
 			var time = GetLatestDataTime();
@@ -88,8 +99,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = string.Format(
-						"select e_time, sum(consumption) as total from consumptions_10min where e_time <= {0} and e_time > {1} and ch in (1, 2) group by e_time",
-						Convert.TimeToInt(time), Convert.TimeToInt(time.AddMinutes(-10 * n)));
+						"select e_time, sum(consumption) as total from consumptions_10min where e_time <= {0} and e_time > {1} and {2} group by e_time",
+						Convert.TimeToInt(time), Convert.TimeToInt(time.AddMinutes(-10 * n)), ch_condition);
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())

@@ -81,6 +81,7 @@
     <Compile Include="GnuplotChart.cs" />
     <Compile Include="GnuplotTrinityChart.cs" />
     <Compile Include="GoogleImageChart.cs" />
+    <Compile Include="LegacyIndexPage.cs" />
     <Compile Include="LegacyMonthlyChart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

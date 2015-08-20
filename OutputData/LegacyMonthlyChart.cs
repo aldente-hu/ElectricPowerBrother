@@ -503,7 +503,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 
 		// (1.3.11)
-		#region [static]DailyCsvDestinationGeneratorクラス
+		#region [static]MonthlyChartDestinationGeneratorクラス
 		public static class MonthlyChartDestinationGenerator
 		{
 			// 2015年7月2日を表すDateTimeから， "public/data/Y2015_07/D02_01.csv"のような文字列を生成する．
