@@ -156,7 +156,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// (0.1.7)
 			void OutputIndexPage()
 			{
-				indexPage.Generate();
+				indexPage.Update();
 			}
 
 			private void buttonIndex_Click(object sender, RoutedEventArgs e)

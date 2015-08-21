@@ -15,22 +15,40 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 	namespace Legacy
 	{
+
 		// (1.3.15)
+		#region IndexPageクラス
 		public class IndexPage : ConsumptionData, IPlugin
 		{
+
 			// (1.3.15)
+			#region *コンストラクタ(IndexPage)
 			public IndexPage(string databaseFile)
 				: base(databaseFile)
 			{
 				alerts = new AlertData(databaseFile);
 			}
 			readonly AlertData alerts;
+			#endregion
+
+
+			#region プロパティ
 
 			// (1.3.15)
+			#region *Templateプロパティ
+			/// <summary>
+			/// テンプレートが記述されたファイルへのパスを取得／設定します．
+			/// </summary>
 			public string Template { get; set; }
+			#endregion
 
 			// (1.3.15)
+			#region *Destinationプロパティ
+			/// <summary>
+			/// 生成されたhtmlドキュメントの出力先を取得／設定します．
+			/// </summary>
 			public string Destination { get; set; }
+			#endregion
 
 			// (1.3.15)
 			#region *CharacterEncodingプロパティ
@@ -48,9 +66,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			Encoding _encoding = Encoding.UTF8;
 			#endregion
 
+			#endregion
+
 
 			// (1.3.15)
 			#region *出力する(Output)
+			/// <summary>
+			/// Templateをもとにhtmlドキュメントを生成し，指定されたStreamWriterに出力します．
+			/// </summary>
+			/// <param name="writer"></param>
 			public void Output(StreamWriter writer)
 			{
 				var current_month = this.GetLatestDataTime();
@@ -138,18 +162,38 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#endregion
 
 
-			public void Generate()
+			// (1.3.15)
+			#region *更新する(Update)
+			/// <summary>
+			/// Templateをもとに新しいhtmlドキュメントを作成し，Destinationに出力します．
+			/// </summary>
+			public void Update()
 			{
 				using (StreamWriter writer = new StreamWriter(File.Open(this.Destination, FileMode.Create, FileAccess.Write), CharacterEncoding))
 				{
 					this.Output(writer);
 				}
 			}
+			#endregion
 
+
+			// <Config template="B:\index_template.html" destination="B:\index.html" encoding="Shift_JIS" />
+
+			// (1.3.16)
 			public void Configure(System.Xml.Linq.XElement config)
 			{
-				throw new NotImplementedException();
+				this.Template = (string)config.Attribute("template");
+				this.Destination = (string)config.Attribute("destination");
+				var encodingAttribute = config.Attribute("encoding");
+				if (encodingAttribute != null)
+				{
+					this.CharacterEncoding = Encoding.GetEncoding(encodingAttribute.Value);
+				}
+
+				this.UpdateAction = (time) => { Update(); };
 			}
 		}
+		#endregion
+
 	}
 }
