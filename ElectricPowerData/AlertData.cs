@@ -59,8 +59,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = string.Format("select data_time, rank from alerts where region = 1 and data_time > {0} and data_time < {1} order by data_time",
-						Convert.TimeToInt(from), Convert.TimeToInt(to));
+					command.CommandText
+						= "select data_time, rank from alerts where region = 1 and data_time > @from and data_time < @to order by data_time";
+					command.Parameters.Add(new SQLiteParameter("@from",Convert.TimeToInt(from)));
+					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(to)));
 					using (var reader = command.ExecuteReader())
 					{
 						int current = 0;
@@ -94,8 +96,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = string.Format(
-						"select declared_at, data_time, rank from alerts where region = 1 order by data_time desc limit {0}", n);
+					command.CommandText
+						= "select declared_at, data_time, rank from alerts where region = 1 order by data_time desc limit @1";
+					command.Parameters.Add(new SQLiteParameter("@1", n));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -128,9 +131,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = string.Format(
-						"INSERT INTO alerts VALUES({0}, {1}, {2}, {3})",
-						region, Convert.TimeToInt(data.DataTime), Convert.TimeToInt(data.DeclaredAt), data.Rank);
+					command.CommandText = "INSERT INTO alerts VALUES(@region, @datatime, @declared, @rank)";
+					command.Parameters.Add(new SQLiteParameter("@region", region));
+					command.Parameters.Add(new SQLiteParameter("@datatime", Convert.TimeToInt(data.DataTime)));
+					command.Parameters.Add(new SQLiteParameter("@declared", Convert.TimeToInt(data.DeclaredAt)));
+					command.Parameters.Add(new SQLiteParameter("@rank", data.Rank));
+
 					command.ExecuteNonQuery();
 				}
 			}

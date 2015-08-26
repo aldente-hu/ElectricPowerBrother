@@ -35,7 +35,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				// ch間の比較はプログラム側で行うことにする(↓のクエリはほぼ一瞬で返る)．
 				var latest1 = GetLatestTime(connection, 1);
 				var latest2 = GetLatestTime(connection, 2);
-				connection.Close();
+				//connection.Close();
 
 				return latest1 < latest2 ? latest1 : latest2;
 			}
@@ -56,9 +56,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			using (SQLiteCommand command = connection.CreateCommand())
 			{
 				// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-				command.CommandText = string.Format(
-					"select max(e_time) from consumptions_10min where ch = {0}",
-					ch);
+				command.CommandText = "select max(e_time) from consumptions_10min where ch = @ch";
+				command.Parameters.Add(new SQLiteParameter("@ch", ch));
+
 				using (var reader = command.ExecuteReader())
 				{
 					reader.Read();
@@ -99,8 +99,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = string.Format(
-						"select e_time, sum(consumption) as total from consumptions_10min where e_time <= {0} and e_time > {1} and {2} group by e_time",
-						Convert.TimeToInt(time), Convert.TimeToInt(time.AddMinutes(-10 * n)), ch_condition);
+						"select e_time, sum(consumption) as total from consumptions_10min where e_time <= @from and e_time > @to and {0} group by e_time",
+						ch_condition);
+					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(time)));
+					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(time.AddMinutes(-10 * n))));
+
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -138,9 +141,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = string.Format(
-						"select date, sum(consumption) as total from jdhm_consumptions_10min where date < {0} and date >= {0} - 21 and ch in (1, 2) group by date",
-						Convert.DateToInt(before));
+					command.CommandText = 
+						"select date, sum(consumption) as total from jdhm_consumptions_10min where date < @date and date >= @date - 21 and ch in (1, 2) group by date";
+					command.Parameters.Add(new SQLiteParameter("@date", Convert.DateToInt(before)));
+					
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -177,9 +181,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = string.Format(
-						"select hour + 1 as e_hour, count(consumption) as cnt, sum(consumption) as total from jdhm_consumptions_10min where date = {0} and ch in (1, 2) group by hour",
-						Convert.DateToInt(date));
+					command.CommandText = 
+						"select hour + 1 as e_hour, count(consumption) as cnt, sum(consumption) as total from jdhm_consumptions_10min where date = @date and ch in (1, 2) group by hour";
+					command.Parameters.Add(new SQLiteParameter("@date", Convert.DateToInt(date)));
+
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -194,7 +199,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 						}
 					}
 				}
-				connection.Close();
+				//connection.Close();
 			}
 			return hourlyConsumptions;
 
@@ -234,7 +239,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					}
 
 				}
-				connection.Close();
+				//connection.Close();
 			}
 
 			return detailConsumptions;
@@ -284,7 +289,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					}
 
 				}
-				connection.Close();
+				//connection.Close();
 			}
 			return data;
 
@@ -387,9 +392,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = string.Format(
-						"select sum(consumption) as total from consumptions_10min where e_time > {0} and e_time <= {1} and ch in (1, 2) group by e_time order by e_time",
-						Convert.TimeToInt(time.AddHours(-1)), Convert.TimeToInt(time.AddHours(1)));
+					command.CommandText = "select sum(consumption) as total from consumptions_10min where e_time > @from and e_time <= @to and ch in (1, 2) group by e_time order by e_time";
+					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(time.AddHours(-1))));
+					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(time.AddHours(1))));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -398,7 +403,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 						}
 					}
 				}
-				connection.Close();
+				//connection.Close();
 			}
 
 			return consumptions.ToArray();
