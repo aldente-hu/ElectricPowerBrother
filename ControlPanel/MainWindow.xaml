@@ -1,22 +1,40 @@
 ﻿<Window x:Class="HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				xmlns:local="clr-namespace:HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel"
         Title="ControlPanel" Height="350" Width="525">
-    <Grid>
-        <GroupBox Header="LegacyCSV出力" HorizontalAlignment="Left" Height="267" Margin="24,30,0,0" VerticalAlignment="Top" Width="359">
-            <Grid>
-            <Calendar HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="179" Height="180"
-                      Name="csv_calender" />
-                <Button Content="出力" HorizontalAlignment="Left" Margin="224,52,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
-                <Button Content="Hourly" HorizontalAlignment="Left" Margin="224,81,0,0" VerticalAlignment="Top" Width="100" Click="HourlyButton_Click"/>
-                <Button Content="pltお試し" HorizontalAlignment="Left" Margin="10,195,0,0" VerticalAlignment="Top" Width="78" Click="PltButton_Click"/>
-                <Button Content="CSV一斉" HorizontalAlignment="Left" Margin="224,110,0,0" VerticalAlignment="Top" Width="100" Click="CsvAllButton_Click"/>
-                <Button Content="ZIP" HorizontalAlignment="Left" Margin="243,139,0,0" VerticalAlignment="Top" Width="65" Click="CreateZipButton_Click"/>
-                <Button Content="pngお試し" HorizontalAlignment="Left" Margin="111,195,0,0" VerticalAlignment="Top" Width="78" Click="PngButton_Click"/>
-                <Button Content="index.html" HorizontalAlignment="Left" Margin="243,195,0,0" VerticalAlignment="Top" Width="75"
-                        Name="buttonIndex" Click="buttonIndex_Click"/>
-            </Grid>
-        </GroupBox>
+	<Window.CommandBindings>
+		<CommandBinding Command="{x:Static local:Commands.RetrieveLoggerDataCommand}"
+										Executed="RetrieveLoggerData_Executed" CanExecute="RetrieveLoggerData_CanExecute" />
+	</Window.CommandBindings>
+	<Grid>
 
-    </Grid>
+		<TabControl Margin="5" TabStripPlacement="Bottom">
+			<TabItem Header="TabItem">
+				<Grid Background="#FFE5FFE5">
+					<TextBox Name="textBlockInfo" Margin="100,162,40,10" TextWrapping="Wrap" Background="White" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+					<Button Content="お試し" HorizontalAlignment="Left" Margin="10,174,0,0" VerticalAlignment="Top" Width="75"
+									Click="Buttonお試し_Click"/>
+					<Button Content="ロガーデータ取得" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top" Width="138"
+									Command="{x:Static local:Commands.RetrieveLoggerDataCommand}" />
+
+				</Grid>
+			</TabItem>
+			<TabItem Header="LegacyCSV出力">
+				<Grid>
+					<Calendar HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="179" Height="180"
+                      Name="csv_calender" />
+					<Button Content="出力" HorizontalAlignment="Left" Margin="224,52,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
+					<Button Content="Hourly" HorizontalAlignment="Left" Margin="224,81,0,0" VerticalAlignment="Top" Width="100" Click="HourlyButton_Click"/>
+					<Button Content="pltお試し" HorizontalAlignment="Left" Margin="10,195,0,0" VerticalAlignment="Top" Width="78" Click="PltButton_Click"/>
+					<Button Content="CSV一斉" HorizontalAlignment="Left" Margin="224,110,0,0" VerticalAlignment="Top" Width="100" Click="CsvAllButton_Click"/>
+					<Button Content="ZIP" HorizontalAlignment="Left" Margin="243,139,0,0" VerticalAlignment="Top" Width="65" Click="CreateZipButton_Click"/>
+					<Button Content="pngお試し" HorizontalAlignment="Left" Margin="111,195,0,0" VerticalAlignment="Top" Width="78" Click="PngButton_Click"/>
+					<Button Content="index.html" HorizontalAlignment="Left" Margin="243,195,0,0" VerticalAlignment="Top" Width="75"
+                        Name="buttonIndex" Click="buttonIndex_Click"/>
+				</Grid>
+			</TabItem>
+		</TabControl>
+
+	</Grid>
 </Window>

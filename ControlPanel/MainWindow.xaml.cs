@@ -13,10 +13,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-
+using System.Xml;
+using System.Xml.Linq;
+using System.IO;
+using System.Windows.Threading;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
+	using RetrieveData;
+
 	namespace ControlPanel
 	{
 		/// <summary>
@@ -24,6 +29,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public partial class MainWindow : Window
 		{
+			Environment environment;
+
 			Legacy.DailyHourlyCsvGenerator dataCsvGenerator;
 			Legacy.DailyCsvGenerator detailCsvGenerator;
 			Legacy.MonthlyChart monthlyChartGenerator;
@@ -73,6 +80,22 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				indexPage.Destination = Properties.Settings.Default.IndexPageDestination;
 				indexPage.Template = Properties.Settings.Default.IndexPageTemplate;
 				indexPage.CharacterEncoding = new UTF8Encoding(false);
+
+				// とりあえずここでEnvorinmentを初期化する．(Appの方がいいのか？)
+				
+				//environment = new Environment()
+				using (XmlReader reader = XmlReader.Create(
+					new FileStream(Properties.Settings.Default.DataLoggersConfig, FileMode.Open, FileAccess.Read),
+					new XmlReaderSettings()))
+				{
+					var doc = System.Xml.Linq.XDocument.Load(reader);
+					environment = new Environment(
+														Properties.Settings.Default.DatabaseFile, 
+														doc.Root.Element("Loggers"));
+					environment.Tweet += environment_Tweet;
+				}
+				timer.Tick += Buttonお試し_Click;
+
 
 			}
 
@@ -164,6 +187,58 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				OutputIndexPage();
 			}
 
+
+
+
+			private void Buttonお試し_Click(object sender, EventArgs e)
+			{
+				//environment.TestTweet();
+
+				//☆現在の実装では同期実行している．これを非同期実行にするべき！
+				//environment.Run(true);
+				Task task = new Task(() => environment.Run(true));
+				task.Start();
+				task.Wait();
+			}
+
+			// 別スレッドから実行される！
+			void environment_Tweet(object sender, TweetEventArgs e)
+			{
+				Dispatcher.BeginInvoke(new Action<string>(AddMessage), e.Message);
+			}
+
+			void AddMessage(string message)
+			{
+				var now = DateTime.Now;
+				textBlockInfo.Text = textBlockInfo.Text
+					+ string.Format("{0} {1} : {2}\n",
+					now.ToShortDateString(), now.ToLongTimeString(),
+					message);
+			}
+
+
+			DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15), IsEnabled = false };
+			private void RetrieveLoggerData_Executed(object sender, ExecutedRoutedEventArgs e)
+			{
+				timer.Start();
+			}
+
+			private void RetrieveLoggerData_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+			{
+				e.CanExecute = true;
+			}
+
+		}
+
+		public static class Commands
+		{
+			/// <summary>
+			/// データロガーのデータを取得します．
+			/// </summary>
+			public static RoutedCommand RetrieveLoggerDataCommand = new RoutedCommand();
 		}
 	}
+
+
+
 }

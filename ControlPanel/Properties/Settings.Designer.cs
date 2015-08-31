@@ -94,5 +94,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.Propertie
                 this["IndexPageDestination"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\loggers_config.xml")]
+        public string DataLoggersConfig {
+            get {
+                return ((string)(this["DataLoggersConfig"]));
+            }
+            set {
+                this["DataLoggersConfig"] = value;
+            }
+        }
     }
 }
