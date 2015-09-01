@@ -17,10 +17,12 @@ using System.Xml;
 using System.Xml.Linq;
 using System.IO;
 using System.Windows.Threading;
+using System.Reflection;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
 	using RetrieveData;
+	using Helpers;
 
 	namespace ControlPanel
 	{
@@ -31,6 +33,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		{
 			Environment environment;
 
+			// (0.1.8)
+			#region *DataCsvGeneratorプロパティ
 			public Legacy.DailyCsvGenerator DataCsvGenerator
 			{
 				get
@@ -38,7 +42,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					return this.dataCsvGenerator;
 				}
 			}
+			Legacy.DailyHourlyCsvGenerator dataCsvGenerator;
+			#endregion
 
+			// (0.1.8)
+			#region *DetailCsvGeneratorプロパティ
 			public Legacy.DailyCsvGenerator DetailCsvGenerator
 			{
 				get
@@ -46,9 +54,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					return this.detailCsvGenerator;
 				}
 			}
-
-			Legacy.DailyHourlyCsvGenerator dataCsvGenerator;
 			Legacy.DailyCsvGenerator detailCsvGenerator;
+			#endregion
+
 			Legacy.MonthlyChart monthlyChartGenerator;
 			Legacy.IndexPage indexPage;
 
@@ -59,24 +67,104 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				InitializeComponent();
 
-				dataCsvGenerator = new Legacy.DailyHourlyCsvGenerator(Properties.Settings.Default.DatabaseFile);
-				dataCsvGenerator.CsvRoot = Properties.Settings.Default.DataRoot;
-				dataCsvGenerator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
-				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "理工学部", Channels = new int[] { 1, 2 } });
-				//dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
-				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "1号館", Channels = new int[] { 1 } });
-				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "2号館", Channels = new int[] { 2 } });
-				dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "総情センター", Channels = new int[] { 3 } });
+				// (0.1.9)設定ファイルからgeneratorを生成してみる．
+				using (XmlReader reader = XmlReader.Create(Properties.Settings.Default.OutputConfigFile))
+				{
+					XDocument doc = XDocument.Load(reader);
+					var root = doc.Root;
+					if (root.Name.LocalName == "ElectricPower")
+					{
+						// (0.2.2)static変数の設定を行う．
+						foreach (var element in root.Element("Values").Elements())
+						{
+							foreach (var attribute in element.Attributes())
+							{
+								var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+								Type type = null;
+								for (int i = 0; i < assemblies.Length; i++)
+								{
+									type = assemblies[i].GetType("HirosakiUniversity.Aldente.ElectricPowerBrother." + element.Name.LocalName, false);
+									if (type != null)
+									{
+										//asm = assemblies[i];
+										break;
+									}
+								}
+								type.GetProperty(attribute.Name.LocalName).SetValue(null, attribute.Value);
+							}
+						}
 
 
-				detailCsvGenerator = new Legacy.DailyCsvGenerator(Properties.Settings.Default.DatabaseFile);
-				detailCsvGenerator.CsvRoot = Properties.Settings.Default.DetailRoot;
-				detailCsvGenerator.CsvEncoding = Encoding.GetEncoding("Shift_JIS");
-				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "理工学部", Channels = new int[] { 1, 2 } });
-				//dataCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "なにこれ", Channels = new int[] { 3, 2 } });
-				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "1号館", Channels = new int[] { 1 } });
-				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "2号館", Channels = new int[] { 2 } });
-				detailCsvGenerator.Columns.Add(new Legacy.DailyCsvGenerator.CsvColumn { Name = "総情センター", Channels = new int[] { 3 } });
+						int n = 1;
+
+						foreach (var task in root.Element("Tasks").Elements())
+						{
+							var name = task.Name.LocalName;
+							var type_name = "HirosakiUniversity.Aldente.ElectricPowerBrother." + name;
+
+							// ↓と思ったけど，Type.GetTypeで取得できるのは自身のアセンブリにある型だけなのか？
+							// ローカルで認識できるものはローカルで取得する．
+							//Type type_info = Type.GetType(type_name, false);
+							// 名前からDLLを特定し，そこからtypeをgetしなければならない！
+							var dll = (string)task.Attribute("Dll");
+							var asm = Assembly.LoadFrom(string.Format("{0}.dll", string.IsNullOrEmpty(dll) ? name : dll));
+							Type type_info = asm.GetType(type_name);
+							if (type_info == null)
+							{
+								asm = Assembly.LoadFrom(string.Format("plugins/{0}.dll", string.IsNullOrEmpty(dll) ? name : dll));
+								type_info = asm.GetType(type_name);
+							}
+
+							foreach (var config in task.Elements("Config"))
+							{
+								// インスタンスを生成する．
+								IPluginBase generator = Activator.CreateInstance(type_info, Properties.Settings.Default.DatabaseFile) as IPluginBase;
+
+								if (generator == null)
+								{
+									// エラー．
+								}
+								else
+								{
+									// 設定は，XMLの要素をインスタンスに渡して，中で行う．
+									generator.Configure(config);
+
+									// ここでInvokeするワケではない．Invoke時の挙動を設定するのである．
+									// ↑Configureでそれも含めて行ってしまえるよね？
+									// generator.Invoke();
+
+									// Tickerをどこに置く？
+									// ここで生成して，staticに置いておく？
+
+									//var interval = (int?)config.Attribute("Interval");
+
+									//var ticker = new PluginTicker(generator);
+									//ticker.Interval = interval ?? 300;
+									//ticker.Count = ticker.Interval - 3 * (n++);
+									//TimerTicked += ticker.OnTick;
+									//PluginTickers.Add(ticker);
+
+									// これらは複数回出てこないよね？
+									if (generator.GetType() == typeof(Legacy.DailyHourlyCsvGenerator))
+									{
+										dataCsvGenerator = (Legacy.DailyHourlyCsvGenerator)generator;
+									}
+									else if (generator.GetType() == typeof(Legacy.DailyCsvGenerator))
+									{
+										detailCsvGenerator = (Legacy.DailyCsvGenerator)generator;
+									}
+								}
+
+							}
+						}
+
+					}
+					else
+					{
+						// ルート要素が違う！
+					}
+
+				}
 
 				monthlyChartGenerator = new Legacy.MonthlyChart(Properties.Settings.Default.DatabaseFile);
 				monthlyChartGenerator.Width = 640;
