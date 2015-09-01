@@ -118,13 +118,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				writer.WriteLine("set output '{0}'",
 						Path.Combine(
 							GetAbsolutePath(SourceRootPath),	// 出力先をSourceRootPathに固定している！しかもRootPathを考慮していない！
-							MonthlyChartDestinationGenerator.Generate(hour, this.SeriesName)
+							MonthlyChartDestinationGenerator.Generate(month_origin, this.SeriesName)
 						)
 				);
 				writer.WriteLine("set datafile separator ','");
 				writer.WriteLine("set key outside");
 				// もともとはこんな感じだった．何がどう作用しているのかは全くわからん．
-				// set key outside Right noreverse enhanced box linetype -2 linewidth 1.000 samplen 4 spacing 1 width 3 height -2 autotitles
+				writer.WriteLine("set key outside Right box linetype -2 linewidth 1 samplen 4 spacing 1 width 3 height -2 autotitles");
 
 				// 横軸
 				writer.WriteLine("set xlabel 'Time'");

@@ -159,8 +159,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// (1.3.10)
 			/// <summary>
 			/// 指定した月のcsvファイルを1つのzipファイルにまとめます．
+			/// このメソッドでは，新規にcsvファイルを出力することはありません．
 			/// </summary>
-			/// <param name="month"></param>
+			/// <param name="month">出力する対象の月．</param>
 			public void CreateArchive(DateTime month)
 			{
 				var name = DailyCsvDestinationGenerator.GenerateDirectory(month);

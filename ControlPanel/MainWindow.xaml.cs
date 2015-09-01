@@ -31,6 +31,22 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		{
 			Environment environment;
 
+			public Legacy.DailyCsvGenerator DataCsvGenerator
+			{
+				get
+				{
+					return this.dataCsvGenerator;
+				}
+			}
+
+			public Legacy.DailyCsvGenerator DetailCsvGenerator
+			{
+				get
+				{
+					return this.detailCsvGenerator;
+				}
+			}
+
 			Legacy.DailyHourlyCsvGenerator dataCsvGenerator;
 			Legacy.DailyCsvGenerator detailCsvGenerator;
 			Legacy.MonthlyChart monthlyChartGenerator;
@@ -84,83 +100,61 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// とりあえずここでEnvorinmentを初期化する．(Appの方がいいのか？)
 				
 				//environment = new Environment()
-				using (XmlReader reader = XmlReader.Create(
-					new FileStream(Properties.Settings.Default.DataLoggersConfig, FileMode.Open, FileAccess.Read),
-					new XmlReaderSettings()))
-				{
-					var doc = System.Xml.Linq.XDocument.Load(reader);
-					environment = new Environment(
-														Properties.Settings.Default.DatabaseFile, 
-														doc.Root.Element("Loggers"));
-					environment.Tweet += environment_Tweet;
-				}
-				timer.Tick += Buttonお試し_Click;
 
+				// (0.1.8)Legacyタブの作業だけを行いたければ，DataLoggersConfig(ならびに関連のplugin)を用意する必要はない．
+				if (File.Exists(Properties.Settings.Default.DataLoggersConfig))
+				{
+
+					using (XmlReader reader = XmlReader.Create(
+						new FileStream(Properties.Settings.Default.DataLoggersConfig, FileMode.Open, FileAccess.Read),
+						new XmlReaderSettings()))
+					{
+						var doc = System.Xml.Linq.XDocument.Load(reader);
+						environment = new Environment(
+															Properties.Settings.Default.DatabaseFile,
+															doc.Root.Element("Loggers"));
+						environment.Tweet += environment_Tweet;
+					}
+					timer.Tick += Buttonお試し_Click;
+				}
+				else
+				{
+					// ☆適宜disableする．
+				}
 
 			}
 
 			//public static string DatabaseFile = @"B:\ep.sqlite3";
 
-			public void OutputCsv()
-			{
-				if (csv_calender.SelectedDate.HasValue)
-				{
-					detailCsvGenerator.OutputOneDay(csv_calender.SelectedDate.Value);
-				}
-			}
-
-			public void OutputAllCsv()
-			{
-				detailCsvGenerator.UpdateFiles(DateTime.Now);
-			}
 
 			public void CreateZip(DateTime month)
 			{
 				detailCsvGenerator.CreateArchive(month);
 			}
 
-			private void Button_Click(object sender, RoutedEventArgs e)
-			{
-				OutputCsv();
-			}
-
-			private void HourlyButton_Click(object sender, RoutedEventArgs e)
-			{
-
-				if (csv_calender.SelectedDate.HasValue)
-				{
-					dataCsvGenerator.OutputOneDay(csv_calender.SelectedDate.Value);
-				}
-			}
-
 			private void PltButton_Click(object sender, RoutedEventArgs e)
 			{
-				if (csv_calender.SelectedDate.HasValue)
+				if (LegacyCalender.SelectedDate.HasValue)
 				{
-					OutputLegacyChartPlt(csv_calender.SelectedDate.Value.AddDays(1));
+					OutputLegacyChartPlt(LegacyCalender.SelectedDate.Value.AddDays(1));
 				}
 			}
 
 			// (0.1.5)
 			private void PngButton_Click(object sender, RoutedEventArgs e)
 			{
-				if (csv_calender.SelectedDate.HasValue)
+				if (LegacyCalender.SelectedDate.HasValue)
 				{
-					OutputLegacyChart(csv_calender.SelectedDate.Value.AddDays(1));
+					OutputLegacyChart(LegacyCalender.SelectedDate.Value.AddDays(1));
 				}
-			}
-
-			private void CsvAllButton_Click(object sender, RoutedEventArgs e)
-			{
-				OutputAllCsv();
 			}
 
 
 			private void CreateZipButton_Click(object sender, RoutedEventArgs e)
 			{
-				if (csv_calender.SelectedDate.HasValue)
+				if (LegacyCalender.SelectedDate.HasValue)
 				{
-					CreateZip(csv_calender.SelectedDate.Value);
+					CreateZip(LegacyCalender.SelectedDate.Value);
 				}
 			}
 
@@ -228,6 +222,50 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				e.CanExecute = true;
 			}
 
+
+
+			private void OneDayOutput_Executed(object sender, ExecutedRoutedEventArgs e)
+			{
+				if (LegacyCalender.SelectedDate.HasValue)
+				{
+					var generator = ((ContentControl)sender).DataContext as Legacy.DailyCsvGenerator;
+					if (generator != null)
+					{
+						generator.OutputOneDay(LegacyCalender.SelectedDate.Value);
+					}
+				}
+			}
+
+			private void OutputAll_Executed(object sender, ExecutedRoutedEventArgs e)
+			{
+				if (LegacyCalender.SelectedDate.HasValue)
+				{
+					var generator = ((ContentControl)sender).DataContext as Legacy.DailyCsvGenerator;
+					if (generator != null)
+					{
+						generator.UpdateFiles(LegacyCalender.SelectedDate.Value.AddDays(1));
+					}
+				}
+			}
+
+			private void CreateArchive_Executed(object sender, ExecutedRoutedEventArgs e)
+			{
+				if (LegacyCalender.SelectedDate.HasValue)
+				{
+					var generator = ((ContentControl)sender).DataContext as Legacy.DailyCsvGenerator;
+					if (generator != null)
+					{
+						generator.CreateArchive(LegacyCalender.SelectedDate.Value);
+					}
+				}
+			}
+
+			private void DateSpecified_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+			{
+				// senderはGroupBox(CommandBindingを設定した場所)で，e.SourceがButton！
+				e.CanExecute = LegacyCalender.SelectedDate.HasValue && ((ContentControl)sender).DataContext is Legacy.DailyCsvGenerator;
+			}
+
 		}
 
 		public static class Commands
@@ -236,6 +274,20 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// データロガーのデータを取得します．
 			/// </summary>
 			public static RoutedCommand RetrieveLoggerDataCommand = new RoutedCommand();
+
+
+			/// <summary>
+			/// 1日分の出力を行います．パラメータで対象日を与えます．
+			/// </summary>
+			public static RoutedCommand OneDayOutputCommand = new RoutedCommand();
+
+			/// <summary>
+			/// 対象日までの一斉出力を行います．パラメータで対象日を与えます．
+			/// </summary>
+			public static RoutedCommand OutputAllCommand = new RoutedCommand();
+
+
+			public static RoutedCommand CreateArchiveCommand = new RoutedCommand();
 		}
 	}
 

@@ -23,5 +23,8 @@
     <Setting Name="DataLoggersConfig" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\loggers_config.xml</Value>
     </Setting>
+    <Setting Name="OutputConfigFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\config.xml</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
