@@ -121,7 +121,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				// pngcairo...レイアウトやカラーインデックスがかなり変わってしまうので，
 				// set terminal だけ修正すれば使えるというものでもないようです．
-				writer.WriteLine("set terminal {2} size {0},{1}", this.Width, this.Height, this.UseCairo ? "pngcairo" : "png mediam");
+				writer.WriteLine("set terminal {2} size {0},{1}", this.Width, this.Height, this.UseCairo ? "pngcairo" : "png medium");
 				writer.WriteLine("set output '{0}'",
 						Path.Combine(
 							GetAbsolutePath(SourceRootPath),	// 出力先をSourceRootPathに固定している！しかもRootPathを考慮していない！
