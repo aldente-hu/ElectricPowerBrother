@@ -57,7 +57,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			Legacy.DailyCsvGenerator detailCsvGenerator;
 			#endregion
 
+			// (0.1.10)riko1用とriko2用を追加。
 			Legacy.MonthlyChart monthlyChartGenerator;
+			Legacy.MonthlyChart monthlyChartGenerator1;
+			Legacy.MonthlyChart monthlyChartGenerator2;
 			Legacy.IndexPage indexPage;
 
 			// (0.1.7)IndexPageを追加．
@@ -111,7 +114,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 							Type type_info = asm.GetType(type_name);
 							if (type_info == null)
 							{
-								asm = Assembly.LoadFrom(string.Format("plugins/{0}.dll", string.IsNullOrEmpty(dll) ? name : dll));
+								asm = Assembly.LoadFrom(string.Format("{0}.dll", string.IsNullOrEmpty(dll) ? name : dll));
 								type_info = asm.GetType(type_name);
 							}
 
@@ -166,17 +169,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				}
 
-				monthlyChartGenerator = new Legacy.MonthlyChart(Properties.Settings.Default.DatabaseFile);
-				monthlyChartGenerator.Width = 640;
-				monthlyChartGenerator.Height = 480;
-				monthlyChartGenerator.SeriesNo = 2;
-				monthlyChartGenerator.Maximum = 800;
-				monthlyChartGenerator.Minimum = 0;
-				monthlyChartGenerator.SeriesName = "riko";
-				monthlyChartGenerator.SourceRootPath = Properties.Settings.Default.DataRoot;
-				monthlyChartGenerator.MonthlyTotalChannels = new int[] { 1, 2 };
-				monthlyChartGenerator.BorderLine = 600;
-
+				monthlyChartGenerator = GenerateLegacyMonthlyChart("riko");
+				monthlyChartGenerator1 = GenerateLegacyMonthlyChart("riko1");
+				monthlyChartGenerator2 = GenerateLegacyMonthlyChart("riko2");
+				
 				// (0.1.5.1)
 				Helpers.Gnuplot.BinaryPath = Properties.Settings.Default.GnuplotBinaryPath;
 
@@ -212,6 +208,56 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			}
 
+			// (0.1.10)staticメソッドとして分離。
+			#region *[static]LegacyMonthlyChartの設定を行う(GenerateLegacyMonthlyChart)
+			static private Legacy.MonthlyChart GenerateLegacyMonthlyChart(string seriesName)
+			{
+				int seriesNo;
+				int maximum;
+				int? borderLine = null;
+				int[] channels;
+				switch(seriesName)
+				{
+					case "riko":
+						seriesNo = 2;
+						maximum = 800;
+						borderLine = 600;
+						channels = new int[] { 1, 2 };
+						break;
+					case "riko1":
+						seriesNo = 3;
+						maximum = 500;
+						borderLine = null;
+						channels = new int[] { 1 };
+						break;
+					case "riko2":
+						seriesNo = 4;
+						maximum = 500;
+						borderLine = null;
+						channels = new int[] { 2 };
+						break;
+					default:
+						throw new ArgumentException("未定義の系列名です。", "seriesName");
+				}
+				var chartGenerator = new Legacy.MonthlyChart(Properties.Settings.Default.DatabaseFile)
+				{
+					Width = 640,
+					Height = 480,
+					SeriesNo = seriesNo,
+					Maximum = maximum,
+					Minimum = 0,
+					SourceRootPath = Properties.Settings.Default.DataRoot,
+					SeriesName = seriesName,
+					MonthlyTotalChannels = channels
+				};
+				if (borderLine.HasValue)
+				{
+					chartGenerator.BorderLine = borderLine;
+				}
+				return chartGenerator;
+			}
+			#endregion
+
 			//public static string DatabaseFile = @"B:\ep.sqlite3";
 
 
@@ -220,20 +266,22 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				detailCsvGenerator.CreateArchive(month);
 			}
 
+			// (0.1.10)各チャンネルに対応。
 			private void PltButton_Click(object sender, RoutedEventArgs e)
 			{
 				if (LegacyCalender.SelectedDate.HasValue)
 				{
-					OutputLegacyChartPlt(LegacyCalender.SelectedDate.Value.AddDays(1));
+					OutputLegacyChartPlt(((ComboBoxItem)comboBoxChartSeries.SelectedItem).Content.ToString(), LegacyCalender.SelectedDate.Value.AddDays(1));
 				}
 			}
 
+			// (0.1.10)各チャンネルに対応。
 			// (0.1.5)
 			private void PngButton_Click(object sender, RoutedEventArgs e)
 			{
 				if (LegacyCalender.SelectedDate.HasValue)
 				{
-					OutputLegacyChart(LegacyCalender.SelectedDate.Value.AddDays(1));
+					OutputLegacyChart(((ComboBoxItem)comboBoxChartSeries.SelectedItem).Content.ToString(), LegacyCalender.SelectedDate.Value.AddDays(1));
 				}
 			}
 
@@ -246,15 +294,39 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 			}
 
-			void OutputLegacyChartPlt(DateTime date)
+			// (0.1.10)各チャンネルに対応。
+			void OutputLegacyChartPlt(string seriesName, DateTime date)
 			{
-				monthlyChartGenerator.OtameshiPlt(date, @"B:\otameshi.plt");
+				switch (seriesName)
+				{
+					case "riko":
+						monthlyChartGenerator.OtameshiPlt(date, @"B:\otameshi.plt");
+						break;
+					case "riko1":
+						monthlyChartGenerator1.OtameshiPlt(date, @"B:\otameshi1.plt");
+						break;
+					case "riko2":
+						monthlyChartGenerator2.OtameshiPlt(date, @"B:\otameshi2.plt");
+						break;
+				}
 			}
 
+			// (0.1.10)各チャンネルに対応。
 			// (0.1.5)
-			void OutputLegacyChart(DateTime date)
+			void OutputLegacyChart(string seriesName, DateTime date)
 			{
-				monthlyChartGenerator.DrawChartTest(date);
+				switch(seriesName)
+				{
+ 					case "riko":
+						monthlyChartGenerator.DrawChartTest(date);
+						break;
+					case "riko1":
+						monthlyChartGenerator1.DrawChartTest(date);
+						break;
+					case "riko2":
+						monthlyChartGenerator2.DrawChartTest(date);
+						break;
+				}
 			}
 
 
