@@ -208,6 +208,30 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			}
 
+			// (0.1.11.0)
+			#region *AutoStartプロパティ
+			/// <summary>
+			/// 起動時にロガーデータの取得を自動で開始するかどうかの値を取得／設定します。
+			/// 起動後に設定しても何の効果もありません。
+			/// </summary>
+			public bool AutoStart { get; set; }
+
+			#endregion
+
+			// (0.1.11.1)LoadedからInitializedに変更(Loadedは複数回呼ばれるので)。
+			// (0.1.11.0)ロガーデータの取得を自動で開始できるように改良。
+			#region *ウィンドウ初期化時
+			private void Window_Initialized(object sender, EventArgs e)
+			{
+				if (AutoStart)
+				{
+					Commands.RetrieveLoggerDataCommand.Execute(null, this);
+					this.AutoStart = false;
+				}
+			}
+			#endregion
+
+
 			// (0.1.10)staticメソッドとして分離。
 			#region *[static]LegacyMonthlyChartの設定を行う(GenerateLegacyMonthlyChart)
 			static private Legacy.MonthlyChart GenerateLegacyMonthlyChart(string seriesName)
@@ -425,7 +449,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// senderはGroupBox(CommandBindingを設定した場所)で，e.SourceがButton！
 				e.CanExecute = LegacyCalender.SelectedDate.HasValue && ((ContentControl)sender).DataContext is Legacy.DailyCsvGenerator;
 			}
-
 		}
 
 		public static class Commands
