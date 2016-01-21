@@ -201,7 +201,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// 非同期化はいったん断念．yield returnと相性が良くない？(いずれもメソッドの返り値の型に影響するし...)
 			// というか，両者のカンケイを一度きちんと調べる必要があるカモね．
 			/// <summary>
-			/// time以降のデータ(timeも含む！)を返します．
+			/// 1つのファイルから，time以降のデータ(timeも含む！)を返します．
 			/// </summary>
 			/// <param name="reader"></param>
 			/// <param name="time"></param>
@@ -256,6 +256,34 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 
 			#endregion
+
+			// (1.1.0)ローカルからデータを取得できるようにした．
+			/// <summary>
+			/// ロガーが書き出したファイルからデータを読み込みます．
+			/// </summary>
+			/// <param name="time"></param>
+			/// <param name="root">USB(CF)/HIOKI_LR8400に相当するディレクトリを絶対パスで指定します．</param>
+			/// <returns></returns>
+			public IEnumerable<TimeSeriesDataInt> GetDataFromLocal(DateTime time, string root)
+			{
+				var directory = Path.Combine(root, "DATA", time.ToString("yy-MM-dd"));
+				
+				// Directory.GetFilesの第2引数は，正規表現ではなくワイルドカードで指定する．
+				foreach (var file_name in Directory.GetFiles(directory, @"*.CSV", SearchOption.TopDirectoryOnly))
+				{
+					using (var stream = new StreamReader(Path.Combine(directory, file_name), Encoding.GetEncoding("Shift_JIS")))
+					{
+					foreach (var data in GetDataFromFile(stream, time))
+						{
+							yield return data;
+						}
+					}
+				}
+
+
+			}
+
+
 
 			#region 設定関連
 
