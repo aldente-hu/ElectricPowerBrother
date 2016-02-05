@@ -103,6 +103,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Commands.cs" />
+    <Compile Include="Environment.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -148,9 +150,9 @@
       <Project>{3772129d-9889-4797-a358-5b1bacaf8763}</Project>
       <Name>OutputData</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RetrieveData\RetrieveData.csproj">
-      <Project>{374c3d51-1d0c-4372-bb45-36cebd78f169}</Project>
-      <Name>RetrieveData</Name>
+    <ProjectReference Include="..\PulseLoggerBase\PulseLoggerBase.csproj">
+      <Project>{bcfd6bf9-7e88-4ac6-8641-8a513d74dcd3}</Project>
+      <Name>PulseLoggerBase</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
