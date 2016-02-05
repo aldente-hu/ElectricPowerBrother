@@ -11,13 +11,17 @@
 	<Grid>
 
 		<TabControl TabStripPlacement="Bottom">
-			<TabItem Header="TabItem" Height="22" VerticalAlignment="Top">
+			<TabItem Header="ロガーデータ取得" Height="22" VerticalAlignment="Top">
 				<Grid Background="#FFE5FFE5">
-					<TextBox Name="textBlockInfo" Margin="100,162,40,10" TextWrapping="Wrap" Background="White" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
-					<Button Content="お試し" HorizontalAlignment="Left" Margin="10,174,0,0" VerticalAlignment="Top" Width="75"
-									Click="Buttonお試し_Click"/>
-					<Button Content="ロガーデータ取得" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top" Width="138"
-									Command="{x:Static local:Commands.RetrieveLoggerDataCommand}" />
+					<TextBox Name="textBlockInfo" Margin="30,160,30,10" TextWrapping="Wrap" Background="White" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+					<Button Content="お試し" HorizontalAlignment="Left" Margin="10,44,0,0" VerticalAlignment="Top" Width="75"
+									Click="Buttonお試し_Click" ToolTip="試しに1回だけデータ取得を試みます．" />
+					<Button Content="ロガーデータ自動取得" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Width="138"
+									Command="{x:Static local:Commands.RetrieveLoggerDataCommand}"
+									ToolTip="定期的にデータ取得を繰り返します．"/>
+					<TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Height="19" Margin="10,20,0,0"
+									 TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="461"
+									 ToolTip="ローカルからデータを取得する場合は，ここに取得元のディレクトリ(DATAの手前まで)を記述します．空白の場合は既定のネットワーク上からデータを取得します．"/>
 
 				</Grid>
 			</TabItem>
@@ -34,7 +38,7 @@
                     Name="LegacyCalender" />
 					<Button Content="pltお試し" HorizontalAlignment="Left" Margin="10,230,0,0" VerticalAlignment="Top" Width="78" Click="PltButton_Click"/>
 					<Button Content="pngお試し" HorizontalAlignment="Left" Margin="111,230,0,0" VerticalAlignment="Top" Width="78" Click="PngButton_Click"/>
-					<Button Content="index.html" HorizontalAlignment="Left" Margin="243,195,0,0" VerticalAlignment="Top" Width="75"
+					<Button Content="index.html" HorizontalAlignment="Left" Margin="198,230,0,0" VerticalAlignment="Top" Width="75"
                         Name="buttonIndex" Click="buttonIndex_Click"/>
 					<GroupBox Header="1時間ごと" HorizontalAlignment="Left" Margin="198,43,0,0" VerticalAlignment="Top" Width="142"
 										DataContext="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataCsvGenerator}">
@@ -73,15 +77,15 @@
 											Command="{x:Static local:Commands.CreateArchiveCommand}" />
 						</StackPanel>
 					</GroupBox>
-                    <ComboBox HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" Width="120"
+					<ComboBox HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" Width="120"
                               Name="comboBoxChartSeries">
-                        <ComboBox.Items>
-                            <ComboBoxItem>riko</ComboBoxItem>
-                            <ComboBoxItem>riko1</ComboBoxItem>
-                            <ComboBoxItem>riko2</ComboBoxItem>
-                        </ComboBox.Items>
-                    </ComboBox>
-                </Grid>
+						<ComboBox.Items>
+							<ComboBoxItem>riko</ComboBoxItem>
+							<ComboBoxItem>riko1</ComboBoxItem>
+							<ComboBoxItem>riko2</ComboBoxItem>
+						</ComboBox.Items>
+					</ComboBox>
+				</Grid>
 			</TabItem>
 		</TabControl>
 

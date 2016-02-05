@@ -23,6 +23,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		}
 		#endregion
 
+		public interface IPulseLoggerWithSubSource : IPulseLogger
+		{
+			IEnumerable<TimeSeriesDataDouble> GetDataFromSubSourceAfter(DateTime time, int max = -1);
+			Task<IDictionary<DateTime, TimeSeriesDataDouble>> GetDataFromSubSourceAfterTask(DateTime time);
+		}
+
+
 		#region Channelクラス
 		public class Channel
 		{
@@ -44,18 +51,20 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		#region [abstract]StoragingPulseLoggerクラス
 		public abstract class StoragingPulseLogger : IPulseLogger
 		{
-			SortedDictionary<DateTime, TimeSeriesDataDouble> storagedData = new SortedDictionary<DateTime, TimeSeriesDataDouble>();
-
-			public IEnumerable<TimeSeriesDataDouble> GetDataAfter(DateTime time, int max = -1)
+			protected SortedDictionary<DateTime, TimeSeriesDataDouble> storagedData = new SortedDictionary<DateTime, TimeSeriesDataDouble>();
+			protected void RemoveOldData(DateTime time)
 			{
-				// この時点で，timeより古いデータを破棄していいような気がする...ので削除する．
 				var old_keys = storagedData.Keys.Where(k => k < time).ToArray();
 				foreach (var k in old_keys)
 				{
 					storagedData.Remove(k);
 				}
+			}
 
-
+			public IEnumerable<TimeSeriesDataDouble> GetDataAfter(DateTime time, int max = -1)
+			{
+				// この時点で，timeより古いデータを破棄していいような気がする...ので削除する．
+				RemoveOldData(time);
 
 				while (time < DateTime.Now)
 				{
@@ -173,5 +182,65 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		}
 		#endregion
 
+
+		#region [abstract]StoragingPulseLoggerクラス
+		public abstract class StoragingPulseLoggerWithSubSource : StoragingPulseLogger, IPulseLoggerWithSubSource
+		{
+			/// <summary>
+			/// ロガーにアクセスしてデータを取り出します．
+			/// </summary>
+			/// <param name="time"></param>
+			/// <param name="max"></param>
+			/// <returns></returns>
+			public abstract IEnumerable<TimeSeriesDataInt> RetrieveCountsAfter(DateTime time, bool fromSubSource, int max = -1);
+
+			// ※これをコピペせずに済ませたい...
+			public IEnumerable<TimeSeriesDataDouble> GetDataFromSubSourceAfter(DateTime time, int max = -1)
+			{
+				// この時点で，timeより古いデータを破棄していいような気がする...ので削除する．
+				RemoveOldData(time);
+
+				while (time < DateTime.Now)
+				{
+					TimeSeriesDataDouble data;
+					if (storagedData.TryGetValue(time, out data))
+					{
+						yield return data;
+						// ここでは削除を行わない！(取得したデータを使う準備ができているかどうかわからないから．)
+						//storagedData.Remove(time);
+						time = time.AddMinutes(10); // (0.2.1.2)この間違いが多すぎ！
+					}
+					else
+					{
+						foreach (var new_data in RetrieveActualData(time))
+						{
+							//if (new_data.Time >= time)	// timeは変わらないのだから，これがfalseになることはありえないのでは？
+							//{
+							try
+							{
+								storagedData.Add(new_data.Time, new_data);
+							}
+							catch (AggregateException ex)
+							{
+								throw new AggregateException(
+									string.Format("[I tried to inserting {0} but it always existed.]", new_data.Time) + ex.Message);
+							}
+							yield return new_data;
+							//}
+						}
+						yield break;
+					}
+				}
+
+			}
+
+
+			// 並列化関連
+			public Task<IDictionary<DateTime, TimeSeriesDataDouble>> GetDataFromSubSourceAfterTask(DateTime time)
+			{
+				return new Task<IDictionary<DateTime, TimeSeriesDataDouble>>(() => { return GetDataAfter(time).ToDictionary(data => data.Time); });
+			}
+		}
+		#endregion
 	}
 }

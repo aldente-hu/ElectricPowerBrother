@@ -10,12 +10,20 @@ using System.Text.RegularExpressions;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
-	using RetrieveData;
+	using Base;
 	namespace PulseLoggers.Hioki
 	{
 
-		public class LR8400 : StoragingPulseLogger
+		// (2.0.0)親クラスをBase.CachingPulseLoggerに変更．
+		public class LR8400 : CachingPulseLogger
 		{
+
+			// データをネットワークから取得する方法と，
+			// メディアに記録されたデータをローカルから読み込む方法に対応しています．
+			// (パルスロガーをUSBなどでPCに接続する場合は不明．)
+
+			// ユースケースとしては，基本的にはネットワーク経由だけど，
+			// トラブル時の対応としてローカルファイルから取得するのかな，と．
 
 			public IPAddress Address { get; set; }
 			public NetworkCredential Credential {
@@ -23,12 +31,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			NetworkCredential _credential = new NetworkCredential();
 
-
+			// ★やぶれかぶれにローカルファイルからのデータ取得に対応．
 			// (1.0.1.1)GetDataViaFtpの結果を配列として保持してみる．
 			// time，もしくはそれより後のデータを取得します．(timeのデータが欲しい！それ以降のデータもあれば欲しい！)
+
+			/// <summary>
+			/// LocalRootが設定されていればローカルファイルから，そうでなければAddressで指定されたリモートから，
+			/// カウント値データを取得します．
+			/// </summary>
+			/// <param name="time"></param>
+			/// <param name="max"></param>
+			/// <returns></returns>
 			public override IEnumerable<TimeSeriesDataInt> RetrieveCountsAfter(DateTime time, int max = -1)
 			{
-				int n = 0;
 
 				if (DateTime.Now < time)
 				{
@@ -36,48 +51,76 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					yield break;
 				}
 
-
-				// 最新データをHTTP経由で取得する．
-				var new_data = GetLatestCounts().Result;
-				if (new_data == null || new_data.Time < time)
+				if (string.IsNullOrEmpty(this.LocalRoot))
 				{
-					// 前者を後者と同列に扱っていいものか？(後者は正常系，前者は異常系？)
-					yield break;
-				}
 
-				while (new_data.Time > time)
-				{
-					// 取りこぼしたデータがある(はずな)ので，ftp経由で補完する．
-					var old_data_series = GetDataViaFtp(time).ToArray();
-					if (old_data_series.Count() == 0)
+					// 最新データをHTTP経由で取得する．
+					var new_data = GetLatestCounts().Result;
+					if (new_data == null || new_data.Time < time)
 					{
+						// 前者を後者と同列に扱っていいものか？(後者は正常系，前者は異常系？)
 						yield break;
 					}
 
-					foreach (var data in old_data_series)
+					while (new_data.Time > time)
 					{
-						yield return data;
+						// 取りこぼしたデータがある(はずな)ので，ftp経由で補完する．
+						var old_data_series = GetDataViaFtp(time).ToArray();
+						if (old_data_series.Count() == 0)
+						{
+							yield break;
+						}
+
+						foreach (var data in old_data_series)
+						{
+							yield return data;
+						}
+						var last_data = old_data_series.Max(d => d.Time);
+
+						time = last_data.AddMinutes(10);
+
+						// ★timeが0:00なら翌日のGetDataViaFtpにトライ！
+						// ★timeがnew_data(あるいはlast_data)のTimeに等しければ無問題！
+
+						// ★どっちでもないときが困ってしまう．
+						// →気にしないで書き込んでしまう方針でいいのでは？
+						// →データに抜けが生じるという問題点があるけど...
+
 					}
-					var last_data = old_data_series.Max(d => d.Time);
-					
-					time = last_data.AddMinutes(10);
 
-					// ★timeが0:00なら翌日のGetDataViaFtpにトライ！
-					// ★timeがnew_data(あるいはlast_data)のTimeに等しければ無問題！
-
-					// ★どっちでもないときが困ってしまう．
-					// →気にしないで書き込んでしまう方針でいいのでは？
-					// →データに抜けが生じるという問題点があるけど...
-										
+					yield return new_data;
 				}
+				else
+				{
+					while (true)
+					{
+						var old_data_series = GetDataFromLocal(time, LocalRoot).ToArray();
+						if (old_data_series.Count() == 0)
+						{
+							yield break;
+						}
 
-				yield return new_data;
+						foreach (var data in old_data_series)
+						{
+							yield return data;
+						}
+						var last_data = old_data_series.Max(d => d.Time);
+
+						time = last_data.AddMinutes(10);
+						if (time.Hour != 0 || time.Minute != 0)
+						{
+							yield break;
+						}
+
+					}
+
+				}
 			}
 
 
 			#region 最新データ取得関連
 
-			// (0.1.0)とりあえずpublic．
+				// (0.1.0)とりあえずpublic．
 			public async Task<TimeSeriesDataInt> GetLatestCounts()
 			{
 				using (WebClient client = new WebClient())
@@ -206,7 +249,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// <param name="reader"></param>
 			/// <param name="time"></param>
 			/// <returns></returns>
-			public IEnumerable<TimeSeriesDataInt> GetDataFromFile(StreamReader reader, DateTime time)
+			public static IEnumerable<TimeSeriesDataInt> GetDataFromFile(StreamReader reader, DateTime time)
 			{
 				var origin_reg = new Regex(@"トリガ時刻"",""'(\d\d-\d\d-\d\d \d\d:\d\d:\d\d)");
 				var data_reg = new Regex(@"(\d\.\d+E\+\d\d),");
@@ -259,12 +302,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			// (1.1.0)ローカルからデータを取得できるようにした．
 			/// <summary>
-			/// ロガーが書き出したファイルからデータを読み込みます．
+			/// ロガーが書き出したファイルから(1日分の)データを読み込みます．
 			/// </summary>
 			/// <param name="time"></param>
 			/// <param name="root">USB(CF)/HIOKI_LR8400に相当するディレクトリを絶対パスで指定します．</param>
 			/// <returns></returns>
-			public IEnumerable<TimeSeriesDataInt> GetDataFromLocal(DateTime time, string root)
+			public static IEnumerable<TimeSeriesDataInt> GetDataFromLocal(DateTime time, string root)
 			{
 				var directory = Path.Combine(root, "DATA", time.ToString("yy-MM-dd"));
 				
@@ -283,11 +326,23 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			}
 
-
+			// (2.0.0.0)
+			#region *CanGetVountsFromLocalプロパティ
+			/// <summary>
+			/// LR8400は，ローカルファイルシステムからのデータ取得に対応しています．
+			/// </summary>
+			public override bool CanGetCountsFromLocal
+			{
+				get
+				{
+					return true;
+				}
+			}
+			#endregion
 
 			#region 設定関連
 
-			public override void Configure(System.Xml.Linq.XElement config)
+			public override void SetUp(System.Xml.Linq.XElement config)
 			{
 				// config.Name.LocalNameをチェックしますか？
 				try
@@ -311,8 +366,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					this.Credential.Password = pass;
 				}
 
+				// ★ローカルファイルを使う場合(やぶれかぶれな対応)．
+				this.LocalRoot = (string)config.Attribute("LocalRoot");
+
+
 				// Chに関する情報は親クラスで設定する．
-				base.Configure(config);
+				base.SetUp(config);
 			}
 
 			#endregion

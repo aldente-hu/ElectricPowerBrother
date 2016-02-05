@@ -5,17 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.RetrieveData
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 {
 	using Data;
-	using PulseLoggers;
+	//using PulseLoggers;
+	using Base;
 
+	// (0.2.0)ControlPanelに移動．
 	// (0.3.1)RetrieveDataに移動．クラスの名前がヘンだけどまあいいか．
 	#region Environmentクラス
 	public class Environment
 	{
-		List<IPulseLogger> loggers = new List<IPulseLogger>();
+		List<CachingPulseLogger> loggers = new List<CachingPulseLogger>();
 		//DateTime last_data_time = DateTime.Today.AddHours(-2);
+
+		public List<CachingPulseLogger>PulseLoggers
+		{
+			get
+			{
+				return loggers;
+			}
+		}
 
 		// (1.1.4)
 		#region *LoggersCountプロパティ
@@ -27,6 +37,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.RetrieveData
 			}
 		}
 		#endregion
+
+
+
 
 		#region 使用例？
 
@@ -70,7 +83,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.RetrieveData
 
 		#endregion
 
-		readonly ConsumptionRecorder db;	// for RetrieveData
+		readonly ConsumptionRecorder db;  // for RetrieveData
 
 		#region *コンストラクタ(Environment)
 		public Environment(string databaseFile, System.Xml.Linq.XElement loggers)
@@ -89,15 +102,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.RetrieveData
 
 				// 名前からDLLを特定し，そこからtypeをgetしなければならない！
 
-				var name = elem_logger.Name.LocalName;	// ex. "Hioki.LR8400"
+				var name = elem_logger.Name.LocalName;  // ex. "Hioki.LR8400"
 				var dll = (string)elem_logger.Attribute("Dll");
 
 				// ※dll名の規約はどうしますかねぇ？
 				var asm = Assembly.LoadFrom(string.Format("plugins/{0}.dll", string.IsNullOrEmpty(dll) ? name : dll));
 				var type_info = asm.GetType("HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers." + name);
 
-				var logger = Activator.CreateInstance(type_info) as IPulseLogger;
-				logger.Configure(elem_logger);
+				var logger = Activator.CreateInstance(type_info) as CachingPulseLogger;
+				logger.SetUp(elem_logger);
 				this.loggers.Add(logger);
 			}
 		}
@@ -112,24 +125,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.RetrieveData
 		// (1.1.4.2)tryの範囲を縮小．
 		// (1.1.3.3)例外処理を追加．
 		#region *トリガ動作を実行(Run)
-		public void Run(bool saving = false, Task<IDictionary<DateTime, TimeSeriesDataDouble>>[] tasks = null)
+//		public void Run(bool saving = false, Task<IDictionary<DateTime, TimeSeriesDataDouble>>[] tasks = null)
+		public void Run(bool saving = false)
 		{
 			DateTime next_data_time = db.GetLatestDataTime().AddMinutes(10);
 			Console.WriteLine("Here we go! : {0}", next_data_time);
 
-			//Func<DateTime, IDictionary<DateTime, TimeSeriesDataDouble>>[] task_functions
-			//	= new Func<DateTime, IDictionary<DateTime, TimeSeriesDataDouble>>[] {
-			//	};
-			//task_functions.Select(f => new Task<IDictionary<DateTime, TimeSeriesDataDouble>(f.Invoke(next_data_time)));
-
-			//IEnumerable<IDictionary<DateTime, TimeSeriesDataDouble>> results;
-			// 並列動作でデータを取って来て欲しい．
-			//Task<IDictionary<DateTime, TimeSeriesDataDouble>>[] tasks
-			// = loggers.Select(logger => logger.GetDataAfterTask(next_data_time)).ToArray();
-			if (tasks == null)
-			{
-				tasks = loggers.Select(logger => logger.GetDataAfterTask(next_data_time)).ToArray();
-			}
+			//if (tasks == null)
+			//{
+			//	tasks = loggers.Select(logger => logger.GetCountsAfterTask(next_data_time)).ToArray();
+			//}
+			var tasks = loggers.Select(logger => logger.GetCountsAfterTask(next_data_time)).ToArray();
 
 			try
 			{
@@ -222,7 +228,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.RetrieveData
 
 	public class TweetEventArgs : EventArgs
 	{
-		public string Message {get; set;}
+		public string Message { get; set; }
 	}
 
 }

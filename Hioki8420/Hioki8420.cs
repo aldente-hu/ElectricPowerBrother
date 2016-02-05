@@ -9,11 +9,11 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
-	using RetrieveData;
+	using Base;
 
-	namespace Hioki
+	namespace PulseLoggers.Hioki
 	{
 
 		// WebException(タイムアウト時を想定)を拾いたいが，ライブラリで発生した例外を呼び出し元で拾うにはどうします？
@@ -21,11 +21,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers
 		// →すると，ライブラリ側で処理を続行できないのでは？
 		// →そうだけど...例外の性質に依るよね．タイムアウトならそれでも問題ないと思うし．
 
-		public class Logger8420 : StoragingPulseLogger
+		// (2.0.0)親クラスをBase.CachingPulseLoggerに変更．
+		public class Logger8420 : CachingPulseLogger
 		{
 			public IPAddress Address { get; set; }
 
-			#region StoragingPulseLogger実装
+			#region CachingPulseLogger実装
 
 			// (1.0.1.10)やっとうまくいったので，コードを整理．
 			// (1.0.1.1)最初のリクエストのステータスコードを確認．
@@ -140,7 +141,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers
 
 			// <Hioki.Logger8420 IpAddress="" />
 
-			public override void Configure(XElement config)
+			public override void SetUp(XElement config)
 			{
 				// config.Name.LocalNameをチェックしますか？
 				try
@@ -153,7 +154,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.PulseLoggers
 				}
 
 				// Chに関する情報は親クラスで設定する．
-				base.Configure(config);
+				base.SetUp(config);
 
 			}
 
