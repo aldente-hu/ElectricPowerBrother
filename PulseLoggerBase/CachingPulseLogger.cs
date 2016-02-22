@@ -46,9 +46,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Base
 				{
 					// 休憩モード
 					var rest_end = RestEnd ?? DateTime.Now;
-					while (time <= RestEnd.Value)
+					while (time <= rest_end)
 					{
-						cachedData.Add(time, ReturnZeroData(time));
+						yield return ReturnZeroData(time);
 						time = time.AddMinutes(10);
 					}
 				}
@@ -257,7 +257,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Base
 			var rest_element = config.Element("Rest");
 			if (rest_element != null)
 			{
-
+				RestBegin = (DateTime)rest_element.Attribute("Begin");
+				RestEnd = (DateTime?)rest_element.Attribute("End");
 			}
 
 		}
