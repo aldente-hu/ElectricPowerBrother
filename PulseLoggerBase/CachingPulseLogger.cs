@@ -40,6 +40,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Base
 			// この時点で，timeより古いデータを破棄する．
 			RemoveOldData(time);
 
+			if (RestBegin.HasValue)
+			{
+				if (time > RestBegin.Value)
+				{
+					// 休憩モード
+					var rest_end = RestEnd ?? DateTime.Now;
+					while (time <= RestEnd.Value)
+					{
+						cachedData.Add(time, ReturnZeroData(time));
+						time = time.AddMinutes(10);
+					}
+				}
+			}
 
 			while (time < DateTime.Now)
 			{
@@ -90,6 +103,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Base
 
 		// 2 => 35 みたいなデータだけ返せばよい．
 
+		/// <summary>
+		/// time以降のデータを取り出します．
+		/// </summary>
+		/// <param name="time"></param>
+		/// <param name="max"></param>
+		/// <returns></returns>
 		public IEnumerable<TimeSeriesDataDouble> RetrieveActualData(DateTime time, int max = -1)
 		{
 			foreach (var data in RetrieveCountsAfter(time, max))
@@ -123,6 +142,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Base
 			}
 
 		}
+
 		#endregion
 
 		/// <summary>
@@ -181,6 +201,37 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Base
 
 		#endregion
 
+
+		#region 休憩関連
+
+		/// <summary>
+		/// 測定休止が始まる時刻を取得／設定します．この時刻の次のデータからは取得時に0が返ります．
+		/// 値がnullの場合，休憩が設定されていないものとみなします．
+		/// </summary>
+		protected DateTime? RestBegin { get; set; }
+		/// <summary>
+		/// 測定休止が終了する時刻を取得／設定します．
+		/// RestBeginプロパティがnullの場合は無効です．値がnullの場合，永遠に続くものとみなします．
+		/// </summary>
+		protected DateTime? RestEnd { get; set; }
+
+		/// <summary>
+		/// 該当する全てのチャンネルが0であるデータを返します．
+		/// 未計測データを処理する場合に使うことを想定しています．
+		/// </summary>
+		/// <param name="time"></param>
+		/// <returns></returns>
+		protected TimeSeriesDataDouble ReturnZeroData(DateTime time)
+		{
+			var data = new Dictionary<int, double>();
+			foreach (var ch in Channels.SelectMany(l_ch => l_ch.Gains.Keys))
+			{
+				data[ch] = 0;
+			}
+			return new TimeSeriesDataDouble { Time = time, Data = data };
+		}
+		#endregion
+
 		#region 設定関連
 
 		#region ISetUpWithXElement実装
@@ -199,6 +250,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Base
 					gains.Add((int)data.Attribute("Ch"), ((double?)data.Attribute("Gain")) ?? 1.0);
 				}
 				this.Channels.Add(new Channel { Gains = gains });
+			}
+
+			// Rest関連
+
+			var rest_element = config.Element("Rest");
+			if (rest_element != null)
+			{
+
 			}
 
 		}
