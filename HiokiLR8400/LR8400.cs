@@ -88,7 +88,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 					}
 
-					yield return new_data;
+						yield return new_data;
 				}
 				else
 				{
@@ -188,6 +188,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#region FTPデータ取得関連
 
 			// (0.0.4.0)とりあえず．
+			/// <summary>
+			/// FTP経由でデータを取得します．時刻順に返ってくるものと信じます．
+			/// </summary>
+			/// <param name="time"></param>
+			/// <returns></returns>
 			public IEnumerable<TimeSeriesDataInt> GetDataViaFtp(DateTime time)
 			{
 				var directory = string.Format("ftp://{1}/CF/HIOKI_LR8400/DATA/{0}/", time.ToString("yy-MM-dd"), this.Address);
@@ -199,6 +204,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					var m = file_line.Match(line);
 					// "Apr 15 23:59"みたいな文字列をDateTime.Parseするにはなかなかな困難を伴う．
 					// それが面倒なので，タイムスタンプのチェックは割愛する．
+					// ※でもそれでファイルの"順番"は保証できるのか？
 					if (m.Success  /* && DateTime.Parse(m.Groups[1].Value) >= time */ )
 					{
 						string file_name = directory + m.Groups[2].Value;

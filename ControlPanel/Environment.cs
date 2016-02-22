@@ -159,6 +159,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 				return;
 			}
 			var results = tasks.Select(t => t.Result);
+			// ここで結果だけを取り出しているので，各要素がどのロガーから来たデータなのかは簡単には判別できない．
 
 			ProcessData(results, next_data_time, saving);
 			Console.WriteLine("That's all.");
@@ -167,9 +168,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 
 
 		// Runから分離．
+		// 1つの時刻に対するデータを計算して，DBに記録する．
 		public void ProcessData(IEnumerable<IDictionary<DateTime, TimeSeriesDataDouble>> results, DateTime next_data_time, bool saving = false)
 		{
-			while (results.All(result => { return result.Keys.Contains(next_data_time); }))
+			while (results.All(result => { return result.Keys.Contains(next_data_time); }))  
 			{
 				// 総和を求める．
 				var sum = new TimeSeriesDataDouble { Time = next_data_time };
