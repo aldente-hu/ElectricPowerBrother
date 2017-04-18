@@ -249,39 +249,43 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// 線の色を曜日毎にする．
 				// [金，茶，赤，紫，青，緑，灰](環境依存)
 				// LINE_COLORS = [7, 6, 1, 4, 3, 2, 24].freeze
+				// (0.2.0)5.0.6では8色しかなくなった？
+				// [黄，橙，赤，紫，青緑，緑，灰](環境依存)
+				// LINE_COLORS = [5, 4, 7, 1, 6, 2, 0].freeze
+
 
 				int color = 0;
 				string day_of_week = string.Empty;
 				switch(date.DayOfWeek)
 				{
 					case DayOfWeek.Sunday:
-						color = 7;
+						color = 5;
 						day_of_week = "Sun";
-					break;
+						break;
 					case DayOfWeek.Monday:
-					color = 6;
-						day_of_week = "Mon";
-					break;
+						color = 4;
+							day_of_week = "Mon";
+						break;
 					case DayOfWeek.Tuesday:
-					color = 1;
-						day_of_week = "Tue";
-					break;
+						color = 7;
+							day_of_week = "Tue";
+						break;
 					case DayOfWeek.Wednesday:
-					color = 4;
-						day_of_week = "Wed";
-					break;
+						color = 1;
+							day_of_week = "Wed";
+						break;
 					case DayOfWeek.Thursday:
-					color = 3;
-						day_of_week = "Thu";
-					break;
+						color = 6;
+							day_of_week = "Thu";
+						break;
 					case DayOfWeek.Friday:
-					color = 2;
-						day_of_week = "Fri";
-					break;
+						color = 2;
+							day_of_week = "Fri";
+						break;
 					case DayOfWeek.Saturday:
-					color = 24;
-						day_of_week = "Sat";
-					break;
+						color = 0;
+							day_of_week = "Sat";
+						break;
 				}
 
 				// pt 1 lc 2 title '7/02(Thu)'
