@@ -30,6 +30,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 						break;
 				}
 			}
+			
 			window.Show();
 		}
 		#endregion

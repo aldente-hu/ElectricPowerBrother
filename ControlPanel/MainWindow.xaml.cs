@@ -212,16 +212,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#region *AutoStartプロパティ
 			/// <summary>
 			/// 起動時にロガーデータの取得を自動で開始するかどうかの値を取得／設定します。
-			/// 起動後に設定しても何の効果もありません。
+			/// 起動後に設定しても何の効果もありません。Appクラスから設定するようにして下さい。
 			/// </summary>
 			public bool AutoStart { get; set; }
 
 			#endregion
 
+			// (0.2.0)やっぱりLoadedに戻す。
 			// (0.1.11.1)LoadedからInitializedに変更(Loadedは複数回呼ばれるので)。
 			// (0.1.11.0)ロガーデータの取得を自動で開始できるように改良。
 			#region *ウィンドウ初期化時
-			private void Window_Initialized(object sender, EventArgs e)
+			private void Window_Loaded(object sender, EventArgs e)
 			{
 				if (AutoStart)
 				{
