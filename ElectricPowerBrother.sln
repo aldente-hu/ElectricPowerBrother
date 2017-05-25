@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputData", "OutputData\OutputData.csproj", "{3772129D-9889-4797-A358-5B1BACAF8763}"
 EndProject
@@ -209,12 +209,14 @@ Global
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Debug|x86.Build.0 = Debug|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Release|x64.ActiveCfg = Release|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Release|x86.ActiveCfg = Release|Any CPU
 		{BCFD6BF9-7E88-4AC6-8641-8A513D74DCD3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
