@@ -264,7 +264,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					}
 
 				}
-				#endregion
 
 				monthlyChartGenerator = GenerateLegacyMonthlyChart("riko");
 				monthlyChartGenerator1 = GenerateLegacyMonthlyChart("riko1");
@@ -303,7 +302,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					// ☆適宜disableする．
 				}
 
+			
 			}
+			#endregion
+
 
 			// (0.1.10)staticメソッドとして分離。
 			#region *[static]LegacyMonthlyChartの設定を行う(GenerateLegacyMonthlyChart)
@@ -363,11 +365,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			Legacy.MonthlyChart monthlyChartGenerator2;
 			Legacy.IndexPage indexPage;
 
-			public void CreateZip(DateTime month)
-			{
-				detailCsvGenerator.CreateArchive(month);
-			}
-
 			// (0.1.10)各チャンネルに対応。
 			private void PltButton_Click(object sender, RoutedEventArgs e)
 			{
@@ -386,16 +383,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					OutputLegacyChart(((ComboBoxItem)comboBoxChartSeries.SelectedItem).Content.ToString(), LegacyCalender.SelectedDate.Value.AddDays(1));
 				}
 			}
-
-
-			private void CreateZipButton_Click(object sender, RoutedEventArgs e)
-			{
-				if (LegacyCalender.SelectedDate.HasValue)
-				{
-					CreateZip(LegacyCalender.SelectedDate.Value);
-				}
-			}
-
 			// (0.1.10)各チャンネルに対応。
 			void OutputLegacyChartPlt(string seriesName, DateTime date)
 			{

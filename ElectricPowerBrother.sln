@@ -15,10 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helpers", "Helpers\Helpers.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainProcedure", "MainProcedure\MainProcedure.csproj", "{65B05F5F-88DA-4DA0-BA9D-4C691A517686}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetrieveData", "RetrieveData\RetrieveData.csproj", "{374C3D51-1D0C-4372-BB45-36CEBD78F169}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckRetrieveData", "CheckRetrieveData\CheckRetrieveData.csproj", "{0D18F0E9-D471-400D-BACD-2F999658D944}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hioki8420", "Hioki8420\Hioki8420.csproj", "{17F5D2FB-7F93-465F-9830-C735AF65C61F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiokiLR8400", "HiokiLR8400\HiokiLR8400.csproj", "{9FD19697-3711-4FFB-9624-5E1DAD4037FB}"
