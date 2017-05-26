@@ -55,12 +55,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			Console.WriteLine(uri);
 			using (Stream stream = new FileStream(Destination, FileMode.Create))
+			using (BinaryWriter writer = new BinaryWriter(stream))
 			{
-				using (BinaryWriter writer = new BinaryWriter(stream))
-				{
-					writer.Write(client.DownloadData(uri));
-				}
+				writer.Write(client.DownloadData(uri));
 			}
+			
 
 		}
 		#endregion

@@ -14,5 +14,17 @@
     <Setting Name="DetailRoot" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\detail\</Value>
     </Setting>
+    <Setting Name="IndexPageTemplate" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\index_template.html</Value>
+    </Setting>
+    <Setting Name="IndexPageDestination" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\index.html</Value>
+    </Setting>
+    <Setting Name="DataLoggersConfig" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\loggers_config.xml</Value>
+    </Setting>
+    <Setting Name="OutputConfigFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">B:\config.xml</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

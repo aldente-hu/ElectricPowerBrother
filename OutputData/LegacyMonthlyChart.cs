@@ -60,6 +60,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// CSVファイルのルートとなるディレクトリを，絶対パスまたはRootPathからの相対パスで取得／設定します．
 			/// </summary>
 			public string SourceRootPath { get; set; }
+			// ※とりあえずグラフの出力先のルートも↑と同じにしておく．
 
 			// (1.3.13)
 			/// <summary>
@@ -67,7 +68,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// </summary>
 			public int? BorderLine { get; set; }
 
-			// ※とりあえずグラフの出力先のルートも↑と同じにしておく．
+			// (1.3.18)
+			/// <summary>
+			/// 'pngcairo'で出力するかどうかの値を取得／設定します．
+			/// falseであれば，'png'で出力します．
+			/// </summary>
+			public bool UseCairo { get; set; }
 
 			#endregion
 
@@ -113,18 +119,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 
 
-
-				writer.WriteLine("set terminal png medium size {0},{1}", this.Width, this.Height);
+				// pngcairo...レイアウトやカラーインデックスがかなり変わってしまうので，
+				// set terminal だけ修正すれば使えるというものでもないようです．
+				writer.WriteLine("set terminal {2} size {0},{1}", this.Width, this.Height, this.UseCairo ? "pngcairo" : "png medium");
 				writer.WriteLine("set output '{0}'",
 						Path.Combine(
 							GetAbsolutePath(SourceRootPath),	// 出力先をSourceRootPathに固定している！しかもRootPathを考慮していない！
-							MonthlyChartDestinationGenerator.Generate(hour, this.SeriesName)
+							MonthlyChartDestinationGenerator.Generate(month_origin, this.SeriesName)
 						)
 				);
 				writer.WriteLine("set datafile separator ','");
 				writer.WriteLine("set key outside");
 				// もともとはこんな感じだった．何がどう作用しているのかは全くわからん．
-				// set key outside Right noreverse enhanced box linetype -2 linewidth 1.000 samplen 4 spacing 1 width 3 height -2 autotitles
+				writer.WriteLine("set key outside Right box linetype -2 linewidth 1 samplen 4 spacing 1 width 3 height -2 autotitles");
 
 				// 横軸
 				writer.WriteLine("set xlabel 'Time'");
@@ -207,7 +214,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			#endregion
 
-
+			// (1.3.18)UseCairoの設定を反映．
 			// (1.3.6)とりあえず決め打ちだらけ．
 			#region *系列の書式文字列を生成(GenerateFromatString)
 			public string GenerateFormatString(DateTime date)
@@ -242,39 +249,43 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// 線の色を曜日毎にする．
 				// [金，茶，赤，紫，青，緑，灰](環境依存)
 				// LINE_COLORS = [7, 6, 1, 4, 3, 2, 24].freeze
+				// (0.2.0)5.0.6では8色しかなくなった？
+				// [黄，橙，赤，紫，青緑，緑，灰](環境依存)
+				// LINE_COLORS = [5, 4, 7, 1, 6, 2, 0].freeze
+
 
 				int color = 0;
 				string day_of_week = string.Empty;
 				switch(date.DayOfWeek)
 				{
 					case DayOfWeek.Sunday:
-						color = 7;
+						color = 5;
 						day_of_week = "Sun";
-					break;
+						break;
 					case DayOfWeek.Monday:
-					color = 6;
-						day_of_week = "Mon";
-					break;
+						color = 4;
+							day_of_week = "Mon";
+						break;
 					case DayOfWeek.Tuesday:
-					color = 1;
-						day_of_week = "Tue";
-					break;
+						color = 7;
+							day_of_week = "Tue";
+						break;
 					case DayOfWeek.Wednesday:
-					color = 4;
-						day_of_week = "Wed";
-					break;
+						color = 1;
+							day_of_week = "Wed";
+						break;
 					case DayOfWeek.Thursday:
-					color = 3;
-						day_of_week = "Thu";
-					break;
+						color = 6;
+							day_of_week = "Thu";
+						break;
 					case DayOfWeek.Friday:
-					color = 2;
-						day_of_week = "Fri";
-					break;
+						color = 2;
+							day_of_week = "Fri";
+						break;
 					case DayOfWeek.Saturday:
-					color = 24;
-						day_of_week = "Sat";
-					break;
+						color = 0;
+							day_of_week = "Sat";
+						break;
 				}
 
 				// pt 1 lc 2 title '7/02(Thu)'
@@ -344,13 +355,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 
 			// とりあえずDataRootは使わず，SourceRootPathに絶対パスを記述する運用にする．
-			// <Config source_root="～">
+			// <Config source_root="～" use_cairo="true">
 			//   <ChartFormat width="640" height="480" />
 			//   <Series no="2" name="riko" />
 			//   <YValue max="800" min="0" border="600" />
 			//   <MonthlyTotal ch="1+2" />
 			// </Config>
 
+			// (1.3.18)UseCairoプロパティの設定を追加．
 			// (1.3.14)本格的に整備．
 			#region *XMLから設定(Configure)
 			public void Configure(XElement config)
@@ -364,6 +376,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						//	break;
 						case "source_root":
 							this.SourceRootPath = attribute.Value;
+							break;
+						case "use_cairo":
+							this.UseCairo = ((bool?)attribute).Value;
 							break;
 					}
 				}
@@ -503,7 +518,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 
 		// (1.3.11)
-		#region [static]DailyCsvDestinationGeneratorクラス
+		#region [static]MonthlyChartDestinationGeneratorクラス
 		public static class MonthlyChartDestinationGenerator
 		{
 			// 2015年7月2日を表すDateTimeから， "public/data/Y2015_07/D02_01.csv"のような文字列を生成する．

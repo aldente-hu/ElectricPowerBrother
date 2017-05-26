@@ -1,20 +1,93 @@
 ﻿<Window x:Class="HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:local="clr-namespace:HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel"
+        Loaded="Window_Loaded"
         Title="ControlPanel" Height="350" Width="525">
-    <Grid>
-        <GroupBox Header="LegacyCSV出力" HorizontalAlignment="Left" Height="267" Margin="24,30,0,0" VerticalAlignment="Top" Width="359">
-            <Grid>
-            <Calendar HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="179" Height="180"
-                      Name="csv_calender" />
-                <Button Content="出力" HorizontalAlignment="Left" Margin="224,52,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
-                <Button Content="Hourly" HorizontalAlignment="Left" Margin="224,81,0,0" VerticalAlignment="Top" Width="100" Click="HourlyButton_Click"/>
-                <Button Content="pltお試し" HorizontalAlignment="Left" Margin="10,195,0,0" VerticalAlignment="Top" Width="78" Click="PltButton_Click"/>
-                <Button Content="CSV一斉" HorizontalAlignment="Left" Margin="224,110,0,0" VerticalAlignment="Top" Width="100" Click="CsvAllButton_Click"/>
-                <Button Content="ZIP" HorizontalAlignment="Left" Margin="243,139,0,0" VerticalAlignment="Top" Width="65" Click="CreateZipButton_Click"/>
-                <Button Content="pngお試し" HorizontalAlignment="Left" Margin="111,195,0,0" VerticalAlignment="Top" Width="78" Click="PngButton_Click"/>
-            </Grid>
-        </GroupBox>
+	<Window.CommandBindings>
+		<CommandBinding Command="{x:Static local:Commands.RetrieveLoggerDataCommand}"
+										Executed="RetrieveLoggerData_Executed" CanExecute="RetrieveLoggerData_CanExecute" />
+	</Window.CommandBindings>
+	<Grid>
 
-    </Grid>
+		<TabControl TabStripPlacement="Bottom">
+			<TabItem Header="ロガーデータ取得" Height="22" VerticalAlignment="Top">
+				<Grid Background="#FFE5FFE5">
+					<TextBox Name="textBlockInfo" Margin="30,160,30,10" TextWrapping="Wrap" Background="White" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+					<Button Content="お試し" HorizontalAlignment="Left" Margin="10,44,0,0" VerticalAlignment="Top" Width="75"
+									Click="Buttonお試し_Click" ToolTip="試しに1回だけデータ取得を試みます．" />
+					<Button Content="ロガーデータ自動取得" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Width="138"
+									Command="{x:Static local:Commands.RetrieveLoggerDataCommand}"
+									ToolTip="定期的にデータ取得を繰り返します．"/>
+					<TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Height="19" Margin="10,20,0,0"
+									 TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="461"
+									 ToolTip="ローカルからデータを取得する場合は，ここに取得元のディレクトリ(DATAの手前まで)を記述します．空白の場合は既定のネットワーク上からデータを取得します．"/>
+
+				</Grid>
+			</TabItem>
+			<TabItem Header="Legacy出力">
+				<TabItem.Resources>
+					<Style x:Key="groupBoxButton" TargetType="Button">
+						<Setter Property="HorizontalAlignment" Value="Stretch" />
+						<Setter Property="Margin" Value="10,3" />
+						<Setter Property="CommandParameter" Value="{Binding ElementName=LegacyCalender, Path=SelectedDate}" />
+					</Style>
+				</TabItem.Resources>
+				<Grid>
+					<Calendar HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="179" Height="180"
+                    Name="LegacyCalender" />
+					<Button Content="pltお試し" HorizontalAlignment="Left" Margin="10,230,0,0" VerticalAlignment="Top" Width="78" Click="PltButton_Click"/>
+					<Button Content="pngお試し" HorizontalAlignment="Left" Margin="111,230,0,0" VerticalAlignment="Top" Width="78" Click="PngButton_Click"/>
+					<Button Content="index.html" HorizontalAlignment="Left" Margin="198,230,0,0" VerticalAlignment="Top" Width="75"
+                        Name="buttonIndex" Click="buttonIndex_Click"/>
+					<GroupBox Header="1時間ごと" HorizontalAlignment="Left" Margin="198,43,0,0" VerticalAlignment="Top" Width="142"
+										DataContext="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataCsvGenerator}">
+						<GroupBox.CommandBindings>
+							<CommandBinding Command="{x:Static local:Commands.OneDayOutputCommand}"
+															Executed="OneDayOutput_Executed" CanExecute="DateSpecified_CanExecute" />
+							<CommandBinding Command="{x:Static local:Commands.OutputAllCommand}"
+															Executed="OutputAll_Executed" CanExecute="DateSpecified_CanExecute" />
+						</GroupBox.CommandBindings>
+						<StackPanel Orientation="Vertical">
+							<Button Content="1日分出力" Style="{StaticResource groupBoxButton}"
+											Command="{x:Static local:Commands.OneDayOutputCommand}" />
+							<Button Content="一斉出力"  Style="{StaticResource groupBoxButton}"
+											Command="{x:Static local:Commands.OutputAllCommand}" />
+						</StackPanel>
+					</GroupBox>
+					<GroupBox Header="10分ごと" HorizontalAlignment="Left" Margin="345,43,0,0" VerticalAlignment="Top" Width="142"
+										DataContext="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DetailCsvGenerator}">
+						<GroupBox.CommandBindings>
+							<CommandBinding Command="{x:Static local:Commands.OneDayOutputCommand}"
+															Executed="OneDayOutput_Executed" CanExecute="DateSpecified_CanExecute" />
+							<CommandBinding Command="{x:Static local:Commands.OutputAllCommand}"
+															Executed="OutputAll_Executed" CanExecute="DateSpecified_CanExecute" />
+							<CommandBinding Command="{x:Static local:Commands.CreateArchiveCommand}"
+															Executed="CreateArchive_Executed" CanExecute="DateSpecified_CanExecute" />
+						</GroupBox.CommandBindings>
+						<GroupBox.Resources>
+							<Style TargetType="Button" BasedOn="{StaticResource groupBoxButton}" />
+						</GroupBox.Resources>
+						<StackPanel Orientation="Vertical">
+							<Button Content="1日分出力"
+											Command="{x:Static local:Commands.OneDayOutputCommand}" />
+							<Button Content="一斉出力"
+											Command="{x:Static local:Commands.OutputAllCommand}" />
+							<Button Content="1月分ZIP出力"
+											Command="{x:Static local:Commands.CreateArchiveCommand}" />
+						</StackPanel>
+					</GroupBox>
+					<ComboBox HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" Width="120"
+                              Name="comboBoxChartSeries">
+						<ComboBox.Items>
+							<ComboBoxItem>riko</ComboBoxItem>
+							<ComboBoxItem>riko1</ComboBoxItem>
+							<ComboBoxItem>riko2</ComboBoxItem>
+						</ComboBox.Items>
+					</ComboBox>
+				</Grid>
+			</TabItem>
+		</TabControl>
+
+	</Grid>
 </Window>

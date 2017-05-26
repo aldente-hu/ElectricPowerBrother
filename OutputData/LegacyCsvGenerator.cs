@@ -59,6 +59,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			public string CsvRoot
 			{ get; set; }
 
+			#region *CsvEncodingプロパティ
 			/// <summary>
 			/// CSVファイルの文字エンコーディングを取得／設定します．デフォルトはEncoding.UTF8です．
 			/// </summary>
@@ -71,10 +72,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 			}
 			Encoding _encoding = Encoding.UTF8;
+			#endregion
+
 
 			const int RECURSIVE_COUNT_LIMIT = 31;
 
 			// UpdateActionに設定する？→(1.3.9.3)UpdateActionに設定(Configureメソッド内)．
+			#region *CSVの最終データ以降を更新する(UpdateFiles)
 			// 更新したファイルの最新データの時刻を返す．
 			public DateTime UpdateFiles(DateTime latestData, int recursiveCount = 0)
 			{
@@ -153,14 +157,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 				return csv_last_data;
 
-
 			}
+			#endregion
+
 
 			// (1.3.10)
+			#region *ZIPアーカイブを作成する(CreateArchive)
 			/// <summary>
 			/// 指定した月のcsvファイルを1つのzipファイルにまとめます．
+			/// このメソッドでは，新規にcsvファイルを出力することはありません．
 			/// </summary>
-			/// <param name="month"></param>
+			/// <param name="month">出力する対象の月．</param>
 			public void CreateArchive(DateTime month)
 			{
 				var name = DailyCsvDestinationGenerator.GenerateDirectory(month);
@@ -177,10 +184,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					}
 				}
 			}
+			#endregion
 
 
 			// (1.3.6)とにかく1日分のデータを記録する．
 			// 24時までコンプリートすればtrue，さもなければfalseを返す．
+			#region *1日分のデータを出力する(OutputOneDay)
 			public bool OutputOneDay(DateTime target_date)
 			{
 				// dateは時刻を度外視する．
@@ -196,6 +205,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				return date_end == UpdateFiles(date_end, RECURSIVE_COUNT_LIMIT);
 
 			}
+			#endregion
+
 
 			protected virtual DateTime Record(StreamWriter writer, DateTime csv_last_data, IDictionary<DateTime, IDictionary<int, int>> data)
 			{
@@ -258,6 +269,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			// (1.3.9.3) UpdateActionを設定．
 			// (1.3.9) 実装開始．
+			#region *XML要素から設定(Configure)
 			public void Configure(System.Xml.Linq.XElement config)
 			{
 				this.CsvRoot = (string)config.Attribute("root");
@@ -280,10 +292,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				this.UpdateAction = (time) => UpdateFiles(time);
 			}
+			#endregion
 
 			public IList<CsvColumn> Columns { get { return _columns; } }
 			List<CsvColumn> _columns = new List<CsvColumn>();
 
+			#region CsvColumnクラス
 			public class CsvColumn
 			{
 				public string Name { get; set; }
@@ -300,21 +314,22 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 
 			}
+			#endregion
+
 
 			// (1.3.9) 2行目をコメントアウト．
+			#region *ヘッダ行を出力(OutputHeader)
 			public void OutputHeader(StreamWriter writer, DateTime date)
 			{
-				// ※決め打ちバージョン．
-
-				// ※↓これを動的に生成したい．
+				// ※↓これを動的に生成したい(日付の書式？)．
 				writer.WriteLine("# " + date.ToString("MM/dd/yyyy"));
 				string[] series = Columns.Select(c => c.Name).ToArray();
-				//string[] series = new string[] { "理工学部", "1号館", "2号館", "総情センター" };
 				writer.WriteLine("# 時刻," + string.Join(",", series));
 
 			}
+			#endregion
 
-
+			#region *データ行を出力(OutputDataRow)
 			public void OutputDataRow(StreamWriter writer, DateTime time, IDictionary<int, int> data)
 			{
 				// ※決め打ちバージョン．
@@ -326,6 +341,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				var time_format = time.TimeOfDay == TimeSpan.Zero ? this.TimeFormat.Replace("HH", "24") : this.TimeFormat;
 				writer.WriteLine("{0},{1}", time.ToString(time_format), string.Join(",", output_data));
 			}
+			#endregion
+
 
 		}
 		#endregion
