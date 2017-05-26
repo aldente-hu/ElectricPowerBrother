@@ -73,10 +73,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			#endregion
 
+			// (0.2.0)やっぱりLoadedに戻す。
 			// (0.1.11.1)LoadedからInitializedに変更(Loadedは複数回呼ばれるので)。
 			// (0.1.11.0)ロガーデータの取得を自動で開始できるように改良。
 			#region *ウィンドウ初期化時
-			private void Window_Initialized(object sender, EventArgs e)
+			private void Window_Loaded(object sender, EventArgs e)
 			{
 				if (AutoStart)
 				{
