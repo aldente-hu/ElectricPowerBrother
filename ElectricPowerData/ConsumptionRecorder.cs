@@ -26,7 +26,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				var insert_queries = data.Select(
 					ch_data => string.Format("INSERT INTO consumptions_10min VALUES({0}, {1}, {2})",
-										Convert.TimeToInt(time), ch_data.Key, Math.Truncate(ch_data.Value))
+										TimeConverter.TimeToInt(time), ch_data.Key, Math.Truncate(ch_data.Value))
 				);
 				InsertData(insert_queries);
 			}
@@ -35,7 +35,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				var insert_queries = data.Select(
 					ch_data => string.Format("INSERT INTO consumptions_10min VALUES({0}, {1}, {2})",
-										Convert.TimeToInt(time), ch_data.Key, ch_data.Value)
+										TimeConverter.TimeToInt(time), ch_data.Key, ch_data.Value)
 				);
 				InsertData(insert_queries);
 			}

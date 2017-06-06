@@ -3,28 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
-using System.Data.SQLite;
-
-using System.Xml.Linq;
-using System.Xml;
+using MySql.Data.MySqlClient;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
+	using Data.MySQL;
 
-	using Data;
-
-	namespace TenkiChecker.Data
+	namespace TenkiChecker.MySQL
 	{
 
-		#region TemperatureDataクラス
-		public class TemperatureData
-		 : SQLiteData, ITemperatureData
+		// とりあえず、MySQLでもSQLiteと同じようにDateTimeを変換する。
+
+		public class TemperatureData : DataTicker, ITemperatureData
 		{
+
 			#region *定番コンストラクタ(TemperatureData)
-			public TemperatureData(string fileName)
-				: base(fileName)
+			public TemperatureData(ConnectionProfile profile)
+				: base(profile)
 			{ }
 			#endregion
 
@@ -35,6 +30,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			#region データIOメソッド
 
+			// ☆以外はSQlite版と同じだった。
+
 			#region *最新データの時刻を取得(GetLatestDataTime)
 			public override DateTime GetLatestDataTime()
 			{
@@ -44,11 +41,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// (1.3.0)表向きにはGetLatestDataTimeメソッドで代替．
 			DateTime GetLatestTime()
 			{
-				using (var connection = new SQLiteConnection(this.ConnectionString))
+				using (var connection = new MySqlConnection(Profile.ConnectionString))  // ☆
 				{
 					DateTime time;
 					connection.Open();
-					using (SQLiteCommand command = connection.CreateCommand())
+					using (MySqlCommand command = connection.CreateCommand()) // ☆
 					{
 						command.CommandText = "select max(time) from temperatures";
 						using (var reader = command.ExecuteReader())
@@ -69,10 +66,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				var temperatures = new Dictionary<DateTime, decimal>();
 
-				using (var connection = new SQLiteConnection(this.ConnectionString))
+				using (var connection = new MySqlConnection(Profile.ConnectionString))
 				{
 					connection.Open();
-					using (SQLiteCommand command = connection.CreateCommand())
+					using (MySqlCommand command = connection.CreateCommand()) // ☆
 					{
 						command.CommandText = string.Format(
 							"select time, temperature from temperatures where time >= {0} and time <= {1}", TimeConverter.TimeToInt(from), TimeConverter.TimeToInt(to));
@@ -104,10 +101,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#region *気温データを追加(InsertTemperature)
 			public void InsertTemperature(DateTime time, decimal temperature)
 			{
-				using (var connection = new SQLiteConnection(this.ConnectionString))
+				using (var connection = new MySqlConnection(Profile.ConnectionString))  // ☆
 				{
 					connection.Open();
-					using (SQLiteCommand command = connection.CreateCommand())
+					using (MySqlCommand command = connection.CreateCommand()) // ☆
 					{
 						command.CommandText = string.Format(
 							"INSERT INTO temperatures VALUES({0}, {1})", TimeConverter.TimeToInt(time), TemperatureToInt(temperature));
@@ -137,7 +134,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#endregion
 
 		}
-		#endregion
 
 	}
 

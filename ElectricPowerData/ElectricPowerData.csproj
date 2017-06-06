@@ -85,6 +85,8 @@
     <Compile Include="AlertData.cs" />
     <Compile Include="ConsumptionData.cs" />
     <Compile Include="ConsumptionRecorder.cs" />
+    <Compile Include="DataTicker.cs" />
+    <Compile Include="MySQL\DataTicker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLiteData.cs" />
   </ItemGroup>

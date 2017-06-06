@@ -161,7 +161,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					var current_long_time = current.DataTime.ToString("M月d日HH時mm分");
 					AtomEntry entry = new AtomEntry
 					{
-						ID = this.FeedID + SQLiteData.Convert.TimeToInt(current.DeclaredAt),
+						ID = this.FeedID + SQLiteData.TimeConverter.TimeToInt(current.DeclaredAt),
 						PublishedAt = current.DeclaredAt
 					};
 
