@@ -37,13 +37,61 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Main.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("B:\\config.xml")]
+        [global::System.Configuration.DefaultSettingValueAttribute("B:\\MainProcedure\\config-watch.xml")]
         public string ConfigFile {
             get {
                 return ((string)(this["ConfigFile"]));
             }
             set {
                 this["ConfigFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
+        public string MyServer {
+            get {
+                return ((string)(this["MyServer"]));
+            }
+            set {
+                this["MyServer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("user")]
+        public string MyUserName {
+            get {
+                return ((string)(this["MyUserName"]));
+            }
+            set {
+                this["MyUserName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("pass")]
+        public string MyPassword {
+            get {
+                return ((string)(this["MyPassword"]));
+            }
+            set {
+                this["MyPassword"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ep")]
+        public string MyDatabase {
+            get {
+                return ((string)(this["MyDatabase"]));
+            }
+            set {
+                this["MyDatabase"] = value;
             }
         }
     }
