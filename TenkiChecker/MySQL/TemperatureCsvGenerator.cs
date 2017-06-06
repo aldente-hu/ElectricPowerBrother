@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker.MySQL
 {
-	using Data;
+	using ElectricPowerBrother.Data.MySQL;
 
 	public class TemperatureCsvGenerator : TemperatureData, Helpers.IPlugin
 	{
+		// コンストラクタ以外はSQLite版と同じ。
 
 		#region プロパティ
 
@@ -26,8 +27,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 
 		#endregion
 
-		#region *コンストラクタ(TemperatureCsvGenerator)
-		public TemperatureCsvGenerator(string fileName) : base(fileName) { }
+
+		#region *定番コンストラクタ(TemperatureCsvGenerator)
+		public TemperatureCsvGenerator(ConnectionProfile profile) : base(profile) { }
 		#endregion
 
 		#region *本日分のCSVを出力(OutputTodayCsv)

@@ -6,17 +6,18 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker.MySQL
 {
-	using Data;
+	using ElectricPowerBrother.Data.MySQL;
 
-	// 01/21/2015 by aldente : ほとんどConsumptionXmlGeneratorのコピペ．
 	#region TemperatureXmlGeneratorクラス
 	public class TemperatureXmlGenerator : TemperatureData, Helpers.IPlugin
 	{
 
+		// コンストラクタ以外はSQLite版と同じ。
+
 		#region *定番コンストラクタ(TemperatureXmlGenerator)
-		public TemperatureXmlGenerator(string fileName) : base(fileName)
+		public TemperatureXmlGenerator(ConnectionProfile profile) : base(profile)
 		{ }
 		#endregion
 

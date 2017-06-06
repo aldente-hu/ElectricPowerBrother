@@ -96,7 +96,10 @@
   <ItemGroup>
     <Compile Include="AmedasTemperatureWatcher.cs" />
     <Compile Include="ITemperatureData.cs" />
+    <Compile Include="MySQL\AmedasTemperatureWatcher.cs" />
+    <Compile Include="MySQL\TemperatureCsvGenerator.cs" />
     <Compile Include="MySQL\TemperatureData.cs" />
+    <Compile Include="MySQL\TemperatureXmlGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

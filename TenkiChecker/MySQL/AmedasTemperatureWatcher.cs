@@ -6,17 +6,20 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Net;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker.MySQL
 {
+
 	// (1.2.1) インターフェイスをIUpdatingPluginに変更．
 	#region AmedasTemperatureWatcherクラス
-	public class AmedasTemperatureWatcher : Data.TemperatureData, Helpers.IUpdatingPlugin
+	public class AmedasTemperatureWatcher : TemperatureData, Helpers.IUpdatingPlugin
 	{
+		// コンストラクタ以外はSQLite版と同じ。
+
 		static System.Globalization.CultureInfo JpCulture = new System.Globalization.CultureInfo("ja-JP");
 
 		#region *定番コンストラクタ(AmedasTemperatureWatcher)
-		public AmedasTemperatureWatcher(string fileName)
-			: base(fileName)
+		public AmedasTemperatureWatcher(ElectricPowerBrother.Data.MySQL.ConnectionProfile profile)
+			: base(profile)
 		{ }
 		#endregion
 
