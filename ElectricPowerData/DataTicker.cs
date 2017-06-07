@@ -12,6 +12,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		// SQLiteDataのコピペ。
 		#region Ticker関連
 
+		// ※abstract化した方がよい？
 		public virtual DateTime GetLatestDataTime() { return new DateTime(0); }
 
 		public Action<DateTime> UpdateAction { get; set; }

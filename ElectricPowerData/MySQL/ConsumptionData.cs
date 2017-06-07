@@ -4,18 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using System.Data.SQLite;
+using MySql.Data.MySqlClient;
 
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data.MySQL
 {
 
-	public class ConsumptionData : SQLiteData
+	public class ConsumptionData : MySQL.DataTicker
 	{
 
-		#region *コンストラクタ(ConsumptionData) ; 実質的実装はなし
-		public ConsumptionData(string fileName)
-			: base(fileName)
+		#region *定番コンストラクタ(ConsumptionData) ; 実質的実装はなし
+		public ConsumptionData(ConnectionProfile profile)
+			: base(profile)
 		{ }
 		#endregion
 
@@ -27,7 +27,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		/// <returns></returns>
 		public override DateTime GetLatestDataTime()
 		{
-			using (var connection = new SQLiteConnection(this.ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))	// ☆
 			{
 				connection.Open();
 				// "select min(latest) from (select ch, max(e_time) as latest from consumptions_10min where ch in (1, 2) group by ch)"
@@ -51,13 +51,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		/// <param name="connection"></param>
 		/// <param name="ch"></param>
 		/// <returns></returns>
-		protected DateTime GetLatestTime(SQLiteConnection connection, int ch)
+		protected DateTime GetLatestTime(MySqlConnection connection, int ch)
 		{
-			using (SQLiteCommand command = connection.CreateCommand())
+			using (MySqlCommand command = connection.CreateCommand())
 			{
 				// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 				command.CommandText = "select max(e_time) from consumptions_10min where ch = @ch";
-				command.Parameters.Add(new SQLiteParameter("@ch", ch));
+				command.Parameters.Add(new MySqlParameter("@ch", ch));
 
 				using (var reader = command.ExecuteReader())
 				{
@@ -92,17 +92,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			IDictionary<DateTime, int> data = new Dictionary<DateTime, int>();
 			var time = GetLatestDataTime();
 
-			using (var connection = new SQLiteConnection(this.ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = string.Format(
 						"select e_time, sum(consumption) as total from consumptions_10min where e_time <= @from and e_time > @to and {0} group by e_time",
 						ch_condition);
-					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(time)));
-					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(time.AddMinutes(-10 * n))));
+					command.Parameters.Add(new MySqlParameter("@from", TimeConverter.TimeToInt(time)));
+					command.Parameters.Add(new MySqlParameter("@to", TimeConverter.TimeToInt(time.AddMinutes(-10 * n))));
 
 					using (var reader = command.ExecuteReader())
 					{
@@ -135,15 +135,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			//int today = DateToInt(DateTimeOffset.Now);
 			//Console.WriteLine(today);
 
-			using (var connection = new SQLiteConnection(this.ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = 
 						"select date, sum(consumption) as total from jdhm_consumptions_10min where date < @date and date >= @date - 21 and ch in (1, 2) group by date";
-					command.Parameters.Add(new SQLiteParameter("@date", TimeConverter.DateToInt(before)));
+					command.Parameters.Add(new MySqlParameter("@date", TimeConverter.DateToInt(before)));
 					
 					using (var reader = command.ExecuteReader())
 					{
@@ -175,15 +175,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			// キーがhour，値がtotalに対応．
 			var hourlyConsumptions = new Dictionary<int, int>();
 
-			using (var connection = new SQLiteConnection(ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = 
 						"select hour + 1 as e_hour, count(consumption) as cnt, sum(consumption) as total from jdhm_consumptions_10min where date = @date and ch in (1, 2) group by hour";
-					command.Parameters.Add(new SQLiteParameter("@date", TimeConverter.DateToInt(date)));
+					command.Parameters.Add(new MySqlParameter("@date", TimeConverter.DateToInt(date)));
 
 					using (var reader = command.ExecuteReader())
 					{
@@ -218,16 +218,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		{
 			var detailConsumptions = new Dictionary<DateTime, int>();
 
-			using (var connection = new SQLiteConnection(ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = 
 						"select e_time, sum(consumption) as total from consumptions_10min where e_time > @1 and e_time <= @2 and ch in (1, 2) group by e_time";
-					command.Parameters.Add(new SQLiteParameter("@1", TimeConverter.TimeToInt(from)));
-					command.Parameters.Add(new SQLiteParameter("@2", TimeConverter.TimeToInt(to)));
+					command.Parameters.Add(new MySqlParameter("@1", TimeConverter.TimeToInt(from)));
+					command.Parameters.Add(new MySqlParameter("@2", TimeConverter.TimeToInt(to)));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -260,10 +260,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 			var data = new Dictionary<DateTime, IDictionary<int,int>>();
 
-			using (var connection = new SQLiteConnection(ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 
@@ -271,8 +271,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					// intなので，SQLインジェクションの心配はないよね？
 					command.CommandText =
 						string.Format("select e_time, ch, consumption from consumptions_10min where e_time > @from and e_time <= @to and ch in ({0})", string.Join(",", channels));
-					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(from)));
-					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(to)));
+					command.Parameters.Add(new MySqlParameter("@from", TimeConverter.TimeToInt(from)));
+					command.Parameters.Add(new MySqlParameter("@to", TimeConverter.TimeToInt(to)));
 					//command.Parameters.Add(new SQLiteParameter("@ch", channels));
 					using (var reader = command.ExecuteReader())
 					{
@@ -324,10 +324,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		#region *指定した期間の合計を取得(GetTotal)
 		public int GetTotal(DateTime from, DateTime to, params int[] channels)
 		{
-			using (var connection = new SQLiteConnection(ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 
@@ -335,8 +335,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					// intなので，SQLインジェクションの心配はないよね？
 					command.CommandText =
 						string.Format("select sum(consumption) as total from consumptions_10min where e_time > @from and e_time <= @to and ch in ({0})", string.Join(",", channels));
-					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(from)));
-					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(to)));
+					command.Parameters.Add(new MySqlParameter("@from", TimeConverter.TimeToInt(from)));
+					command.Parameters.Add(new MySqlParameter("@to", TimeConverter.TimeToInt(to)));
 					//command.Parameters.Add(new SQLiteParameter("@ch", channels));
 					using (var reader = command.ExecuteReader())
 					{
@@ -391,15 +391,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		{
 			var consumptions = new List<int>();
 
-			using (var connection = new SQLiteConnection(ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = "select sum(consumption) as total from consumptions_10min where e_time > @from and e_time <= @to and ch in (1, 2) group by e_time order by e_time";
-					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(time.AddHours(-1))));
-					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(time.AddHours(1))));
+					command.Parameters.Add(new MySqlParameter("@from", TimeConverter.TimeToInt(time.AddHours(-1))));
+					command.Parameters.Add(new MySqlParameter("@to", TimeConverter.TimeToInt(time.AddHours(1))));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using System.Data.SQLite;
+using MySql.Data.MySqlClient;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data.MySQL
 {
-	public class AlertData : SQLiteData
+	public class AlertData : MySQL.DataTicker
 	{
 		// テーブル名: alerts
 		//   region: 1(理工学部)，他の値はテスト用．
@@ -21,16 +21,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 		// ひどいモデルだなぁ．
 		#region *定番コンストラクタ(AlertData)
-		public AlertData(string fileName) : base(fileName) { }
+		public AlertData(ConnectionProfile profile) : base(profile) { }
 		#endregion
 
 		#region *現在のランクを取得(GetCurrentRank)
 		public int GetCurrentRank()
 		{
-			using (var connection = new SQLiteConnection(this.ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))	// ☆
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())	// ☆
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = "select rank from alerts where region = 1 order by data_time desc limit 1";
@@ -57,16 +57,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		{
 			var warnings = new Dictionary<DateTime, int>();
 
-			using (var connection = new SQLiteConnection(this.ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))	// ☆
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())		// ☆
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText
 						= "select data_time, rank from alerts where region = 1 and data_time > @from and data_time < @to order by data_time";
-					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(from)));
-					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(to)));
+					command.Parameters.Add(new MySqlParameter("@from", TimeConverter.TimeToInt(from)));		// ☆
+					command.Parameters.Add(new MySqlParameter("@to", TimeConverter.TimeToInt(to)));		// ☆
 					using (var reader = command.ExecuteReader())
 					{
 						int current = 0;
@@ -94,15 +94,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		{
 			var alerts = new Dictionary<DateTime, AlertElement>();
 
-			using (var connection = new SQLiteConnection(this.ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))		// ☆
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())		// ☆
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText
 						= "select declared_at, data_time, rank from alerts where region = 1 order by data_time desc limit @1";
-					command.Parameters.Add(new SQLiteParameter("@1", n));
+					command.Parameters.Add(new MySqlParameter("@1", n));		// ☆
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -130,17 +130,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		/// <param name="region"></param>
 		public void InsertData(AlertElement data, int region = 1)
 		{
-			using (var connection = new SQLiteConnection(this.ConnectionString))
+			using (var connection = new MySqlConnection(Profile.ConnectionString))		// ☆
 			{
 				connection.Open();
-				using (SQLiteCommand command = connection.CreateCommand())
+				using (MySqlCommand command = connection.CreateCommand())		// ☆
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = "INSERT INTO alerts VALUES(@region, @datatime, @declared, @rank)";
-					command.Parameters.Add(new SQLiteParameter("@region", region));
-					command.Parameters.Add(new SQLiteParameter("@datatime", TimeConverter.TimeToInt(data.DataTime)));
-					command.Parameters.Add(new SQLiteParameter("@declared", TimeConverter.TimeToInt(data.DeclaredAt)));
-					command.Parameters.Add(new SQLiteParameter("@rank", data.Rank));
+					command.Parameters.Add(new MySqlParameter("@region", region));		// ☆
+					command.Parameters.Add(new MySqlParameter("@datatime", TimeConverter.TimeToInt(data.DataTime)));		// ☆
+					command.Parameters.Add(new MySqlParameter("@declared", TimeConverter.TimeToInt(data.DeclaredAt)));		// ☆
+					command.Parameters.Add(new MySqlParameter("@rank", data.Rank));		// ☆
 
 					command.ExecuteNonQuery();
 				}
