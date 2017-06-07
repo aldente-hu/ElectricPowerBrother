@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MySQL
 {
-	using Data;
-	//using PulseLoggers;
+
+	// ほとんどSQLite版のコピペ！
+
+	using Data.MySQL;
 	using Base;
 
+	// (0.3.0)MySQL版を作成。
 	// (0.2.0)ControlPanelに移動．
 	// (0.3.1)RetrieveDataに移動．クラスの名前がヘンだけどまあいいか．
 	#region Environmentクラス
@@ -86,9 +89,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 		readonly ConsumptionRecorder db;  // for RetrieveData
 
 		#region *コンストラクタ(Environment)
-		public Environment(string databaseFile, System.Xml.Linq.XElement loggers)
+		public Environment(ConnectionProfile profile, System.Xml.Linq.XElement loggers)
 		{
-			db = new ConsumptionRecorder(databaseFile);
+			db = new ConsumptionRecorder(profile);
 
 			foreach (var elem_logger in loggers.Elements())
 			{
@@ -233,5 +236,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 
 	}
 	#endregion
+
+
 
 }

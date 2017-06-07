@@ -26,7 +26,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public partial class MainWindow : Window
 		{
-			Environment environment;
+			IEnvironment environment;
 
 			// (0.1.7)IndexPageを追加．
 			// (0.1.6)csvの出力先などにアプリケーション設定を適用．
@@ -47,9 +47,29 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						new XmlReaderSettings()))
 					{
 						var doc = XDocument.Load(reader);
-						environment = new Environment(
-															Properties.Settings.Default.DatabaseFile,
-															doc.Root.Element("Loggers"));
+
+						// 以下、readerは関係ない？
+						if (string.IsNullOrEmpty(Properties.Settings.Default.MyServer))
+						{
+							// SQLiteを使用。
+							environment = new Environment(
+																Properties.Settings.Default.DatabaseFile,
+																doc.Root.Element("Loggers"));
+						}
+						else
+						{
+							// MySQLを使用。
+							environment = new MySQL.Environment(
+									new Data.MySQL.ConnectionProfile
+									{
+										Server = Properties.Settings.Default.MyServer,
+										UserName = Properties.Settings.Default.MyUserName,
+										Password = Properties.Settings.Default.MyPassword,
+										Database = Properties.Settings.Default.MyUserName
+									},
+									doc.Root.Element("Loggers")
+									);
+						}
 						environment.Tweet += environment_Tweet;
 					}
 					timer.Tick += LoggerTimer_Tick;
