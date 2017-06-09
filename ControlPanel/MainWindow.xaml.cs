@@ -36,7 +36,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				InitializeComponent();
 
-				InitializeLegacyOutputTab();
+				MessageBox.Show("Componentが初期化されたよ！");
+
+				//InitializeLegacyOutputTab();
+				//MessageBox.Show("LegacyOutputが初期化されたよ！");
 
 				// (0.1.8)Legacyタブの作業だけを行いたければ，DataLoggersConfig(ならびに関連のplugin)を用意する必要はない．
 				if (File.Exists(Properties.Settings.Default.DataLoggersConfig))
@@ -65,7 +68,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 										Server = Properties.Settings.Default.MyServer,
 										UserName = Properties.Settings.Default.MyUserName,
 										Password = Properties.Settings.Default.MyPassword,
-										Database = Properties.Settings.Default.MyUserName
+										Database = Properties.Settings.Default.MyDatabase
 									},
 									doc.Root.Element("Loggers")
 									);
@@ -113,9 +116,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// (0.2.0)定期実行時は使わないように変更．
 			private void Buttonお試し_Click(object sender, EventArgs e)
 			{
-
+				bool mysql = environment is MySQL.Environment;
+				MessageBox.Show($"MySQL? : {mysql}");
 				DateTime next_data_time = environment.GetNextDataTime();
 				Console.WriteLine("Here we go! : {0}", next_data_time);
+				MessageBox.Show($"Here we go! : {next_data_time}");
 
 
 				if (!string.IsNullOrEmpty(textBoxRoot.Text))
@@ -137,6 +142,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					}
 				}
 				// それ以外の場合は普通に実行する．
+				MessageBox.Show("普通にデータを取得するよ！");
 				environment.Run(true);
 			}
 

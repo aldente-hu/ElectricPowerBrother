@@ -157,22 +157,24 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MySQL
 				foreach (Exception inner in ex.InnerExceptions)
 				{
 					Tweet(this, new TweetEventArgs { Message = inner.Message });
+					Tweet(this, new TweetEventArgs { Message = inner.Source });
+					Tweet(this, new TweetEventArgs { Message = inner.StackTrace });
 				}
 				Tweet(this, new TweetEventArgs { Message = "Something is wrong." });
 				return;
 			}
 			// for debug.
-			//foreach (var t in tasks)
-			//{
-			//	Tweet(this, new TweetEventArgs { Message = string.Format("Count {0}", t.Result.Count) });
-			//}
+			foreach (var t in tasks)
+			{
+				Tweet(this, new TweetEventArgs { Message = string.Format("Count {0}", t.Result.Count) });
+			}
 
 			var results = tasks.Select(t => t.Result);
 			// ここで結果だけを取り出しているので，各要素がどのロガーから来たデータなのかは簡単には判別できない．
 
 			ProcessData(results, next_data_time, saving);
 			// for debug.
-			//Tweet(this, new TweetEventArgs { Message = "That's all." });
+			Tweet(this, new TweetEventArgs { Message = "That's all." });
 		}
 		#endregion
 
