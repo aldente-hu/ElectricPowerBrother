@@ -65,7 +65,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 										Server = Properties.Settings.Default.MyServer,
 										UserName = Properties.Settings.Default.MyUserName,
 										Password = Properties.Settings.Default.MyPassword,
-										Database = Properties.Settings.Default.MyUserName
+										Database = Properties.Settings.Default.MyDatabase
 									},
 									doc.Root.Element("Loggers")
 									);
