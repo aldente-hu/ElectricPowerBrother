@@ -88,7 +88,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 		#region *コンストラクタ(Environment)
 		public Environment(string databaseFile, System.Xml.Linq.XElement loggers)
 		{
-			db = new ConsumptionRecorder(databaseFile);
 
 			foreach (var elem_logger in loggers.Elements())
 			{
@@ -113,6 +112,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 				logger.SetUp(elem_logger);
 				this.loggers.Add(logger);
 			}
+
+			db = new ConsumptionRecorder(databaseFile, this.loggers.SelectMany(l => l.Channels.SelectMany(ch => ch.Gains.Keys)).Distinct().ToArray());
 		}
 		#endregion
 
