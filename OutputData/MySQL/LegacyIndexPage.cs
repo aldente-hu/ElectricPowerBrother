@@ -8,25 +8,25 @@ using System.Xml.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.MySQL
 {
-	using Data;
+	using Data.MySQL;
 	using Helpers;
 
 	namespace Legacy
 	{
 
-		// (1.3.15)
+		// (1.5.0)
 		#region IndexPageクラス
-		public class IndexPage : ConsumptionData, IPlugin, IIndexpage
+		public class IndexPage : ConsumptionData, IPlugin, ElectricPowerBrother.Legacy.IIndexpage
 		{
 
 			// (1.3.15)
 			#region *コンストラクタ(IndexPage)
-			public IndexPage(string databaseFile)
-				: base(databaseFile)
+			public IndexPage(ConnectionProfile profile)
+				: base(profile)
 			{
-				alerts = new AlertData(databaseFile);
+				alerts = new AlertData(profile);
 			}
 			readonly AlertData alerts;
 			#endregion
@@ -149,7 +149,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// (1.3.15)
 			string ChartDestination(DateTime month, string name)
 			{
-				return MonthlyChartDestinationGenerator.Generate(month, name);
+				return ElectricPowerBrother.Legacy.MonthlyChartDestinationGenerator.Generate(month, name);
 			}
 
 			// (1.3.15)
@@ -194,31 +194,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 		}
 		#endregion
-
-		public interface IIndexpage
-		{
-
-			#region プロパティ
-
-			/// <summary>
-			/// テンプレートが記述されたファイルへのパスを取得／設定します．
-			/// </summary>
-			string Template { get; set; }
-
-			/// <summary>
-			/// 生成されたhtmlドキュメントの出力先を取得／設定します．
-			/// </summary>
-			string Destination { get; set; }
-
-			/// <summary>
-			/// CSVファイルの文字エンコーディングを取得／設定します．デフォルトはEncoding.UTF8です．
-			/// </summary>
-			Encoding CharacterEncoding { get; set; }
-
-			#endregion
-
-			void Update();
-		}
 
 	}
 }

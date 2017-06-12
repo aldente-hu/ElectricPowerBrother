@@ -9,9 +9,9 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.IO.Compression;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.MySQL
 {
-	using Data;
+	using Data.MySQL;
 	using Helpers;
 
 	namespace Legacy
@@ -30,19 +30,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 
 
-		// (1.3.6)Legacy名前空間に落とし込む．
+		// (1.5.0)
 		#region DailyCsvGeneratorクラス
-		public class DailyCsvGenerator : ConsumptionData, IPlugin, IDailyCsvGenerator
+		public class DailyCsvGenerator : ConsumptionData, IPlugin, ElectricPowerBrother.Legacy.IDailyCsvGenerator
 		{
 
-			public DailyCsvGenerator(string databaseFile) : base(databaseFile)
+			#region *定番コンストラクタ(DailyCsvGenerator)
+			public DailyCsvGenerator(ConnectionProfile profile) : base(profile)
 			{ }
+			#endregion
 
-			// (1.3.9.3)削除．
-			/// <summary>
-			/// データが1時間ごとかどうかを示す値を取得／設定します．
-			/// </summary>
-			//public bool IsHourly { get; set; }
 
 			#region *TimeFormatプロパティ
 			/// <summary>
@@ -88,7 +85,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				DateTime date_end = date_origin.AddDays(1);
 
 				// date_originの日のファイルが存在するか確認．
-				string target = Path.Combine(CsvRoot, DailyCsvDestinationGenerator.Generate(date_origin));
+				string target = Path.Combine(CsvRoot, ElectricPowerBrother.Legacy.DailyCsvDestinationGenerator.Generate(date_origin));
 
 				DateTime csv_last_data;
 				StreamWriter writer = null;
@@ -170,7 +167,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			/// <param name="month">出力する対象の月．</param>
 			public void CreateArchive(DateTime month)
 			{
-				var name = DailyCsvDestinationGenerator.GenerateDirectory(month);
+				var name = ElectricPowerBrother.Legacy.DailyCsvDestinationGenerator.GenerateDirectory(month);
 				var dir = Path.Combine(this.CsvRoot, name);
 				if (Directory.Exists(dir))
 				{
@@ -347,23 +344,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		}
 		#endregion
 
-		// (1.5.1)とりあえず。
-		public interface IDailyCsvGenerator
-		{
-			DateTime UpdateFiles(DateTime latestData, int recursiveCount = 0);
-			bool OutputOneDay(DateTime target_date);
-			void CreateArchive(DateTime month);
-		}
+
 
 
 		// とりあえずここに書く．
-
-		// (1.3.7)
+		// (1.5.0)
 		#region DailyHourlyCsvGeneratorクラス
-		public class DailyHourlyCsvGenerator : DailyCsvGenerator, IDailyHourlyCsvGenerator
+		public class DailyHourlyCsvGenerator : DailyCsvGenerator, ElectricPowerBrother.Legacy.IDailyHourlyCsvGenerator
 		{
-			public DailyHourlyCsvGenerator(string databaseFile) : base(databaseFile)
+
+			#region *定番コンストラクタ(DailyHourlyCsvGenerator)
+			public DailyHourlyCsvGenerator(ConnectionProfile profile) : base(profile)
 			{ TimeFormat = "HH"; }
+			#endregion
 
 			protected override DateTime Record(StreamWriter writer, DateTime csv_last_data, IDictionary<DateTime, IDictionary<int, int>> data)
 			{
@@ -399,32 +392,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				return total;
 			}
 
-		}
-		#endregion
-
-		// (1.5.1)とりあえず。
-		public interface IDailyHourlyCsvGenerator : IDailyCsvGenerator
-		{
-		}
-
-
-		#region [static]DailyCsvDestinationGeneratorクラス
-		public static class DailyCsvDestinationGenerator
-		{
-			// 2015年7月2日を表すDateTimeから， "public/data/Y2015_07/D02_01.csv"のような文字列を生成する．
-
-			// ルートの処理はどこで行う？
-
-			public static string Generate(DateTime date)
-			{
-				return date.ToString(@"\Yyyyy_MM/\Ddd_01.c\sv");
-			}
-
-			// (1.3.10)
-			public static string GenerateDirectory(DateTime month)
-			{
-				return month.ToString(@"\Yyyyy_MM");
-			}
 		}
 		#endregion
 

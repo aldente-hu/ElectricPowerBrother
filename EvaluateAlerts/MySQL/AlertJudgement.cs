@@ -9,12 +9,12 @@ using System.Xml.Linq;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 {
-	using Data;
+	using Data.MySQL;
 	using Helpers;
 
-	namespace EvaluateAlerts
+	namespace EvaluateAlerts.MySQL
 	{
-
+		// (1.4.0)
 		#region AlertJudgementクラス
 		public class AlertJudgement : IUpdatingPlugin
 		{
@@ -25,10 +25,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			// (1.1.0)レベルの決め打ちを解消．Configureメソッドから(のみ)設定できます．
 			#region *コンストラクタ(AlertJudgement)
-			public AlertJudgement(string databaseFile) : this()
+			public AlertJudgement(ConnectionProfile profile) : this()
 			{
-				data = new AlertData(databaseFile);
-				c_data = new ConsumptionData(databaseFile);	// ←dataと分ける意味あるの？
+				data = new AlertData(profile);
+				c_data = new ConsumptionData(profile);	// ←dataと分ける意味あるの？
 			}
 
 			AlertJudgement()
@@ -169,7 +169,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					var current_long_time = current.DataTime.ToString("M月d日HH時mm分");
 					AtomEntry entry = new AtomEntry
 					{
-						ID = this.FeedID + SQLiteData.TimeConverter.TimeToInt(current.DeclaredAt),
+						ID = this.FeedID + Data.DataTicker.TimeConverter.TimeToInt(current.DeclaredAt),
 						PublishedAt = current.DeclaredAt
 					};
 
@@ -406,72 +406,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		}
 		#endregion
 
-		#region AlertLevelクラス
-		public class AlertLevel
-		{
-			public int Rank { get; set; }
-			public string Name { get; set; }
-
-			// (1.1.0)
-			#region *コンストラクタ(AlertLevel)
-			public AlertLevel() { }
- 
-			public AlertLevel(XElement element)
-			{
-
-				this.Rank = (int)element.Attribute("Rank");
-				this.Name = (string)element.Attribute("Name");
-
-
-				this.InBorder = GenerateBorder(element.Element("In"));
-				this.OutBorder = GenerateBorder(element.Element("Out"));
-			}
-
-			static Predicate<int[]> GenerateBorder(XElement element)
-			{
-				// ボーダーと一致する場合は，厳しい方に倒す．
-				double border = (double)element.Attribute("Border");
-				int span = (int)element.Attribute("Span");
-				switch (element.Name.LocalName)
-				{
-					case "In":
-						switch ((string)element.Attribute("Method"))
-						{
-							case "Minimum":
-								return data => { return data.Take(span).Min() >= border; };
-							case "Maximum":
-								return data => { return data.Take(span).Max() >= border; };
-							default:	// especially "Average":
-								return data => { return data.Take(span).Average() >= border; };
-						}
-					case "Out":
-						switch ((string)element.Attribute("Method"))
-						{
-							case "Minimum":
-								return data => { return data.Take(span).Min() < border; };
-							case "Maximum":
-								return data => { return data.Take(span).Max() < border; };
-							default:	// especially "Average":
-								return data => { return data.Take(span).Average() < border; };
-						}
-					default:
-						throw new ArgumentException();
-				}
-
-			}
-			#endregion
-
-			/// <summary>
-			/// 発令条件を満たしたときにtrueを返します．
-			/// </summary>
-			public Predicate<int[]> InBorder { get; set; }
-
-			/// <summary>
-			/// 解除条件を満たしたときにtrueを返します．
-			/// </summary>
-			public Predicate<int[]> OutBorder { get; set; }
-		}
-		#endregion
 
 	}
 }
