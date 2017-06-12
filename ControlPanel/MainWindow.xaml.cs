@@ -28,6 +28,20 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		{
 			IEnvironment environment;
 
+			static Data.MySQL.ConnectionProfile MyConnectionProfile
+			{
+				get
+				{
+					return new Data.MySQL.ConnectionProfile
+					{
+						Server = Properties.Settings.Default.MyServer,
+						UserName = Properties.Settings.Default.MyUserName,
+						Password = Properties.Settings.Default.MyPassword,
+						Database = Properties.Settings.Default.MyDatabase
+					};
+				}
+			}
+
 			// (0.1.7)IndexPageを追加．
 			// (0.1.6)csvの出力先などにアプリケーション設定を適用．
 
@@ -55,23 +69,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						if (string.IsNullOrEmpty(Properties.Settings.Default.MyServer))
 						{
 							// SQLiteを使用。
-							environment = new Environment(
-																Properties.Settings.Default.DatabaseFile,
-																doc.Root.Element("Loggers"));
+							environment = new Environment(Properties.Settings.Default.DatabaseFile,	doc.Root.Element("Loggers"));
 						}
 						else
 						{
 							// MySQLを使用。
-							environment = new MySQL.Environment(
-									new Data.MySQL.ConnectionProfile
-									{
-										Server = Properties.Settings.Default.MyServer,
-										UserName = Properties.Settings.Default.MyUserName,
-										Password = Properties.Settings.Default.MyPassword,
-										Database = Properties.Settings.Default.MyDatabase
-									},
-									doc.Root.Element("Loggers")
-									);
+							environment = new MySQL.Environment(MyConnectionProfile, doc.Root.Element("Loggers"));
 						}
 						environment.Tweet += environment_Tweet;
 					}
@@ -244,7 +247,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 							foreach (var config in task.Elements("Config"))
 							{
 								// インスタンスを生成する．
-								IPluginBase generator = Activator.CreateInstance(type_info, Properties.Settings.Default.DatabaseFile) as IPluginBase;
+								IPluginBase generator;
+								if (name.Contains("MySQL"))
+								{
+									generator = Activator.CreateInstance(type_info, MyConnectionProfile) as IPluginBase;
+								}
+								else
+								{
+									generator = Activator.CreateInstance(type_info, Properties.Settings.Default.DatabaseFile) as IPluginBase;
+								}
 
 								if (generator == null)
 								{
@@ -271,13 +282,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 									//PluginTickers.Add(ticker);
 
 									// これらは複数回出てこないよね？
-									if (generator.GetType() == typeof(Legacy.DailyHourlyCsvGenerator))
+									var interfaces = generator.GetType().GetInterfaces();
+									if (interfaces.Contains(typeof(Legacy.IDailyHourlyCsvGenerator)))
 									{
-										dataCsvGenerator = (Legacy.DailyHourlyCsvGenerator)generator;
+										dataCsvGenerator = (Legacy.IDailyHourlyCsvGenerator)generator;
 									}
-									else if (generator.GetType() == typeof(Legacy.DailyCsvGenerator))
+									else if (!interfaces.Contains(typeof(Legacy.IDailyHourlyCsvGenerator)) && interfaces.Contains(typeof(Legacy.IDailyCsvGenerator)))
 									{
-										detailCsvGenerator = (Legacy.DailyCsvGenerator)generator;
+										detailCsvGenerator = (Legacy.IDailyCsvGenerator)generator;
 									}
 								}
 
@@ -299,7 +311,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// (0.1.5.1)
 				Helpers.Gnuplot.BinaryPath = Properties.Settings.Default.GnuplotBinaryPath;
 
-				indexPage = new Legacy.IndexPage(Properties.Settings.Default.DatabaseFile);
+				if (string.IsNullOrEmpty(Properties.Settings.Default.MyServer))
+				{
+					indexPage = new Legacy.IndexPage(Properties.Settings.Default.DatabaseFile);
+				}
+				else
+				{
+					indexPage = new ElectricPowerBrother.MySQL.Legacy.IndexPage(MyConnectionProfile);
+				}
 				indexPage.Destination = Properties.Settings.Default.IndexPageDestination;
 				indexPage.Template = Properties.Settings.Default.IndexPageTemplate;
 				indexPage.CharacterEncoding = new UTF8Encoding(false);
@@ -317,9 +336,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						new XmlReaderSettings()))
 					{
 						var doc = System.Xml.Linq.XDocument.Load(reader);
-						environment = new Environment(
+						if (string.IsNullOrEmpty(Properties.Settings.Default.MyServer))
+						{
+							environment = new Environment(
 															Properties.Settings.Default.DatabaseFile,
 															doc.Root.Element("Loggers"));
+						}
+						else
+						{
+							environment = new MySQL.Environment(MyConnectionProfile, doc.Root.Element("Loggers"));
+						}
 						environment.Tweet += environment_Tweet;
 					}
 					timer.Tick += Buttonお試し_Click;
@@ -336,7 +362,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			// (0.1.10)staticメソッドとして分離。
 			#region *[static]LegacyMonthlyChartの設定を行う(GenerateLegacyMonthlyChart)
-			static private Legacy.MonthlyChart GenerateLegacyMonthlyChart(string seriesName)
+			static private Legacy.IMonthlyChart GenerateLegacyMonthlyChart(string seriesName)
 			{
 				int seriesNo;
 				int maximum;
@@ -365,17 +391,38 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					default:
 						throw new ArgumentException("未定義の系列名です。", "seriesName");
 				}
-				var chartGenerator = new Legacy.MonthlyChart(Properties.Settings.Default.DatabaseFile)
+
+				Legacy.IMonthlyChart chartGenerator;
+				if (string.IsNullOrEmpty(Properties.Settings.Default.MyServer))
 				{
-					Width = 640,
-					Height = 480,
-					SeriesNo = seriesNo,
-					Maximum = maximum,
-					Minimum = 0,
-					SourceRootPath = Properties.Settings.Default.DataRoot,
-					SeriesName = seriesName,
-					MonthlyTotalChannels = channels
-				};
+					chartGenerator = new Legacy.MonthlyChart(Properties.Settings.Default.DatabaseFile)
+					{
+						Width = 640,
+						Height = 480,
+						SeriesNo = seriesNo,
+						Maximum = maximum,
+						Minimum = 0,
+						SourceRootPath = Properties.Settings.Default.DataRoot,
+						SeriesName = seriesName,
+						MonthlyTotalChannels = channels
+					};
+				}
+				else
+				{
+					chartGenerator = new ElectricPowerBrother.MySQL.Legacy.MonthlyChart(MyConnectionProfile)
+					{
+						Width = 640,
+						Height = 480,
+						SeriesNo = seriesNo,
+						Maximum = maximum,
+						Minimum = 0,
+						SourceRootPath = Properties.Settings.Default.DataRoot,
+						SeriesName = seriesName,
+						MonthlyTotalChannels = channels
+					};
+
+				}
+
 				if (borderLine.HasValue)
 				{
 					chartGenerator.BorderLine = borderLine;
@@ -387,10 +434,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#region LegacyChart関連
 
 			// (0.1.10)riko1用とriko2用を追加。
-			Legacy.MonthlyChart monthlyChartGenerator;
-			Legacy.MonthlyChart monthlyChartGenerator1;
-			Legacy.MonthlyChart monthlyChartGenerator2;
-			Legacy.IndexPage indexPage;
+			Legacy.IMonthlyChart monthlyChartGenerator;
+			Legacy.IMonthlyChart monthlyChartGenerator1;
+			Legacy.IMonthlyChart monthlyChartGenerator2;
+			Legacy.IIndexpage indexPage;
 
 			// (0.1.10)各チャンネルに対応。
 			private void PltButton_Click(object sender, RoutedEventArgs e)
@@ -479,28 +526,30 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			*/
 
+			// (0.3.1) 型をインターフェイスに変更。
 			// (0.1.8)
 			#region *DataCsvGeneratorプロパティ
-			public Legacy.DailyCsvGenerator DataCsvGenerator
+			public Legacy.IDailyCsvGenerator DataCsvGenerator
 			{
 				get
 				{
 					return this.dataCsvGenerator;
 				}
 			}
-			Legacy.DailyHourlyCsvGenerator dataCsvGenerator;
+			Legacy.IDailyHourlyCsvGenerator dataCsvGenerator;
 			#endregion
 
+			// (0.3.1) 型をインターフェイスに変更。
 			// (0.1.8)
 			#region *DetailCsvGeneratorプロパティ
-			public Legacy.DailyCsvGenerator DetailCsvGenerator
+			public Legacy.IDailyCsvGenerator DetailCsvGenerator
 			{
 				get
 				{
 					return this.detailCsvGenerator;
 				}
 			}
-			Legacy.DailyCsvGenerator detailCsvGenerator;
+			Legacy.IDailyCsvGenerator detailCsvGenerator;
 			#endregion
 
 
@@ -514,7 +563,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				if (LegacyCalender.SelectedDate.HasValue)
 				{
-					var generator = ((ContentControl)sender).DataContext as Legacy.DailyCsvGenerator;
+					var generator = ((ContentControl)sender).DataContext as Legacy.IDailyCsvGenerator;
 					if (generator != null)
 					{
 						generator.OutputOneDay(LegacyCalender.SelectedDate.Value);
@@ -530,7 +579,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				if (LegacyCalender.SelectedDate.HasValue)
 				{
-					var generator = ((ContentControl)sender).DataContext as Legacy.DailyCsvGenerator;
+					var generator = ((ContentControl)sender).DataContext as Legacy.IDailyCsvGenerator;
 					if (generator != null)
 					{
 						generator.UpdateFiles(LegacyCalender.SelectedDate.Value.AddDays(1));
@@ -546,7 +595,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				if (LegacyCalender.SelectedDate.HasValue)
 				{
-					var generator = ((ContentControl)sender).DataContext as Legacy.DailyCsvGenerator;
+					var generator = ((ContentControl)sender).DataContext as Legacy.IDailyCsvGenerator;
 					if (generator != null)
 					{
 						generator.CreateArchive(LegacyCalender.SelectedDate.Value);
@@ -559,7 +608,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			private void DateSpecified_CanExecute(object sender, CanExecuteRoutedEventArgs e)
 			{
 				// senderはGroupBox(CommandBindingを設定した場所)で，e.SourceがButton！
-				e.CanExecute = LegacyCalender.SelectedDate.HasValue && ((ContentControl)sender).DataContext is Legacy.DailyCsvGenerator;
+				e.CanExecute = LegacyCalender.SelectedDate.HasValue && ((ContentControl)sender).DataContext is Legacy.IDailyCsvGenerator;
 			}
 
 			#endregion

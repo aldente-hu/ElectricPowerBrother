@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Xml.Linq;
 
-namespace HirosakiUniversity.Aldente.ElectricPowerBrother
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.MySQL
 {
 	using Helpers;
 
@@ -15,7 +15,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	{
 		// (1.3.6)
 		#region MonthlyChartクラス
-		public class MonthlyChart : PltFileGeneratorBase, IPlugin, IMonthlyChart
+		public class MonthlyChart : PltFileGeneratorBase, IPlugin, ElectricPowerBrother.Legacy.IMonthlyChart
 		{
 
 			#region プロパティ
@@ -125,7 +125,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				writer.WriteLine("set output '{0}'",
 						Path.Combine(
 							GetAbsolutePath(SourceRootPath),	// 出力先をSourceRootPathに固定している！しかもRootPathを考慮していない！
-							MonthlyChartDestinationGenerator.Generate(month_origin, this.SeriesName)
+							ElectricPowerBrother.Legacy.MonthlyChartDestinationGenerator.Generate(month_origin, this.SeriesName)
 						)
 				);
 				writer.WriteLine("set datafile separator ','");
@@ -204,7 +204,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				{
 					source_list.Add(
 						string.Format("'{0}' using 1:{2} w lp {1}", 
-							 Path.Combine(source_root, DailyCsvDestinationGenerator.Generate(date)),
+							 Path.Combine(source_root, ElectricPowerBrother.Legacy.DailyCsvDestinationGenerator.Generate(date)),
 							 GenerateFormatString(date),
 							 this.SeriesNo));
 					date = date.AddDays(1);
@@ -298,14 +298,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// (1.3.11)やっぱり復活．
 			// (1.3.8.2)引数付きコンストラクタをコメントアウト．(うーん，このあたり混乱してるかもなぁ．)
 			// (1.3.3.2)とりあえずのコンストラクタ．
-			public MonthlyChart(string databaseFile)
+			public MonthlyChart(Data.MySQL.ConnectionProfile profile)
 				: base()
 			{
-				this._consumptionTable = new Data.ConsumptionData(databaseFile);
+				this._consumptionTable = new Data.MySQL.ConsumptionData(profile);
 			}
 			//public MonthlyChart() : base() { }
 
-			readonly Data.ConsumptionData _consumptionTable;
+			readonly Data.MySQL.ConsumptionData _consumptionTable;
 
 
 			public DateTime Update(DateTime lastUpdate)
@@ -513,35 +513,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#endregion
 
 
-		}
-		#endregion
-
-		public interface IMonthlyChart
-		{
-			int? BorderLine { get; set; }
-			void OtameshiPlt(DateTime date, string destination);
-			void DrawChartTest(DateTime time);
-		}
-
-
-		// (1.3.11)
-		#region [static]MonthlyChartDestinationGeneratorクラス
-		public static class MonthlyChartDestinationGenerator
-		{
-			// 2015年7月2日を表すDateTimeから， "public/data/Y2015_07/D02_01.csv"のような文字列を生成する．
-
-			// ルートの処理はどこで行う？
-
-			public static string Generate(DateTime date, string name)
-			{
-				// "g" -> "西暦"
-				return string.Format(date.ToString(@"\Yyyyy_MM/yyyyMM_{0}.pn\g"), name);
-			}
-
-			public static string GenerateDirectory(DateTime month)
-			{
-				return month.ToString(@"\Yyyyy_MM");
-			}
 		}
 		#endregion
 
