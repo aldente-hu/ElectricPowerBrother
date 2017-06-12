@@ -17,8 +17,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		public class ConsumptionRecorder : ConsumptionData
 		{
 
+			// (1.5.0) channels引数を追加。
 			#region *定番コンストラクタ(ConsumptionRecoder)
-			public ConsumptionRecorder(ConnectionProfile profile) : base(profile)
+			public ConsumptionRecorder(ConnectionProfile profile, int[] channels) : base(profile, channels)
 			{ }
 			#endregion
 

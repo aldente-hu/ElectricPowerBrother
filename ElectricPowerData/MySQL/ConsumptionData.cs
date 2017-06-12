@@ -13,16 +13,42 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data.MySQL
 	public class ConsumptionData : MySQL.DataTicker
 	{
 
-		#region *定番コンストラクタ(ConsumptionData) ; 実質的実装はなし
-		public ConsumptionData(ConnectionProfile profile)
-			: base(profile)
-		{ }
+		// (1.5.0)
+		#region *InterestingChannelsプロパティ
+		/// <summary>
+		/// 興味のあるチャンネルを返します。
+		/// </summary>
+		protected int[] InterestingChannels
+		{
+			get
+			{
+				return _interestringChannels;
+			}
+		}
+		readonly int[] _interestringChannels;
 		#endregion
 
+		// (1.5.0) channels引数を追加。
+		#region *定番コンストラクタ(ConsumptionData) ; 実質的実装はなし
+		public ConsumptionData(ConnectionProfile profile, params int[] channels)
+			: base(profile)
+		{
+			if (channels.Length == 0)
+			{
+				// とりあえず互換性を保つ。
+				this._interestringChannels = new int[] { 1, 2 };
+			}
+			else
+			{
+				this._interestringChannels = channels;
+			}
+		}
+		#endregion
 
+		// (1.5.0)チャンネル番号の決め打ちを解消。
 		#region *最新データの時刻を取得(GetLatestDataTime)
 		/// <summary>
-		/// 最新データの時刻(ch1, ch2のデータが揃っている時刻)を取得します．
+		/// 最新データの時刻(必要なチャンネルのデータが揃っている時刻)を取得します．
 		/// </summary>
 		/// <returns></returns>
 		public override DateTime GetLatestDataTime()
@@ -33,11 +59,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data.MySQL
 				// "select min(latest) from (select ch, max(e_time) as latest from consumptions_10min where ch in (1, 2) group by ch)"
 				// で一発なのだが，サブクエリ部分の結果が返るのに3秒くらいかかったので，
 				// ch間の比較はプログラム側で行うことにする(↓のクエリはほぼ一瞬で返る)．
-				var latest1 = GetLatestTime(connection, 1);
-				var latest2 = GetLatestTime(connection, 2);
-				//connection.Close();
+				return InterestingChannels.Select(ch => GetLatestTime(connection, ch)).Min();
 
-				return latest1 < latest2 ? latest1 : latest2;
 			}
 
 		}

@@ -13,10 +13,36 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 	public class ConsumptionData : SQLiteData
 	{
 
+		// (1.5.0)
+		#region *InterestingChannelsプロパティ
+		/// <summary>
+		/// 興味のあるチャンネルを返します。
+		/// </summary>
+		protected int[] InterestingChannels
+		{
+			get
+			{
+				return _interestringChannels;
+			}
+		}
+		readonly int[] _interestringChannels;
+		#endregion
+
+		// (1.5.0) channels引数を追加。
 		#region *コンストラクタ(ConsumptionData) ; 実質的実装はなし
-		public ConsumptionData(string fileName)
+		public ConsumptionData(string fileName, params int[] channels)
 			: base(fileName)
-		{ }
+		{
+			if (channels.Length == 0)
+			{
+				// とりあえず互換性を保つ。
+				this._interestringChannels = new int[] { 1, 2 };
+			}
+			else
+			{
+				this._interestringChannels = channels;
+			}
+		}
 		#endregion
 
 
@@ -33,11 +59,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				// "select min(latest) from (select ch, max(e_time) as latest from consumptions_10min where ch in (1, 2) group by ch)"
 				// で一発なのだが，サブクエリ部分の結果が返るのに3秒くらいかかったので，
 				// ch間の比較はプログラム側で行うことにする(↓のクエリはほぼ一瞬で返る)．
-				var latest1 = GetLatestTime(connection, 1);
-				var latest2 = GetLatestTime(connection, 2);
-				//connection.Close();
-
-				return latest1 < latest2 ? latest1 : latest2;
+				return InterestingChannels.Select(ch => GetLatestTime(connection, ch)).Min();
 			}
 
 		}

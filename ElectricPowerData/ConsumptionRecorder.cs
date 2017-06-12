@@ -16,7 +16,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		#region ConsumptionRecorderクラス
 		public class ConsumptionRecorder : ConsumptionData
 		{
-			public ConsumptionRecorder(string fileName) : base(fileName)
+			// (1.5.0) channels引数を追加。
+			public ConsumptionRecorder(string fileName, int[] channels) : base(fileName, channels)
 			{ }
 
 			// (1.1.4.1)int=>doubleなIDictionaryにも対応．
