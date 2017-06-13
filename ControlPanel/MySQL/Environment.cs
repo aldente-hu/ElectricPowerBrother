@@ -124,20 +124,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MySQL
 			return db.GetLatestDataTime().AddMinutes(10);
 		}
 
+		// (0.3.1) Taskのタイムアウト時間を、40sから100sに変更。
 		// (1.1.5)データをDBに保存するかどうかを指定する引数を追加．
 		// (1.1.4.2)tryの範囲を縮小．
 		// (1.1.3.3)例外処理を追加．
 		#region *トリガ動作を実行(Run)
-//		public void Run(bool saving = false, Task<IDictionary<DateTime, TimeSeriesDataDouble>>[] tasks = null)
 		public void Run(bool saving = false)
 		{
 			DateTime next_data_time = db.GetLatestDataTime().AddMinutes(10);
-			Console.WriteLine("Here we go! : {0}", next_data_time);
-
-			//if (tasks == null)
-			//{
-			//	tasks = loggers.Select(logger => logger.GetCountsAfterTask(next_data_time)).ToArray();
-			//}
 			var tasks = loggers.Select(logger => logger.GetCountsAfterTask(next_data_time)).ToArray();
 
 			try
@@ -146,7 +140,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MySQL
 				{
 					task.Start();
 				}
-				if (!Task.WaitAll(tasks, 40 * 1000))
+				if (!Task.WaitAll(tasks, 100 * 1000))
 				{
 					// これでtasksの各要素は破棄されるのだろうか？
 					return;
@@ -179,6 +173,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MySQL
 
 		// Runから分離．
 		// 1つの時刻に対するデータを計算して，DBに記録する．
+		#region *データ処理を実行(ProcessData)
 		public void ProcessData(IEnumerable<IDictionary<DateTime, TimeSeriesDataDouble>> results, DateTime next_data_time, bool saving = false)
 		{
 			while (results.All(result => { return result.Keys.Contains(next_data_time); }))  
@@ -217,13 +212,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MySQL
 			}
 
 		}
+		#endregion
 
-		public event EventHandler<TweetEventArgs> Tweet = delegate { };
 
 		public void TimerCallback(object state)
 		{
 			Run(true);
 		}
+
+		#region Tweet関連
+
+		public event EventHandler<TweetEventArgs> Tweet = delegate { };
 
 		public void TestTweet()
 		{
@@ -231,8 +230,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MySQL
 			{
 				Message = "毎度有り難うございます．"
 			});
-
 		}
+
+		#endregion
 
 	}
 	#endregion
