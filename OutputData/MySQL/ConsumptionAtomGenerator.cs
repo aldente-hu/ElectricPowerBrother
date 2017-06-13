@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-using System.Data.SQLite;
+using MySql.Data.MySqlClient;
 
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.MySQL
 {
@@ -115,7 +115,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.MySQL
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = "select ch, consumption from consumptions_10min where e_time = @1";
-					command.Parameters.Add(new SQLiteParameter("@1", TimeConverter.TimeToInt(time)));
+					command.Parameters.Add(new MySqlParameter("@1", TimeConverter.TimeToInt(time)));
 
 					using (var reader = command.ExecuteReader())
 					{
