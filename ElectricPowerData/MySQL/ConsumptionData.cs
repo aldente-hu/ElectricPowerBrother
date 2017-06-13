@@ -141,6 +141,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data.MySQL
 				using (MySqlCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+					// jdhm_consumptions_10minの定義がMySQLとSQLiteで異なるので注意(/による割り算で実数を返すか整数を返すかが異なる)。
 					command.CommandText = 
 						"select date, sum(consumption) as total from jdhm_consumptions_10min where date < @date and date >= @date - 21 and ch in (1, 2) group by date";
 					command.Parameters.Add(new MySqlParameter("@date", TimeConverter.DateToInt(before)));
