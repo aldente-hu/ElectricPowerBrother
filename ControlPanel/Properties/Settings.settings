@@ -26,5 +26,17 @@
     <Setting Name="OutputConfigFile" Type="System.String" Scope="User">
       <Value Profile="(Default)">B:\config.xml</Value>
     </Setting>
+    <Setting Name="MyServer" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="MyUserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">user</Value>
+    </Setting>
+    <Setting Name="MyPassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)">pass</Value>
+    </Setting>
+    <Setting Name="MyDatabase" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ep</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

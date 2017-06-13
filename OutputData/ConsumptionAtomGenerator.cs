@@ -72,7 +72,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					{
 						Content = string.Format("{0}までの10分間電力消費量[kWh] 1号館 : {1} 2号館 : {2}",
 							time.ToString("MM月dd日HH時mm分"), consumptions[1], consumptions[2]),
-						ID = this.EntryIDBase + SQLiteData.Convert.TimeToInt(time),
+						ID = this.EntryIDBase + SQLiteData.TimeConverter.TimeToInt(time),
 						Title = string.Format("{0}の電力消費量 ({1},{2})",
 							time.ToString("dd日HH:mm"), consumptions[1], consumptions[2]),
 						PublishedAt = time
@@ -115,7 +115,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = "select ch, consumption from consumptions_10min where e_time = @1";
-					command.Parameters.Add(new SQLiteParameter("@1", Convert.TimeToInt(time)));
+					command.Parameters.Add(new SQLiteParameter("@1", TimeConverter.TimeToInt(time)));
 
 					using (var reader = command.ExecuteReader())
 					{

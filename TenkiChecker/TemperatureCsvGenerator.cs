@@ -12,6 +12,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 	public class TemperatureCsvGenerator : TemperatureData, Helpers.IPlugin
 	{
 
+		#region プロパティ
+
 		/// <summary>
 		/// ヘッダ行を#でコメントアウトするかどうかの値を取得／設定します．
 		/// </summary>
@@ -22,8 +24,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 		/// </summary>
 		public bool UseDateOnHeader { get; set; }
 
-		public TemperatureCsvGenerator(string fileName) : base(fileName) { }
+		#endregion
 
+		#region *コンストラクタ(TemperatureCsvGenerator)
+		public TemperatureCsvGenerator(string fileName) : base(fileName) { }
+		#endregion
+
+		#region *本日分のCSVを出力(OutputTodayCsv)
 		public void OutputTodayCsv(DateTime date, string destination)
 		{
 			var data = GetOneDayTemperatures(date);
@@ -47,7 +54,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 			}
 
 		}
-
+		#endregion
 
 		#region  (1.1.1)以下プラグイン用．
 

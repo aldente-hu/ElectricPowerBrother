@@ -16,7 +16,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		#region ConsumptionRecorderクラス
 		public class ConsumptionRecorder : ConsumptionData
 		{
-			public ConsumptionRecorder(string fileName) : base(fileName)
+			// (1.5.0) channels引数を追加。
+			public ConsumptionRecorder(string fileName, int[] channels) : base(fileName, channels)
 			{ }
 
 			// (1.1.4.1)int=>doubleなIDictionaryにも対応．
@@ -26,7 +27,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				var insert_queries = data.Select(
 					ch_data => string.Format("INSERT INTO consumptions_10min VALUES({0}, {1}, {2})",
-										Convert.TimeToInt(time), ch_data.Key, Math.Truncate(ch_data.Value))
+										TimeConverter.TimeToInt(time), ch_data.Key, Math.Truncate(ch_data.Value))
 				);
 				InsertData(insert_queries);
 			}
@@ -35,7 +36,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			{
 				var insert_queries = data.Select(
 					ch_data => string.Format("INSERT INTO consumptions_10min VALUES({0}, {1}, {2})",
-										Convert.TimeToInt(time), ch_data.Key, ch_data.Value)
+										TimeConverter.TimeToInt(time), ch_data.Key, ch_data.Value)
 				);
 				InsertData(insert_queries);
 			}

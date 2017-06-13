@@ -13,10 +13,36 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 	public class ConsumptionData : SQLiteData
 	{
 
+		// (1.5.0)
+		#region *InterestingChannelsプロパティ
+		/// <summary>
+		/// 興味のあるチャンネルを返します。
+		/// </summary>
+		protected int[] InterestingChannels
+		{
+			get
+			{
+				return _interestringChannels;
+			}
+		}
+		readonly int[] _interestringChannels;
+		#endregion
+
+		// (1.5.0) channels引数を追加。
 		#region *コンストラクタ(ConsumptionData) ; 実質的実装はなし
-		public ConsumptionData(string fileName)
+		public ConsumptionData(string fileName, params int[] channels)
 			: base(fileName)
-		{ }
+		{
+			if (channels.Length == 0)
+			{
+				// とりあえず互換性を保つ。
+				this._interestringChannels = new int[] { 1, 2 };
+			}
+			else
+			{
+				this._interestringChannels = channels;
+			}
+		}
 		#endregion
 
 
@@ -33,11 +59,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				// "select min(latest) from (select ch, max(e_time) as latest from consumptions_10min where ch in (1, 2) group by ch)"
 				// で一発なのだが，サブクエリ部分の結果が返るのに3秒くらいかかったので，
 				// ch間の比較はプログラム側で行うことにする(↓のクエリはほぼ一瞬で返る)．
-				var latest1 = GetLatestTime(connection, 1);
-				var latest2 = GetLatestTime(connection, 2);
-				//connection.Close();
-
-				return latest1 < latest2 ? latest1 : latest2;
+				return InterestingChannels.Select(ch => GetLatestTime(connection, ch)).Min();
 			}
 
 		}
@@ -62,7 +84,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (var reader = command.ExecuteReader())
 				{
 					reader.Read();
-					return Convert.IntToTime(System.Convert.ToInt32(reader[0]));
+					return TimeConverter.IntToTime(System.Convert.ToInt32(reader[0]));
 				}
 			}
 		}
@@ -101,14 +123,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					command.CommandText = string.Format(
 						"select e_time, sum(consumption) as total from consumptions_10min where e_time <= @from and e_time > @to and {0} group by e_time",
 						ch_condition);
-					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(time)));
-					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(time.AddMinutes(-10 * n))));
+					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(time)));
+					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(time.AddMinutes(-10 * n))));
 
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
-							DateTime data_time = Convert.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+							DateTime data_time = TimeConverter.IntToTime(System.Convert.ToInt32(reader["e_time"]));
 							int total = System.Convert.ToInt32(reader["total"]);
 							//Console.WriteLine("{0} : {1}", date, total);
 							data.Add(data_time, total);
@@ -143,7 +165,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = 
 						"select date, sum(consumption) as total from jdhm_consumptions_10min where date < @date and date >= @date - 21 and ch in (1, 2) group by date";
-					command.Parameters.Add(new SQLiteParameter("@date", Convert.DateToInt(before)));
+					command.Parameters.Add(new SQLiteParameter("@date", TimeConverter.DateToInt(before)));
 					
 					using (var reader = command.ExecuteReader())
 					{
@@ -152,7 +174,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 							int date = System.Convert.ToInt32(reader["date"]);
 							int total = System.Convert.ToInt32(reader["total"]);
 							//Console.WriteLine("{0} : {1}", date, total);
-							dailyConsumptions.Add(Convert.IntToDate(date), total);
+							dailyConsumptions.Add(TimeConverter.IntToDate(date), total);
 						}
 					}
 				}
@@ -183,7 +205,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = 
 						"select hour + 1 as e_hour, count(consumption) as cnt, sum(consumption) as total from jdhm_consumptions_10min where date = @date and ch in (1, 2) group by hour";
-					command.Parameters.Add(new SQLiteParameter("@date", Convert.DateToInt(date)));
+					command.Parameters.Add(new SQLiteParameter("@date", TimeConverter.DateToInt(date)));
 
 					using (var reader = command.ExecuteReader())
 					{
@@ -226,13 +248,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = 
 						"select e_time, sum(consumption) as total from consumptions_10min where e_time > @1 and e_time <= @2 and ch in (1, 2) group by e_time";
-					command.Parameters.Add(new SQLiteParameter("@1", Convert.TimeToInt(from)));
-					command.Parameters.Add(new SQLiteParameter("@2", Convert.TimeToInt(to)));
+					command.Parameters.Add(new SQLiteParameter("@1", TimeConverter.TimeToInt(from)));
+					command.Parameters.Add(new SQLiteParameter("@2", TimeConverter.TimeToInt(to)));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
-							DateTime e_time = Convert.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+							DateTime e_time = TimeConverter.IntToTime(System.Convert.ToInt32(reader["e_time"]));
 							int total = System.Convert.ToInt32(reader["total"]);
 							detailConsumptions.Add(e_time, total);
 						}
@@ -248,6 +270,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 		// (1.1.5) chを指定できるようにしました．
 		// (1.1.3)
+		#region *期間を指定してデータを取得(GetParticularConsumption)
 		/// <summary>
 		/// e_timeがfromより後でtoまでのデータを全て返します．
 		/// </summary>
@@ -270,14 +293,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					// intなので，SQLインジェクションの心配はないよね？
 					command.CommandText =
 						string.Format("select e_time, ch, consumption from consumptions_10min where e_time > @from and e_time <= @to and ch in ({0})", string.Join(",", channels));
-					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(from)));
-					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(to)));
+					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(from)));
+					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(to)));
 					//command.Parameters.Add(new SQLiteParameter("@ch", channels));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
 						{
-							DateTime e_time = Convert.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+							DateTime e_time = TimeConverter.IntToTime(System.Convert.ToInt32(reader["e_time"]));
 							int ch = System.Convert.ToInt32(reader["ch"]);
 							int consumption = System.Convert.ToInt32(reader["consumption"]);
 							if (!data.Keys.Contains(e_time))
@@ -300,8 +323,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			// かつての実装．
 			return GetParticularConsumptions(from, to, 1, 2);
 		}
+		#endregion
 
 		// (1.1.6)
+		#region *月間合計を取得(GetMonthlyTotal)
 		public int GetMonthlyTotal(DateTime month, params int[] channels)
 		{
 			// monthが 08/31 なら，8月の合計，
@@ -315,8 +340,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 			return GetTotal(from, to, channels);
 		}
+		#endregion
 
 		// (1.1.6)
+		#region *指定した期間の合計を取得(GetTotal)
 		public int GetTotal(DateTime from, DateTime to, params int[] channels)
 		{
 			using (var connection = new SQLiteConnection(ConnectionString))
@@ -330,8 +357,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					// intなので，SQLインジェクションの心配はないよね？
 					command.CommandText =
 						string.Format("select sum(consumption) as total from consumptions_10min where e_time > @from and e_time <= @to and ch in ({0})", string.Join(",", channels));
-					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(from)));
-					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(to)));
+					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(from)));
+					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(to)));
 					//command.Parameters.Add(new SQLiteParameter("@ch", channels));
 					using (var reader = command.ExecuteReader())
 					{
@@ -348,7 +375,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			}
 
 		}
-
+		#endregion
 
 		#region *trinityを決定(DefineTrinity)
 		/// <summary>
@@ -393,8 +420,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
 					command.CommandText = "select sum(consumption) as total from consumptions_10min where e_time > @from and e_time <= @to and ch in (1, 2) group by e_time order by e_time";
-					command.Parameters.Add(new SQLiteParameter("@from", Convert.TimeToInt(time.AddHours(-1))));
-					command.Parameters.Add(new SQLiteParameter("@to", Convert.TimeToInt(time.AddHours(1))));
+					command.Parameters.Add(new SQLiteParameter("@from", TimeConverter.TimeToInt(time.AddHours(-1))));
+					command.Parameters.Add(new SQLiteParameter("@to", TimeConverter.TimeToInt(time.AddHours(1))));
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())

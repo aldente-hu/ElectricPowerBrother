@@ -15,6 +15,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	{
 
 		// (2.0.0)親クラスをBase.CachingPulseLoggerに変更．
+		#region LR8400クラス
 		public class LR8400 : CachingPulseLogger
 		{
 
@@ -25,16 +26,28 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// ユースケースとしては，基本的にはネットワーク経由だけど，
 			// トラブル時の対応としてローカルファイルから取得するのかな，と．
 
+			#region プロパティ
+
+			/// <summary>
+			/// 接続先のIPアドレスを取得/設定します。
+			/// </summary>
 			public IPAddress Address { get; set; }
+
+			/// <summary>
+			/// 認証情報を取得します。設定は、SetUpメソッドから(のみ)行うことができます。
+			/// </summary>
 			public NetworkCredential Credential {
 				get { return this._credential;}
 			}
 			NetworkCredential _credential = new NetworkCredential();
 
+			#endregion
+
 			// ★やぶれかぶれにローカルファイルからのデータ取得に対応．
 			// (1.0.1.1)GetDataViaFtpの結果を配列として保持してみる．
 			// time，もしくはそれより後のデータを取得します．(timeのデータが欲しい！それ以降のデータもあれば欲しい！)
 
+			#region *指定時刻以降のカウント値データを取得(RetrieveCountAfter)
 			/// <summary>
 			/// LocalRootが設定されていればローカルファイルから，そうでなければAddressで指定されたリモートから，
 			/// カウント値データを取得します．
@@ -116,11 +129,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 				}
 			}
-
+			#endregion
 
 			#region 最新データ取得関連
 
-				// (0.1.0)とりあえずpublic．
+			// (0.1.0)とりあえずpublic．
 			public async Task<TimeSeriesDataInt> GetLatestCounts()
 			{
 				using (WebClient client = new WebClient())
@@ -187,7 +200,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			#region FTPデータ取得関連
 
+			// (2.0.1) Passiveモードの設定を追加。
 			// (0.0.4.0)とりあえず．
+			#region *FTP経由でデータを取得(GetDataViaFtp)
 			/// <summary>
 			/// FTP経由でデータを取得します．時刻順に返ってくるものと信じます．
 			/// </summary>
@@ -208,7 +223,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					if (m.Success  /* && DateTime.Parse(m.Groups[1].Value) >= time */ )
 					{
 						string file_name = directory + m.Groups[2].Value;
-						WebRequest req = FtpWebRequest.Create(file_name);
+						// passiveモードを利用する。
+						FtpWebRequest req = FtpWebRequest.Create(file_name) as FtpWebRequest;
+						req.UsePassive = true;
 
 						// LISTコマンドはListDirectoryDetails, NLISTコマンドはListDirectory．
 						req.Method = WebRequestMethods.Ftp.DownloadFile;
@@ -224,11 +241,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 					}
 				}
-
-				
+		
 			}
+			#endregion
 
 			// 汎用できるメソッド？→static化できると思ったら，Credentialでthisを使っていた！
+			#region *ディレクトリ一覧を取得(ListDirectory)
 			IEnumerable<string> ListDirectory(string uri)
 			{
 				WebRequest req = FtpWebRequest.Create(uri);
@@ -246,9 +264,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 
 			}
+			#endregion
 
 			// 非同期化はいったん断念．yield returnと相性が良くない？(いずれもメソッドの返り値の型に影響するし...)
 			// というか，両者のカンケイを一度きちんと調べる必要があるカモね．
+			#region *ファイルからデータを取得(GetDataFromFile)
 			/// <summary>
 			/// 1つのファイルから，time以降のデータ(timeも含む！)を返します．
 			/// </summary>
@@ -298,15 +318,16 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						}
 
 					}
-					
 
 				}
 
 			}
+			#endregion
 
 			#endregion
 
 			// (1.1.0)ローカルからデータを取得できるようにした．
+			#region *ローカルからデータを取得(GetDataFromLocal)
 			/// <summary>
 			/// ロガーが書き出したファイルから(1日分の)データを読み込みます．
 			/// </summary>
@@ -329,11 +350,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					}
 				}
 
-
 			}
+			#endregion
+
 
 			// (2.0.0.0)
-			#region *CanGetVountsFromLocalプロパティ
+			#region *CanGetCountsFromLocalプロパティ
 			/// <summary>
 			/// LR8400は，ローカルファイルシステムからのデータ取得に対応しています．
 			/// </summary>
@@ -383,9 +405,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			#endregion
 
 		}
+		#endregion
 
 	}
-
-
 
 }

@@ -75,8 +75,23 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 								foreach (var config in task.Elements("Config"))
 								{
+									// (0.4.0)MySQLに対応したつもり。
 									// インスタンスを生成する．
-									IPluginBase generator = Activator.CreateInstance(type_info, MySettings.DatabaseFile) as IPluginBase;
+									object argument;
+									if (name.Contains("MySQL"))
+									{
+										argument = new Data.MySQL.ConnectionProfile {
+												Server = MySettings.MyServer,
+												UserName = MySettings.MyUserName,
+												Password = MySettings.MyPassword,
+												Database = MySettings.MyDatabase
+										};
+									}
+									else
+									{
+										argument = MySettings.DatabaseFile;
+									}
+									IPluginBase generator = Activator.CreateInstance(type_info, argument) as IPluginBase;
 
 									if (generator == null)
 									{

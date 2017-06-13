@@ -15,6 +15,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	namespace EvaluateAlerts
 	{
 
+		#region AlertJudgementクラス
 		public class AlertJudgement : IUpdatingPlugin
 		{
 			IDictionary<int, AlertLevel> levels;
@@ -65,6 +66,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 
 			// とりあえず引数なしで．
+			#region *判定を行う(Judge)
 			public void Judge()
 			{
 				// time時点で最新のデータをn件取得する．
@@ -128,13 +130,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// (1.2.1.4)修正．
 				return current_rank;	// 現状維持．(レベル設定の変更がなければnew_rankと等しいはず．)
 			}
+			#endregion
 
+
+			#region 通知関連
+
+			#region フィード用プロパティ
 
 			public string FeedTitle { get; set; }
 			public string FeedAuthor { get; set; }
 			public string FeedID { get; set; }
 			public string FeedSelfLink { get; set; }
 
+			#endregion
 
 			// (1.1.1)Titleなどをプロパティ化．
 			// (1.0.1)
@@ -161,7 +169,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					var current_long_time = current.DataTime.ToString("M月d日HH時mm分");
 					AtomEntry entry = new AtomEntry
 					{
-						ID = this.FeedID + SQLiteData.Convert.TimeToInt(current.DeclaredAt),
+						ID = this.FeedID + SQLiteData.TimeConverter.TimeToInt(current.DeclaredAt),
 						PublishedAt = current.DeclaredAt
 					};
 
@@ -204,6 +212,30 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 			#endregion
 
+
+			#region メール送信関連プロパティ
+
+			public Jappajil MailSender
+			{ get; set; }
+
+			/// <summary>
+			/// Sender(すなわちReturn-Path？)やReplyToに設定されるアドレスを取得／設定します．
+			/// </summary>
+			public string MailReplyTo { get; set; }
+
+			public string MailFrom { get; set; }
+			/// <summary>
+			/// メール本文の末尾につく署名です．
+			/// </summary>
+			public string MailSignature { get; set; }
+			//public string PopServer { get; set; }
+
+			#region *MailDestinationsプロパティ
+			public IList<string> MailDestinations { get { return _mailDestinations; } }
+			IList<string> _mailDestinations = new List<string>();
+			#endregion
+
+			#endregion
 
 			// (1.2.1)メールにReplyToを設定するように修正．
 			#region (1.2.0)メール送信を実装．(とりあえず POP before SMTP 認証のみ．)
@@ -274,6 +306,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				}
 
 			}
+			#endregion
+
 			#endregion
 
 
@@ -368,28 +402,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 			#endregion
 
-			public Jappajil MailSender
-			{ get; set; }
-
-			/// <summary>
-			/// Sender(すなわちReturn-Path？)やReplyToに設定されるアドレスを取得／設定します．
-			/// </summary>
-			public string MailReplyTo { get; set; }
-
-			public string MailFrom { get; set; }
-			/// <summary>
-			/// メール本文の末尾につく署名です．
-			/// </summary>
-			public string MailSignature { get; set; }
-			//public string PopServer { get; set; }
-
-			#region *MailDestinationsプロパティ
-			public IList<string> MailDestinations { get { return _mailDestinations; } }
-			IList<string> _mailDestinations = new List<string>();
-			#endregion
 
 		}
-
+		#endregion
 
 		#region AlertLevelクラス
 		public class AlertLevel

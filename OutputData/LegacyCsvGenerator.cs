@@ -32,7 +32,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 		// (1.3.6)Legacy名前空間に落とし込む．
 		#region DailyCsvGeneratorクラス
-		public class DailyCsvGenerator : ConsumptionData, IPlugin
+		public class DailyCsvGenerator : ConsumptionData, IPlugin, IDailyCsvGenerator
 		{
 
 			public DailyCsvGenerator(string databaseFile) : base(databaseFile)
@@ -347,14 +347,20 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		}
 		#endregion
 
-
+		// (1.5.1)とりあえず。
+		public interface IDailyCsvGenerator
+		{
+			DateTime UpdateFiles(DateTime latestData, int recursiveCount = 0);
+			bool OutputOneDay(DateTime target_date);
+			void CreateArchive(DateTime month);
+		}
 
 
 		// とりあえずここに書く．
 
 		// (1.3.7)
 		#region DailyHourlyCsvGeneratorクラス
-		public class DailyHourlyCsvGenerator : DailyCsvGenerator
+		public class DailyHourlyCsvGenerator : DailyCsvGenerator, IDailyHourlyCsvGenerator
 		{
 			public DailyHourlyCsvGenerator(string databaseFile) : base(databaseFile)
 			{ TimeFormat = "HH"; }
@@ -395,6 +401,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 		}
 		#endregion
+
+		// (1.5.1)とりあえず。
+		public interface IDailyHourlyCsvGenerator : IDailyCsvGenerator
+		{
+		}
 
 
 		#region [static]DailyCsvDestinationGeneratorクラス

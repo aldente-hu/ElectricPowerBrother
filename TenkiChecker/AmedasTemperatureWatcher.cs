@@ -9,15 +9,18 @@ using System.Net;
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 {
 	// (1.2.1) インターフェイスをIUpdatingPluginに変更．
+	#region AmedasTemperatureWatcherクラス
 	public class AmedasTemperatureWatcher : Data.TemperatureData, Helpers.IUpdatingPlugin
 	{
-
 		static System.Globalization.CultureInfo JpCulture = new System.Globalization.CultureInfo("ja-JP");
 
+		#region *定番コンストラクタ(AmedasTemperatureWatcher)
 		public AmedasTemperatureWatcher(string fileName)
 			: base(fileName)
 		{ }
+		#endregion
 
+		#region *新しいデータを取得(GetNewData)
 		/// <summary>
 		/// 
 		/// </summary>
@@ -30,9 +33,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 			Console.WriteLine("オワリ");	// for debug
 			//return GetLatestDataTime();
 		}
+		#endregion
 
-
-		// after以後のデータを取得します(afterは含まない)。
+		#region *Amedasのデータを取得(GetAmedasData)
+		/// <summary>
+		/// after以後のデータを取得します(afterは含まない)。
+		/// </summary>
+		/// <param name="after"></param>
 		public void GetAmedasData(DateTime after)
 		{
 			// http://www.tenki.jp/amedas/2/5/31461.html からデータを取得する．
@@ -219,7 +226,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 			*/
 
 		}
+		#endregion
 
+		#region データ取得用staticメソッド
 
 		// 気温データのある行から気温を取り出します．
 		static decimal? ReadTemperature(string line)
@@ -279,7 +288,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 			}
 		}
 
-
+		#endregion
 
 		#region  (1.1.3)以下プラグイン用．
 
@@ -307,6 +316,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 		#endregion
 
 	}
-
+	#endregion
 
 }

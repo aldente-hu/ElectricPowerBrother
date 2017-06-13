@@ -15,7 +15,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	{
 		// (1.3.6)
 		#region MonthlyChartクラス
-		public class MonthlyChart : PltFileGeneratorBase, IPlugin
+		public class MonthlyChart : PltFileGeneratorBase, IPlugin, IMonthlyChart
 		{
 
 			#region プロパティ
@@ -515,6 +515,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 		}
 		#endregion
+
+		public interface IMonthlyChart
+		{
+			int? BorderLine { get; set; }
+			void OtameshiPlt(DateTime date, string destination);
+			void DrawChartTest(DateTime time);
+		}
 
 
 		// (1.3.11)

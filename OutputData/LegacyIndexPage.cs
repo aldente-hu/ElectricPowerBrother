@@ -18,7 +18,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 		// (1.3.15)
 		#region IndexPageクラス
-		public class IndexPage : ConsumptionData, IPlugin
+		public class IndexPage : ConsumptionData, IPlugin, IIndexpage
 		{
 
 			// (1.3.15)
@@ -194,6 +194,31 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			}
 		}
 		#endregion
+
+		public interface IIndexpage
+		{
+
+			#region プロパティ
+
+			/// <summary>
+			/// テンプレートが記述されたファイルへのパスを取得／設定します．
+			/// </summary>
+			string Template { get; set; }
+
+			/// <summary>
+			/// 生成されたhtmlドキュメントの出力先を取得／設定します．
+			/// </summary>
+			string Destination { get; set; }
+
+			/// <summary>
+			/// CSVファイルの文字エンコーディングを取得／設定します．デフォルトはEncoding.UTF8です．
+			/// </summary>
+			Encoding CharacterEncoding { get; set; }
+
+			#endregion
+
+			void Update();
+		}
 
 	}
 }

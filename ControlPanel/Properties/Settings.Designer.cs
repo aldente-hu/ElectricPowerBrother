@@ -118,5 +118,53 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.Propertie
                 this["OutputConfigFile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
+        public string MyServer {
+            get {
+                return ((string)(this["MyServer"]));
+            }
+            set {
+                this["MyServer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("user")]
+        public string MyUserName {
+            get {
+                return ((string)(this["MyUserName"]));
+            }
+            set {
+                this["MyUserName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("pass")]
+        public string MyPassword {
+            get {
+                return ((string)(this["MyPassword"]));
+            }
+            set {
+                this["MyPassword"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ep")]
+        public string MyDatabase {
+            get {
+                return ((string)(this["MyDatabase"]));
+            }
+            set {
+                this["MyDatabase"] = value;
+            }
+        }
     }
 }

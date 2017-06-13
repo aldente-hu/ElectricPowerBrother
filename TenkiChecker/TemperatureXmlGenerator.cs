@@ -10,12 +10,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 {
 	using Data;
 
-
 	// 01/21/2015 by aldente : ほとんどConsumptionXmlGeneratorのコピペ．
+	#region TemperatureXmlGeneratorクラス
 	public class TemperatureXmlGenerator : TemperatureData, Helpers.IPlugin
 	{
+
+		#region *定番コンストラクタ(TemperatureXmlGenerator)
 		public TemperatureXmlGenerator(string fileName) : base(fileName)
 		{ }
+		#endregion
+
+		#region 出力メソッド
 
 		protected void OutputXmlDocument(XDocument doc, string destination)
 		{
@@ -85,7 +90,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 
 		}
 
-
+		#endregion
 
 		#region  (1.1.2)以下プラグイン用．
 
@@ -133,6 +138,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.TenkiChecker
 		#endregion
 
 	}
-
+	#endregion
 
 }

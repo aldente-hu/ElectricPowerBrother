@@ -14,7 +14,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 	// (0.2.0)ControlPanelに移動．
 	// (0.3.1)RetrieveDataに移動．クラスの名前がヘンだけどまあいいか．
 	#region Environmentクラス
-	public class Environment
+	public class Environment : IEnvironment
 	{
 		List<CachingPulseLogger> loggers = new List<CachingPulseLogger>();
 		//DateTime last_data_time = DateTime.Today.AddHours(-2);
@@ -88,7 +88,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 		#region *コンストラクタ(Environment)
 		public Environment(string databaseFile, System.Xml.Linq.XElement loggers)
 		{
-			db = new ConsumptionRecorder(databaseFile);
 
 			foreach (var elem_logger in loggers.Elements())
 			{
@@ -113,6 +112,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 				logger.SetUp(elem_logger);
 				this.loggers.Add(logger);
 			}
+
+			db = new ConsumptionRecorder(databaseFile, this.loggers.SelectMany(l => l.Channels.SelectMany(ch => ch.Gains.Keys)).Distinct().ToArray());
 		}
 		#endregion
 
@@ -121,20 +122,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 			return db.GetLatestDataTime().AddMinutes(10);
 		}
 
+		// (0.3.1) Taskのタイムアウト時間を、40sから100sに変更。
 		// (1.1.5)データをDBに保存するかどうかを指定する引数を追加．
 		// (1.1.4.2)tryの範囲を縮小．
 		// (1.1.3.3)例外処理を追加．
 		#region *トリガ動作を実行(Run)
-//		public void Run(bool saving = false, Task<IDictionary<DateTime, TimeSeriesDataDouble>>[] tasks = null)
+		//		public void Run(bool saving = false, Task<IDictionary<DateTime, TimeSeriesDataDouble>>[] tasks = null)
 		public void Run(bool saving = false)
 		{
 			DateTime next_data_time = db.GetLatestDataTime().AddMinutes(10);
-			Console.WriteLine("Here we go! : {0}", next_data_time);
-
-			//if (tasks == null)
-			//{
-			//	tasks = loggers.Select(logger => logger.GetCountsAfterTask(next_data_time)).ToArray();
-			//}
 			var tasks = loggers.Select(logger => logger.GetCountsAfterTask(next_data_time)).ToArray();
 
 			try
@@ -143,7 +139,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 				{
 					task.Start();
 				}
-				if (!Task.WaitAll(tasks, 40 * 1000))
+				if (!Task.WaitAll(tasks, 100 * 1000))
 				{
 					// これでtasksの各要素は破棄されるのだろうか？
 					return;
@@ -176,6 +172,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 
 		// Runから分離．
 		// 1つの時刻に対するデータを計算して，DBに記録する．
+		#region *データ処理を実行(ProcessData)
 		public void ProcessData(IEnumerable<IDictionary<DateTime, TimeSeriesDataDouble>> results, DateTime next_data_time, bool saving = false)
 		{
 			while (results.All(result => { return result.Keys.Contains(next_data_time); }))  
@@ -214,13 +211,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 			}
 
 		}
+		#endregion
 
-		public event EventHandler<TweetEventArgs> Tweet = delegate { };
 
 		public void TimerCallback(object state)
 		{
 			Run(true);
 		}
+
+		#region Tweet関連
+
+		public event EventHandler<TweetEventArgs> Tweet = delegate { };
 
 		public void TestTweet()
 		{
@@ -228,16 +229,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 			{
 				Message = "毎度有り難うございます．"
 			});
-
 		}
+
+		#endregion
 
 	}
 	#endregion
-
-
-	public class TweetEventArgs : EventArgs
-	{
-		public string Message { get; set; }
-	}
 
 }
