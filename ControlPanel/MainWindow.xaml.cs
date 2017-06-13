@@ -122,7 +122,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				bool mysql = environment is MySQL.Environment;
 				MessageBox.Show($"MySQL? : {mysql}");
 				DateTime next_data_time = environment.GetNextDataTime();
-				Console.WriteLine("Here we go! : {0}", next_data_time);
 				MessageBox.Show($"Here we go! : {next_data_time}");
 
 

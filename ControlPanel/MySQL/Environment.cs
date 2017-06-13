@@ -133,25 +133,30 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel.MySQL
 		public void Run(bool saving = false)
 		{
 			DateTime next_data_time = db.GetLatestDataTime().AddMinutes(10);
-			Console.WriteLine("Here we go! : {0}", next_data_time);
 
-			//if (tasks == null)
-			//{
-			//	tasks = loggers.Select(logger => logger.GetCountsAfterTask(next_data_time)).ToArray();
-			//}
 			var tasks = loggers.Select(logger => logger.GetCountsAfterTask(next_data_time)).ToArray();
 
 			try
 			{
+				// for debug
+				Tweet(this, new TweetEventArgs { Message = $"{tasks.Count()}個のタスクを開始します。" });
+
 				foreach (var task in tasks)
 				{
 					task.Start();
 				}
-				if (!Task.WaitAll(tasks, 40 * 1000))
+				if (!Task.WaitAll(tasks, 100 * 1000))
 				{
 					// これでtasksの各要素は破棄されるのだろうか？
+
+					// for debug
+					Tweet(this, new TweetEventArgs { Message = "今日のタスクは待ちぼうけ。" });
+
 					return;
 				}
+				// for debug
+				Tweet(this, new TweetEventArgs { Message = "タスクは完了したはず！" });
+
 			}
 			catch (AggregateException ex)
 			{

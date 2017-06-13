@@ -208,7 +208,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					if (m.Success  /* && DateTime.Parse(m.Groups[1].Value) >= time */ )
 					{
 						string file_name = directory + m.Groups[2].Value;
-						WebRequest req = FtpWebRequest.Create(file_name);
+						// passiveモードを利用する。
+						FtpWebRequest req = FtpWebRequest.Create(file_name) as FtpWebRequest;
+						req.UsePassive = true;
+						
 
 						// LISTコマンドはListDirectoryDetails, NLISTコマンドはListDirectory．
 						req.Method = WebRequestMethods.Ftp.DownloadFile;
