@@ -32,40 +32,4 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data.MySQL
 	}
 	#endregion
 
-	#region ConnectionProfile構造体
-	public struct ConnectionProfile
-	{
-		/// <summary>
-		/// 接続先のMySQLサーバ名です。
-		/// </summary>
-		public string Server;
-
-		/// <summary>
-		/// MySQLサーバのユーザ名です。
-		/// </summary>
-		public string UserName;
-
-		/// <summary>
-		/// MySQLサーバのパスワードです。
-		/// </summary>
-		public string Password;
-
-		/// <summary>
-		/// MySQLサーバのデータベース名です。
-		/// </summary>
-		public string Database;
-
-		/// <summary>
-		/// 接続文字列を取得します。
-		/// </summary>
-		public string ConnectionString
-		{
-			get
-			{
-				return $"server={Server};user={UserName};password={Password};database={Database}";
-			}
-		}
-	}
-	#endregion
-
 }

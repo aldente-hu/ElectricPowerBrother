@@ -86,16 +86,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NewAlertData.cs" />
     <Compile Include="AlertData.cs" />
     <Compile Include="ConsumptionData.cs" />
+    <Compile Include="NewConsumptionRecorder.cs" />
     <Compile Include="ConsumptionRecorder.cs" />
+    <Compile Include="DataTickerBase.cs" />
     <Compile Include="DataTicker.cs" />
+    <Compile Include="IConnectionProfile.cs" />
     <Compile Include="MySQL\AlertData.cs" />
+    <Compile Include="MySQL\ConnectionProfile.cs" />
     <Compile Include="MySQL\ConsumptionData.cs" />
     <Compile Include="MySQL\ConsumptionRecorder.cs" />
     <Compile Include="MySQL\DataTicker.cs" />
+    <Compile Include="NewConsumptionData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLiteData.cs" />
+    <Compile Include="SQLite\ConnectionProfile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -106,6 +106,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="NewTemperatureData.cs" />
     <Compile Include="TemperatureData.cs" />
     <Compile Include="TemperatureCsvGenerator.cs" />
     <Compile Include="TemperatureXmlGenerator.cs" />

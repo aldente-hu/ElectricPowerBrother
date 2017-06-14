@@ -1,0 +1,441 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using System.Data.Common;
+
+namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
+{
+
+	namespace New
+	{
+
+		#region ConsumptionDataクラス(新実装)
+		public class ConsumptionData : DataTickerModel
+		{
+
+			// (1.5.0)
+			#region *InterestingChannelsプロパティ
+			/// <summary>
+			/// 興味のあるチャンネルを返します。
+			/// </summary>
+			protected int[] InterestingChannels
+			{
+				get
+				{
+					return _interestringChannels;
+				}
+			}
+			readonly int[] _interestringChannels;
+			#endregion
+
+			// (1.5.0) channels引数を追加。
+			#region *コンストラクタ(ConsumptionData) ; 実質的実装はなし
+			public ConsumptionData(IConnectionProfile profile, params int[] channels)
+				: base(profile)
+			{
+				if (channels.Length == 0)
+				{
+					// とりあえず互換性を保つ。
+					this._interestringChannels = new int[] { 1, 2 };
+				}
+				else
+				{
+					this._interestringChannels = channels;
+				}
+			}
+			#endregion
+
+
+			#region *最新データの時刻を取得(GetLatestDataTime)
+			/// <summary>
+			/// 最新データの時刻(ch1, ch2のデータが揃っている時刻)を取得します．
+			/// </summary>
+			/// <returns></returns>
+			public override async Task<DateTime> GetLatestDataTimeAsync()
+			{
+				using (var connection = await profile.GetConnectionAsync())
+				{
+					//connection.Open();
+
+					// "select min(latest) from (select ch, max(e_time) as latest from consumptions_10min where ch in (1, 2) group by ch)"
+					// で一発なのだが，サブクエリ部分の結果が返るのに3秒くらいかかったので，
+					// ch間の比較はプログラム側で行うことにする(↓のクエリはほぼ一瞬で返る)．
+					//return await InterestingChannels.Select(async ch => await GetLatestTimeAsync(connection, ch)).Min();
+					return await InterestingChannels.Min(async ch => await GetLatestTimeAsync(connection, ch));
+				}
+
+			}
+			#endregion
+
+			// privateでいいのでは？
+			#region *指定したchの最新データの時刻を取得(GetLatestTime)
+			/// <summary>
+			/// 指定したチャンネルの最新データの時刻を取得します．
+			/// </summary>
+			/// <param name="connection"></param>
+			/// <param name="ch"></param>
+			/// <returns></returns>
+			protected async Task<DateTime> GetLatestTimeAsync(DbConnection connection, int ch)
+			{
+				using (var command = connection.CreateCommand())
+				{
+					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+					command.CommandText = "select max(e_time) from consumptions_10min where ch = @ch";
+					command.Parameters.Add(profile.CreateParameter("@ch", ch));
+
+					using (var reader = await command.ExecuteReaderAsync())
+					{
+						await reader.ReadAsync();
+						return TimeConverter.IntToTime(System.Convert.ToInt32(reader[0]));
+					}
+				}
+			}
+			#endregion
+
+			// (1.1.7)単独チャンネルにも対応．
+			// (1.1.1.0)新しい方からn件のデータを取得します(ch1と2の和)．
+			#region *最近のデータを取得(GetRecentData)
+			/// <summary>
+			/// 新しい方からn件のデータ(ch1とch2の和)を取得します．
+			/// </summary>
+			/// <param name="n">データを取得する数．</param>
+			/// <returns></returns>
+			public async Task<IDictionary<DateTime, int>> GetRecentDataAsync(int n)
+			{
+				return await GetRecentDataBaseAsync(n, "ch in (1, 2)");
+			}
+
+			public async Task<IDictionary<DateTime, int>> GetRecentDataAsync(int n, int ch)
+			{
+				return await GetRecentDataBaseAsync(n, string.Format("ch = {0}", ch));
+			}
+
+			async Task<IDictionary<DateTime, int>> GetRecentDataBaseAsync(int n, string ch_condition)
+			{
+				IDictionary<DateTime, int> data = new Dictionary<DateTime, int>();
+
+				var time = await GetLatestDataTimeAsync();
+				using (var connection = await profile.GetConnectionAsync())
+				{
+					using (DbCommand command = connection.CreateCommand())
+					{
+						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+						command.CommandText = string.Format(
+							"select e_time, sum(consumption) as total from consumptions_10min where e_time <= @from and e_time > @to and {0} group by e_time",
+							ch_condition);
+						command.Parameters.Add(profile.CreateParameter("@from", TimeConverter.TimeToInt(time)));
+						command.Parameters.Add(profile.CreateParameter("@to", TimeConverter.TimeToInt(time.AddMinutes(-10 * n))));
+
+						using (var reader = await command.ExecuteReaderAsync())
+						{
+							while (await reader.ReadAsync())
+							{
+								DateTime data_time = TimeConverter.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+								int total = System.Convert.ToInt32(reader["total"]);
+								//Console.WriteLine("{0} : {1}", date, total);
+								data.Add(data_time, total);
+							}
+						}
+					}
+				}
+				return data;
+			}
+			#endregion
+
+
+			// before以前3週間の隔日の合計を取得します．
+			#region *日合計を取得(GetLatestDaily)
+			/// <summary>
+			/// 指定した日以前の3週間についての日合計を取得します．
+			/// </summary>
+			/// <param name="before">指定した日以前のデータを取得します．自身は含みません．</param>
+			/// <returns></returns>
+			public async Task<IDictionary<DateTime, int>> GetLatestDailyAsync(DateTime before)
+			{
+				// キーがdate，値がtotalに対応．
+				var dailyConsumptions = new Dictionary<DateTime, int>();
+
+				using (var connection = await profile.GetConnectionAsync())
+				{
+					using (var command = connection.CreateCommand())
+					{
+						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+						command.CommandText =
+							"select date, sum(consumption) as total from jdhm_consumptions_10min where date < @date and date >= @date - 21 and ch in (1, 2) group by date";
+						command.Parameters.Add(profile.CreateParameter("@date", TimeConverter.DateToInt(before)));
+
+						using (var reader = await command.ExecuteReaderAsync())
+						{
+							while (await reader.ReadAsync())
+							{
+								int date = System.Convert.ToInt32(reader["date"]);
+								int total = System.Convert.ToInt32(reader["total"]);
+								//Console.WriteLine("{0} : {1}", date, total);
+								dailyConsumptions.Add(TimeConverter.IntToDate(date), total);
+							}
+						}
+					}
+				}
+				return dailyConsumptions;
+
+			}
+			#endregion
+
+			// dateの各hour毎の合計を取得します．
+			#region *1時間ごとのデータを取得(GetHourlyConsumptions)
+			/// <summary>
+			/// 指定した日の1時間毎のデータを取得します(ch1とch2の合計)．
+			/// </summary>
+			/// <param name="date">データ取得の対象日．</param>
+			/// <param name="completed_only">trueであれば，データが揃っている時間だけを返します．</param>
+			/// <returns></returns>
+			public async Task<IDictionary<int, int>> GetHourlyConsumptionsTask(DateTime date, bool completed_only = true)
+			{
+				// キーがhour，値がtotalに対応．
+				var hourlyConsumptions = new Dictionary<int, int>();
+
+				using (var connection = await profile.GetConnectionAsync())
+				{
+					connection.Open();
+					using (var command = connection.CreateCommand())
+					{
+						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+						command.CommandText =
+							"select hour + 1 as e_hour, count(consumption) as cnt, sum(consumption) as total from jdhm_consumptions_10min where date = @date and ch in (1, 2) group by hour";
+						command.Parameters.Add(profile.CreateParameter("@date", TimeConverter.DateToInt(date)));
+
+						using (var reader = await command.ExecuteReaderAsync())
+						{
+							while (await reader.ReadAsync())
+							{
+								if (!completed_only || System.Convert.ToInt32(reader["cnt"]) == 12)
+								{
+									int hour = System.Convert.ToInt32(reader["e_hour"]);
+									int total = System.Convert.ToInt32(reader["total"]);
+									//Console.WriteLine("{0} : {1}", hour, total);
+									hourlyConsumptions.Add(hour, total);
+								}
+							}
+						}
+					}
+					//connection.Close();
+				}
+				return hourlyConsumptions;
+
+			}
+			#endregion
+
+			// from自身は含まず，to自身は含みます．
+			#region *消費量データを取得(GetDetailConsumptions)
+			/// <summary>
+			/// 指定した期間のデータ(ch1とch2の合計)を取得します．
+			/// </summary>
+			/// <param name="from">期間の始点です．この時刻のデータは含まれません．</param>
+			/// <param name="to">期間の終点です．この時刻のデータが含まれます．</param>
+			/// <returns></returns>
+			public async Task<IDictionary<DateTime, int>> GetDetailConsumptionsAsync(DateTime from, DateTime to)
+			{
+				var detailConsumptions = new Dictionary<DateTime, int>();
+
+				using (var connection = await profile.GetConnectionAsync())
+				{
+					using (var command = connection.CreateCommand())
+					{
+						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+						command.CommandText =
+							"select e_time, sum(consumption) as total from consumptions_10min where e_time > @1 and e_time <= @2 and ch in (1, 2) group by e_time";
+						command.Parameters.Add(profile.CreateParameter("@1", TimeConverter.TimeToInt(from)));
+						command.Parameters.Add(profile.CreateParameter("@2", TimeConverter.TimeToInt(to)));
+						using (var reader = await command.ExecuteReaderAsync())
+						{
+							while (await reader.ReadAsync())
+							{
+								DateTime e_time = TimeConverter.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+								int total = System.Convert.ToInt32(reader["total"]);
+								detailConsumptions.Add(e_time, total);
+							}
+						}
+
+					}
+					//connection.Close();
+				}
+
+				return detailConsumptions;
+			}
+			#endregion
+
+			// (1.1.5) chを指定できるようにしました．
+			// (1.1.3)
+			#region *期間を指定してデータを取得(GetParticularConsumption)
+			/// <summary>
+			/// e_timeがfromより後でtoまでのデータを全て返します．
+			/// </summary>
+			/// <param name="from"></param>
+			/// <param name="to"></param>
+			/// <returns></returns>
+			public async Task<IDictionary<DateTime, IDictionary<int, int>>> GetParticularConsumptionsAsync(DateTime from, DateTime to, params int[] channels)
+			{
+
+				var data = new Dictionary<DateTime, IDictionary<int, int>>();
+
+				using (var connection = await profile.GetConnectionAsync())
+				{
+					using (var command = connection.CreateCommand())
+					{
+						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+
+						// IN演算子でCommandParameterを使う方法がわからないので，string.Formatでごまかす．
+						// intなので，SQLインジェクションの心配はないよね？
+						command.CommandText =
+							string.Format("select e_time, ch, consumption from consumptions_10min where e_time > @from and e_time <= @to and ch in ({0})", string.Join(",", channels));
+						command.Parameters.Add(profile.CreateParameter("@from", TimeConverter.TimeToInt(from)));
+						command.Parameters.Add(profile.CreateParameter("@to", TimeConverter.TimeToInt(to)));
+						//command.Parameters.Add(new SQLiteParameter("@ch", channels));
+						using (var reader = await command.ExecuteReaderAsync())
+						{
+							while (await reader.ReadAsync())
+							{
+								DateTime e_time = TimeConverter.IntToTime(System.Convert.ToInt32(reader["e_time"]));
+								int ch = System.Convert.ToInt32(reader["ch"]);
+								int consumption = System.Convert.ToInt32(reader["consumption"]);
+								if (!data.Keys.Contains(e_time))
+								{
+									data.Add(e_time, new Dictionary<int, int>());
+								}
+								data[e_time].Add(ch, consumption);  // e_timeとchがともに重複することはないはずだが….
+							}
+						}
+
+					}
+				}
+				return data;
+
+			}
+
+			public async Task<IDictionary<DateTime, IDictionary<int, int>>> GetParticularConsumptionsAsync(DateTime from, DateTime to)
+			{
+				// かつての実装．
+				return await GetParticularConsumptionsAsync(from, to, 1, 2);
+			}
+			#endregion
+
+
+
+			// (1.1.6)
+			#region *月間合計を取得(GetMonthlyTotal)
+			public async Task<int> GetMonthlyTotalAsync(DateTime month, params int[] channels)
+			{
+				// monthが 08/31 なら，8月の合計，
+				// monthが 09/01 00:00 なら8月の合計，
+				// monthが 09/01 00:01 なら9月の合計を返す．
+
+				month = month.AddSeconds(-1);
+				var from = new DateTime(month.Year, month.Month, 1);
+				var to = from.AddDays(31);
+				to = to.AddDays(to.Day - 1);
+
+				return await GetTotalAsync(from, to, channels);
+			}
+			#endregion
+
+			// (1.1.6)
+			#region *指定した期間の合計を取得(GetTotal)
+			public async Task<int> GetTotalAsync(DateTime from, DateTime to, params int[] channels)
+			{
+				using (var connection = await profile.GetConnectionAsync())
+				{
+					using (var command = connection.CreateCommand())
+					{
+						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+
+						// IN演算子でCommandParameterを使う方法がわからないので，string.Formatでごまかす．
+						// intなので，SQLインジェクションの心配はないよね？
+						command.CommandText =
+							string.Format("select sum(consumption) as total from consumptions_10min where e_time > @from and e_time <= @to and ch in ({0})", string.Join(",", channels));
+						command.Parameters.Add(profile.CreateParameter("@from", TimeConverter.TimeToInt(from)));
+						command.Parameters.Add(profile.CreateParameter("@to", TimeConverter.TimeToInt(to)));
+						//command.Parameters.Add(new SQLiteParameter("@ch", channels));
+						using (var reader = await command.ExecuteReaderAsync())
+						{
+							while (await reader.ReadAsync())
+							{
+								return System.Convert.ToInt32(reader["total"]);
+							}
+							// こんなことあるのか？
+							throw new ApplicationException("データベースから合計値が得られませんでした．");
+						}
+
+					}
+					//connection.Close();
+				}
+
+			}
+			#endregion
+
+			#region *trinityを決定(DefineTrinity)
+			/// <summary>
+			/// 指定した日時に対して，trinityを決定します．
+			/// </summary>
+			/// <param name="current">trinityを決定する対象の日時．</param>
+			/// <returns></returns>
+			public async Task<IDictionary<string, DateTime>> DefineTrinityAsync(DateTime current)
+			{
+				var trinity = new Dictionary<string, DateTime>();
+
+				TimeSpan timeOfDay = current.TimeOfDay; // 時刻の情報だけ取り出している．
+				DateTime today = current - timeOfDay; // 日付の情報だけ取り出している．
+																							// とりあえず無条件で．
+																							//trinity["本日"] = today;
+				trinity["本日"] = current;
+
+				var consumptions = (await GetLatestDailyAsync(today)).OrderByDescending(p => p.Value);
+				int size = consumptions.Count();
+				trinity["最大"] = consumptions.First().Key + timeOfDay;
+				trinity["標準"] = consumptions.Skip((size - 1) / 2).First().Key + timeOfDay;
+				return trinity;
+			}
+			#endregion
+
+			// ※↓これ使ってるの？
+			// timeの1時間前は含まない．
+			#region *前後1時間のデータを取得(Around1hour)
+			/// <summary>
+			/// 指定した時刻の前後1時間のデータ(ch1とch2の合計)を，時刻順(古→新)の配列として返します．
+			/// </summary>
+			/// <param name="time"></param>
+			/// <returns></returns>
+			public async Task<int[]> Around1hourAsync(DateTime time)
+			{
+				var consumptions = new List<int>();
+
+				using (var connection = await profile.GetConnectionAsync())
+				{
+					using (var command = connection.CreateCommand())
+					{
+						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
+						command.CommandText = "select sum(consumption) as total from consumptions_10min where e_time > @from and e_time <= @to and ch in (1, 2) group by e_time order by e_time";
+						command.Parameters.Add(profile.CreateParameter("@from", TimeConverter.TimeToInt(time.AddHours(-1))));
+						command.Parameters.Add(profile.CreateParameter("@to", TimeConverter.TimeToInt(time.AddHours(1))));
+						using (var reader = command.ExecuteReader())
+						{
+							while (reader.Read())
+							{
+								consumptions.Add(System.Convert.ToInt32(reader[0]));
+							}
+						}
+					}
+				}
+
+				return consumptions.ToArray();
+
+			}
+			#endregion
+
+		}
+		#endregion
+
+	}
+}

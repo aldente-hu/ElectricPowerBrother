@@ -10,6 +10,7 @@ using System.Data.SQLite;
 namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 {
 
+	#region ConsumptionDataクラス(旧実装)
 	public class ConsumptionData : SQLiteData
 	{
 
@@ -163,10 +164,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = 
+					command.CommandText =
 						"select date, sum(consumption) as total from jdhm_consumptions_10min where date < @date and date >= @date - 21 and ch in (1, 2) group by date";
 					command.Parameters.Add(new SQLiteParameter("@date", TimeConverter.DateToInt(before)));
-					
+
 					using (var reader = command.ExecuteReader())
 					{
 						while (reader.Read())
@@ -203,7 +204,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = 
+					command.CommandText =
 						"select hour + 1 as e_hour, count(consumption) as cnt, sum(consumption) as total from jdhm_consumptions_10min where date = @date and ch in (1, 2) group by hour";
 					command.Parameters.Add(new SQLiteParameter("@date", TimeConverter.DateToInt(date)));
 
@@ -246,7 +247,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 				using (SQLiteCommand command = connection.CreateCommand())
 				{
 					// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
-					command.CommandText = 
+					command.CommandText =
 						"select e_time, sum(consumption) as total from consumptions_10min where e_time > @1 and e_time <= @2 and ch in (1, 2) group by e_time";
 					command.Parameters.Add(new SQLiteParameter("@1", TimeConverter.TimeToInt(from)));
 					command.Parameters.Add(new SQLiteParameter("@2", TimeConverter.TimeToInt(to)));
@@ -280,7 +281,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		public IDictionary<DateTime, IDictionary<int, int>> GetParticularConsumptions(DateTime from, DateTime to, params int[] channels)
 		{
 
-			var data = new Dictionary<DateTime, IDictionary<int,int>>();
+			var data = new Dictionary<DateTime, IDictionary<int, int>>();
 
 			using (var connection = new SQLiteConnection(ConnectionString))
 			{
@@ -307,7 +308,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 							{
 								data.Add(e_time, new Dictionary<int, int>());
 							}
-							data[e_time].Add(ch, consumption);	// e_timeとchがともに重複することはないはずだが….
+							data[e_time].Add(ch, consumption);  // e_timeとchがともに重複することはないはずだが….
 						}
 					}
 
@@ -385,12 +386,12 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 		/// <returns></returns>
 		public IDictionary<string, DateTime> DefineTrinity(DateTime current)
 		{
-			var trinity = new Dictionary<string,DateTime>();
+			var trinity = new Dictionary<string, DateTime>();
 
-			TimeSpan timeOfDay = current.TimeOfDay;	// 時刻の情報だけ取り出している．
-			DateTime today = current - timeOfDay;	// 日付の情報だけ取り出している．
-			// とりあえず無条件で．
-			//trinity["本日"] = today;
+			TimeSpan timeOfDay = current.TimeOfDay; // 時刻の情報だけ取り出している．
+			DateTime today = current - timeOfDay; // 日付の情報だけ取り出している．
+																						// とりあえず無条件で．
+																						//trinity["本日"] = today;
 			trinity["本日"] = current;
 
 			var consumptions = GetLatestDaily(today).OrderByDescending(p => p.Value);
@@ -442,6 +443,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 
 	}
-
+	#endregion
 
 }
