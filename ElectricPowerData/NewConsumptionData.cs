@@ -192,7 +192,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			/// <param name="date">データ取得の対象日．</param>
 			/// <param name="completed_only">trueであれば，データが揃っている時間だけを返します．</param>
 			/// <returns></returns>
-			public async Task<IDictionary<int, int>> GetHourlyConsumptionsTask(DateTime date, bool completed_only = true)
+			public async Task<IDictionary<int, int>> GetHourlyConsumptionsAsync(DateTime date, bool completed_only = true)
 			{
 				// キーがhour，値がtotalに対応．
 				var hourlyConsumptions = new Dictionary<int, int>();
