@@ -77,7 +77,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 				}
 			}
 
-			_client.Send(message);
+			_client.SendAsync(message, null);
 			
 		}
 
@@ -138,5 +138,133 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 	#endregion
 
 
+	namespace New
+	{
+		#region Jappajilクラス
+		public class Jappajil
+		{
+			// この2つはコンストラクタで設定する．
+			//public string Server { get; set; }
+			public readonly string Server;
+			public readonly int Port;
+			//public int Port {get;}
+			readonly SmtpClient _client;
+
+			/// <summary>
+			/// POP/SMTPのユーザ名を取得／設定します．
+			/// SMTP認証やPOP before SMTP認証を行わない場合は，空にしておいて下さい．
+			/// </summary>
+			public string UserName { get; set; }
+
+			/// <summary>
+			/// POP/SMTPのパスワードを取得／設定します．
+			/// </summary>
+			public string Password { get; set; }
+
+			/// <summary>
+			/// POPサーバのアドレスを取得／設定します．
+			/// 空でない値を設定すると，常にPOP before SMTP認証を試みます．
+			/// </summary>
+			public string POPServer { get; set; }
+
+			#region *コンストラクタ(Jappajil)
+			public Jappajil(string server, int port = 25)
+			{
+				this.Server = server;
+				this.Port = port;
+				this._client = new SmtpClient(server, port);
+
+				this.POPServer = string.Empty;
+			}
+			#endregion
+
+
+			// (1.1.5.0)POP before SMTPに対応．
+			public async Task PostAsync(MailMessage message)
+			{
+				if (string.IsNullOrEmpty(this.UserName))
+				{
+					_client.EnableSsl = false;
+				}
+				else
+				{
+					// (1.1.5.1)条件文を修正．
+					if (!string.IsNullOrEmpty(POPServer))
+					{
+						_client.EnableSsl = false;  // (1.1.5.2)追加．
+																				// POP before SMTP
+						await POPAuthenticationAsync(POPServer);
+					}
+					else
+					{
+						// SMTP認証
+						//Console.WriteLine("Try SMTP Authentication.");
+						_client.EnableSsl = true;
+						_client.Credentials = new NetworkCredential(this.UserName, this.Password);
+					}
+				}
+
+				// ※これはawaitできるメソッドではない！
+				_client.SendAsync(message, null);
+
+			}
+
+			// (1.1.5.0)POP before SMTPの認証を行います．
+			protected async Task POPAuthenticationAsync(string server)
+			{
+				using (System.Net.Sockets.TcpClient pop = new System.Net.Sockets.TcpClient())
+				{
+					pop.SendTimeout = 10000;
+					pop.ReceiveTimeout = 10000;
+					await pop.ConnectAsync(server, 110);
+
+					using (System.Net.Sockets.NetworkStream nws = pop.GetStream())
+					{
+						System.IO.StreamWriter sw = new System.IO.StreamWriter(nws);
+						var sr = new System.IO.StreamReader(nws);
+						String res = string.Empty;
+
+						sw.NewLine = "\r\n";
+						res += await sr.ReadLineAsync();
+
+						sw.AutoFlush = true;
+						sw.WriteLine("USER {0}", UserName);
+						res += await sr.ReadLineAsync();
+						sw.WriteLine("PASS {0}", Password);
+						res += await sr.ReadLineAsync();
+						sw.WriteLine("QUIT");
+						res += await sr.ReadLineAsync();
+
+						nws.Close();
+					}
+					pop.Close();
+				}
+			}
+			/*
+				string tanuki = "*****@hirosaki-u.ac.jp";
+				SmtpClient client = new SmtpClient("smtp.*****.*****", 587);
+				client.EnableSsl = true;
+				client.Credentials = new NetworkCredential("jm####@hirosaki-u.ac.jp", "**********");
+
+				ただし，これをやると，Return-Pathが jm####@hirosaki-u.ac.jp になる
+				(こちらで設定しても上書きされる)ので使いにくい． 
+			*/
+
+			/*
+				MailMessage message = new MailMessage();
+				message.From = new MailAddress("*****@hirosaki-u.ac.jp");
+				message.To.Add(new MailAddress(tanuki));
+				message.ReplyToList.Add(new MailAddress(tanuki));
+				message.Sender = new MailAddress("jm####@hirosaki-u.ac.jp");
+				message.Subject = "test";
+
+				message.Body = "これもテストです？\r\n次は本番かな？";
+			*/
+			//client.Send(message);
+
+		}
+		#endregion
+
+	}
 
 }

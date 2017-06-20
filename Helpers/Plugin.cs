@@ -64,6 +64,17 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 		}
 		#endregion
 
+		// (1.1.10)データを更新するプラグインとデータを使って何かするプラグインを分けた方がいいと思う．
+		#region IUpdatingPluginインターフェイス
+		public interface IUpdatingPlugin : IPluginBase
+		{
+			/// <summary>
+			/// 新しいデータをとってきて，DBに記録します．
+			/// </summary>
+			Task UpdateAsync();
+		}
+		#endregion
+
 	}
 
 }
