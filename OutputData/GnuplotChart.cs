@@ -17,6 +17,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 	// 今は使わないかなぁ．
 
 	// for gnuplot
+	[Obsolete("HelpersのGnuplotクラスをお使い下さい。")]
 	public class GnuplotChart : ConsumptionData, IPlugin
 	{
 

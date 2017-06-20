@@ -100,6 +100,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NewLegacyMonthlyChart.cs" />
+    <Compile Include="NewLegacyIndexPage.cs" />
+    <Compile Include="NewLegacyCsvGenerator.cs" />
+    <Compile Include="NewGoogleImageChart.cs" />
+    <Compile Include="NewGnuplotTrinityChart.cs" />
+    <Compile Include="NewConsumptionXmlGenerator.cs" />
+    <Compile Include="NewConsumptionVariableCsvGenerator.cs" />
+    <Compile Include="NewConsumptionCsvGenerator.cs" />
+    <Compile Include="NewConsumptionAtomGenerator.cs" />
     <Compile Include="ConsumptionAtomGenerator.cs" />
     <Compile Include="ConsumptionCsvGenerator.cs" />
     <Compile Include="ConsumptionVariableCsvGenerator.cs" />
