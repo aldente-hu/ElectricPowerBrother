@@ -45,4 +45,25 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Helpers
 	}
 	#endregion
 
+
+	namespace New
+	{
+		#region IPluginインターフェイス
+		/// <summary>
+		/// 更新されたデータをもとに「何かする」プラグインです．
+		/// </summary>
+		public interface IPlugin : IPluginBase
+		{
+			/// <summary>
+			/// 更新されたデータをもとに行う処理を記述します．
+			/// 処理済みデータの最新時刻を返します？
+			/// </summary>
+			/// <param name="latestData"></param>
+			/// <returns></returns>
+			Task<DateTime> UpdateAsync(DateTime latestData);
+		}
+		#endregion
+
+	}
+
 }
