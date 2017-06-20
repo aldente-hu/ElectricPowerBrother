@@ -72,9 +72,15 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data.MySQL
 			/// </summary>
 			public string Database;
 
+			#region *コンストラクタ(ConnectionProfile)
+
 			public ConnectionProfile()
 			{ }
 
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="parameter">設定パラメータを含むIDictionary。有効なキーは、"Server"、"UserName"、"Password"、"Database"です。</param>
 			public ConnectionProfile(IDictionary<string, string> parameter)
 			{
 				this.Server = parameter["Server"];
@@ -82,6 +88,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data.MySQL
 				this.Password = parameter["Password"];
 				this.Database = parameter["Database"];
 			}
+
+			#endregion
 
 			/// <summary>
 			/// 接続文字列を取得します。

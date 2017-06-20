@@ -26,7 +26,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 		/// </summary>
 		public partial class MainWindow : Window
 		{
-			IEnvironment environment;
+			//IEnvironment environment;
+			New.Environment environment;
 
 			static Data.MySQL.ConnectionProfile MyConnectionProfile
 			{
@@ -53,6 +54,14 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				InitializeLegacyOutputTab();
 
 				// (0.1.8)Legacyタブの作業だけを行いたければ，DataLoggersConfig(ならびに関連のplugin)を用意する必要はない．
+				InitializeEnvironment();
+
+			}
+			#endregion
+
+			#region *ロガーやデータベースを初期化(InitializeEnvironment)
+			void InitializeEnvironment()
+			{
 				if (File.Exists(Properties.Settings.Default.DataLoggersConfig))
 				{
 
@@ -63,25 +72,34 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						var doc = XDocument.Load(reader);
 
 						// 以下、readerは関係ない？
+						Data.IConnectionProfile profile;
 						if (string.IsNullOrEmpty(Properties.Settings.Default.MyServer))
 						{
 							// SQLiteを使用。
-							environment = new Environment(Properties.Settings.Default.DatabaseFile,	doc.Root.Element("Loggers"));
+							profile = new Data.SQLite.New.ConnectionProfile(Properties.Settings.Default.DatabaseFile);
+							//environment = new Environment(Properties.Settings.Default.DatabaseFile,	doc.Root.Element("Loggers"));
 						}
 						else
 						{
 							// MySQLを使用。
-							environment = new MySQL.Environment(MyConnectionProfile, doc.Root.Element("Loggers"));
+							var parameters = new Dictionary<string, string>();
+							parameters["Server"] = Properties.Settings.Default.MyServer;
+							parameters["UserName"] = Properties.Settings.Default.MyUserName;
+							parameters["Password"] = Properties.Settings.Default.MyPassword;
+							parameters["Database"] = Properties.Settings.Default.MyDatabase;
+							profile = new Data.MySQL.New.ConnectionProfile(parameters);
+							//environment = new MySQL.Environment(MyConnectionProfile, doc.Root.Element("Loggers"));
 						}
+						environment = new New.Environment(profile, doc.Root.Element("Loggers"));
 						environment.Tweet += environment_Tweet;
 					}
 					timer.Tick += LoggerTimer_Tick;
 				}
 				else
 				{
-					// ☆適宜disableする．
+					// ※どうしますか？
+					// ※ロガーにアクセスできなくても、データベースにはアクセスしたい場合もあるでしょうが...
 				}
-
 			}
 			#endregion
 
@@ -114,10 +132,11 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 
 			// (0.2.0)定期実行時は使わないように変更．
-			private void Buttonお試し_Click(object sender, EventArgs e)
+			private async void Buttonお試し_Click(object sender, EventArgs e)
 			{
 
-				DateTime next_data_time = environment.GetNextDataTime();
+				//DateTime next_data_time = environment.GetNextDataTime();
+				DateTime next_data_time = await environment.GetNextDataTimeAsync();
 				Console.WriteLine("Here we go! : {0}", next_data_time);
 
 
@@ -130,7 +149,8 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 						logger.LocalRoot = textBoxRoot.Text;
 						try
 						{
-							environment.Run(true);
+							//environment.Run(true);
+							await environment.RunAsync(true);
 						}
 						finally
 						{
@@ -140,7 +160,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					}
 				}
 				// それ以外の場合は普通に実行する．
-				environment.Run(true);
+				await environment.RunAsync(true);
 			}
 
 			// 別スレッドから実行される！
@@ -177,8 +197,9 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 			// (0.2.0)定期実行時のハンドラとして分離．
 			private void LoggerTimer_Tick(object sender, EventArgs e)
 			{
-				Task task = new Task(() => environment.Run(true));
-				task.Start();
+				//Task task = new Task(() => environment.Run(true));
+				var task = environment.RunAsync(true);
+				//task.Start();
 				task.Wait();
 			}
 
@@ -322,6 +343,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				//environment = new Environment()
 
 				// (0.1.8)Legacyタブの作業だけを行いたければ，DataLoggersConfig(ならびに関連のplugin)を用意する必要はない．
+
+				// ↓これいるの？ 必要だとしても、InitializeEnvironmentでOKだよね？
+
+				/*
 				if (File.Exists(Properties.Settings.Default.DataLoggersConfig))
 				{
 
@@ -348,7 +373,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				{
 					// ☆適宜disableする．
 				}
-
+				*/
 			
 			}
 			#endregion
