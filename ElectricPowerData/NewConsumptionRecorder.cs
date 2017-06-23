@@ -46,7 +46,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				{
 					using (var connection = await profile.GetConnectionAsync())
 					{
-						connection.Open();
 						// トランザクションを生成して...
 						using (var transaction = connection.BeginTransaction(System.Data.IsolationLevel.ReadCommitted))
 						{

@@ -182,7 +182,7 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 					var title = string.Format("Power Consumption ({0}, {1})", month_origin.ToString("yyyy.M"), this.SeriesName);
 					if (MonthlyTotalChannels != null)
 					{
-						title += string.Format("   Monthly Total {0} kWh", _consumptionTable.GetTotal(month_origin, hour, MonthlyTotalChannels));
+						title += string.Format("   Monthly Total {0} kWh", await _consumptionTable.GetTotalAsync(month_origin, hour, MonthlyTotalChannels));
 					}
 					await writer.WriteLineAsync("set title '{title}'");
 
@@ -303,19 +303,19 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 				// (1.3.11)やっぱり復活．
 				// (1.3.8.2)引数付きコンストラクタをコメントアウト．(うーん，このあたり混乱してるかもなぁ．)
 				// (1.3.3.2)とりあえずのコンストラクタ．
-				public MonthlyChart(string databaseFile)
+				public MonthlyChart(Data.IConnectionProfile profile)
 					: base()
 				{
-					this._consumptionTable = new Data.ConsumptionData(databaseFile);
+					this._consumptionTable = new Data.New.ConsumptionData(profile);
 				}
 				//public MonthlyChart() : base() { }
 
-				readonly Data.ConsumptionData _consumptionTable;
+				readonly Data.New.ConsumptionData _consumptionTable;
 
 
 				public async Task<DateTime> UpdateAsync(DateTime lastUpdate)
 				{
-					var latest_data = _consumptionTable.GetLatestDataTime();
+					var latest_data = await _consumptionTable.GetLatestDataTimeAsync();
 
 					// hour.Min should be 0!
 					var latest_hour = new DateTime(latest_data.Year, latest_data.Month, latest_data.Day, latest_data.Hour, 0, 0);

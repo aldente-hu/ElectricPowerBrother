@@ -100,7 +100,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 
 				using (var connection = await profile.GetConnectionAsync())
 				{
-					connection.Open();
 					using (var command = connection.CreateCommand())
 					{
 						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．
@@ -136,7 +135,6 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 			{
 				using (var connection = await profile.GetConnectionAsync())
 				{
-					connection.Open();
 					using (var command = connection.CreateCommand())
 					{
 						// ☆Commandの書き方は他にも用意されているのだろう(と信じたい)．

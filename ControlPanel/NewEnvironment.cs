@@ -165,7 +165,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.ControlPanel
 				var results = tasks.Select(t => t.Result);
 				// ここで結果だけを取り出しているので，各要素がどのロガーから来たデータなのかは簡単には判別できない．
 
-				await ProcessDataAsync(results, next_data_time, saving);
+				if (results.Count() > 0)
+				{
+					await ProcessDataAsync(results, next_data_time, saving);
+				}
 				// for debug.
 				//Tweet(this, new TweetEventArgs { Message = "That's all." });
 			}

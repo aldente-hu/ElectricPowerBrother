@@ -16,6 +16,23 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother
 
 		public class ConsumptionCsvGenerator : ConsumptionData, Helpers.New.IPlugin
 		{
+			public Data.IConnectionProfile ConnectionProfile
+			{
+				get
+				{
+					return this.profile;
+				}
+				set
+				{
+					this.profile = value;
+				}
+			}
+
+			public ConsumptionCsvGenerator() : this(null)
+			{
+
+			}
+
 			public ConsumptionCsvGenerator(Data.IConnectionProfile profile) : base(profile)
 			{ }
 

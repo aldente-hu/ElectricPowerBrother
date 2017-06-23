@@ -14,6 +14,10 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 	public interface IConnectionProfile
 	{
 		string ConnectionString { get; }
+		/// <summary>
+		/// OpenされたDbConnectionを返します。
+		/// </summary>
+		/// <returns></returns>
 		Task<DbConnection> GetConnectionAsync();
 		DbParameter CreateParameter(string name, object value);
 		//DbCommand CreateCommand();

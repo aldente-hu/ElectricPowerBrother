@@ -63,8 +63,13 @@ namespace HirosakiUniversity.Aldente.ElectricPowerBrother.Data
 					// "select min(latest) from (select ch, max(e_time) as latest from consumptions_10min where ch in (1, 2) group by ch)"
 					// で一発なのだが，サブクエリ部分の結果が返るのに3秒くらいかかったので，
 					// ch間の比較はプログラム側で行うことにする(↓のクエリはほぼ一瞬で返る)．
-					//return await InterestingChannels.Select(async ch => await GetLatestTimeAsync(connection, ch)).Min();
-					return await InterestingChannels.Min(async ch => await GetLatestTimeAsync(connection, ch));
+
+					// OK
+					var tasks = InterestingChannels.Select(ch => GetLatestTimeAsync(connection, ch));
+					return (await Task<DateTime>.WhenAll(tasks)).Min();
+					// NG
+					//return await InterestingChannels.Min(async ch => await GetLatestTimeAsync(connection, ch));
+
 				}
 
 			}
